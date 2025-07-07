@@ -1,5 +1,4 @@
 import { prisma } from "../../../config/prisma";
-import { AppError } from "../../../shared/utils/AppError";
 import { CreateInvoiceInput } from "../schemas/invoice.schema";
 
 export const createInvoice = async (
