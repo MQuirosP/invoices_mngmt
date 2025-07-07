@@ -5,7 +5,7 @@ import { prisma } from "../../../config/prisma";
 import { AppError } from "../../../shared/utils/AppError";
 
 export const registerUser = async (data: RegisterInput) => {
-  const { email, password, name } = data;
+  const { email, password, fullname } = data;
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -24,7 +24,7 @@ export const registerUser = async (data: RegisterInput) => {
     data: {
       email,
       password: hashedPassword,
-      name,
+      fullname,
     },
   });
 
@@ -41,7 +41,7 @@ export const registerUser = async (data: RegisterInput) => {
   return {
     id: user.id,
     email: user.email,
-    name: user.name,
+    fullname: user.fullname,
     token,
   };
 };
