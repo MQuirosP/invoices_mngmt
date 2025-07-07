@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { registerUser, loginUser } from "../controller/auth.controller";
+import { register, loginUser } from "../controller/auth.controller";
 
 const authRouter = Router();
 
 // POST /api/auth/register
-authRouter.post("/register", registerUser);
+authRouter.post("/register", register);
 // POST /api/auth/login
 authRouter.post("/login", loginUser);
 
