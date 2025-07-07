@@ -1,4 +1,4 @@
-import { RegisterInput } from "../schemas/auth.schemas";
+import { RegisterInput, LoginInput } from "../schemas/auth.schemas";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../../config/prisma";
@@ -45,3 +45,33 @@ export const registerUser = async (data: RegisterInput) => {
     token,
   };
 };
+
+export const loginUser = async (data: LoginInput) => {
+  const { email, password } = data;
+
+  const user = await prisma.user.findUnique({
+    where: { email }
+  });
+
+  if (!user) {
+    throw new AppError("User not found.", 404);
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new AppError("Invalid password.", 401);
+  }
+
+  const token = jwt.sign(
+    { sub: user.id, email: user.email },
+    process.env.JWT_SECRET!,
+    { expiresIn: "7d" } 
+  );
+
+  return {
+    id: user.id,
+    email: user.email,
+    fullname: user.fullname,
+    token,
+  }
+}

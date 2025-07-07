@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { registerSchema } from "../schemas/auth.schemas";
-import { registerUser } from "../service/auth.service";
+import { loginSchema, registerSchema } from "../schemas/auth.schemas";
+import { registerUser, loginUser } from "../service/auth.service";
 
 // Registro de usuario
 export const register = async (
@@ -23,14 +23,20 @@ export const register = async (
 };
 
 // Inicio de sesión
-export const loginUser = async (
+export const login = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     // Lógica para iniciar sesión
-    res.status(200).json({ message: "User logged in successfully" });
+    const parsed = loginSchema.parse(req.body);
+    const result = await loginUser(parsed);
+    res.status(200).json({ 
+      success: true,
+      data: result,
+      message: "User logged in successfully",
+     });
   } catch (error) {
     next(error);
   }
