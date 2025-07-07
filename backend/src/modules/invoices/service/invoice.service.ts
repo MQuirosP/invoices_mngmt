@@ -1,4 +1,5 @@
 import { prisma } from "../../../config/prisma";
+import { AppError } from "../../../shared/utils/AppError";
 import { CreateInvoiceInput } from "../schemas/invoice.schema";
 
 export const createInvoice = async (
@@ -23,3 +24,28 @@ export const getUserInvoices = async (userId: string) => {
   });
   return invoices;
 };
+
+export const getInvoiceById = async (id: string, userId: string) => {
+  const invoice = await prisma.invoice.findFirst({
+    where: {
+      id, userId,
+    },
+  });
+  return invoice;
+}
+
+export const deleteInvoiceById = async (id: string, userId: string) => {
+  const invoice = await prisma.invoice.findFirst({
+    where: {
+      id, userId,
+    },
+  });
+
+  if (!invoice) return null;
+
+  await prisma.invoice.delete({
+    where: { id },
+  });
+
+  return invoice
+}

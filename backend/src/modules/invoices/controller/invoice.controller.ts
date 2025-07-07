@@ -1,7 +1,7 @@
 import { AppError } from "./../../../shared/utils/AppError";
 import { Request, Response, NextFunction } from "express";
 import { createInvoiceSchemna } from "../schemas/invoice.schema";
-import { createInvoice, getUserInvoices } from "../service/invoice.service";
+import { createInvoice, getUserInvoices, getInvoiceById, deleteInvoiceById } from "../service/invoice.service";
 import { AuthRequest } from "../../auth/middleware/auth.middleware";
 
 export const create = async (
@@ -44,3 +44,47 @@ export const list = async (
     next(error);
   }
 };
+
+export const show = async (req:AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.id;
+    const invoiceId = req.params.id;
+
+    if (!userId) throw new AppError("Unauthorized", 401);
+    if (!invoiceId) throw new AppError("Invoice ID required", 400);
+
+    const invoice = await getInvoiceById(invoiceId, userId);
+
+    if (!invoice) throw new AppError("Invoice not found", 404);
+
+    res.status(200).json({
+      success: true,
+      message: "Invoice retrieved successfully",
+      data: invoice
+    });
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const remove = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.id;
+    const invoiceId = req.params.id;
+
+    if (!userId) throw new AppError("Unauthorized", 401);
+    if (!invoiceId) throw new AppError("Invoice ID required", 400);
+
+    const deleted = await deleteInvoiceById(invoiceId, userId);
+
+    if (!deleted) throw new AppError("Invoice not found", 404);
+
+    res.status(200).json({
+      success: true,
+      message: "Invoice deleted successfully",
+      data: deleted
+    })
+  } catch (error) {
+    next(error)
+  }
+}
