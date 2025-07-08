@@ -33,7 +33,7 @@ model Invoice {
   provider   String
   fileUrl    String //URL del archivo en la nube
   fileType   String //PDF, XML, JPG
-  extrated   Boolean   @default(false)
+  extracted   Boolean   @default(false)
   warranty   Warranty?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
