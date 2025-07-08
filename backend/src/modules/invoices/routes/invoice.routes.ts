@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { create, list, remove, show } from "../controller/invoice.controller";
+import { create, download, list, remove, show } from "../controller/invoice.controller";
 import { authenticate } from "../../auth/middleware/auth.middleware";
 import { upload } from "../../../shared/middleware/upload";
 
@@ -12,5 +12,8 @@ router.delete("/:id", authenticate, remove)
 
 // Route for upload files
 router.post("/", authenticate, upload.single("file"), create);
+
+// Route to downloadn invoice
+router.get("/:id/download", authenticate, download);
 
 export default router;

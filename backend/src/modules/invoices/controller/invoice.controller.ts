@@ -9,6 +9,7 @@ import {
 } from "../service/invoice.service";
 import { AuthRequest } from "../../auth/middleware/auth.middleware";
 import { uploadToCloudinary } from "../../../shared/utils/uploadToCloudinary";
+import axios from "axios";
 
 export const create = async (
   req: AuthRequest,
@@ -119,3 +120,41 @@ export const remove = async (
     next(error);
   }
 };
+
+export const download = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    const invoiceId = req.params.id;
+
+    if (!userId) throw new AppError("Unauthorized", 401);
+    if (!invoiceId) throw new AppError("Invoice ID required", 400);
+
+    const invoice = await getInvoiceById(invoiceId, userId);
+    if (!invoice) throw new AppError("Invoice not found", 404);
+
+    const fileUrl = invoice.fileUrl;
+    const fileType = invoice.fileType;
+
+    // Infer base name from title and type
+    const fileExtensión = fileType.toLocaleLowerCase();
+    const fileName = `${invoice.title.replace(/\s+/g, "_")}.${fileExtensión}`;
+
+    // Download file from Coudinary as stream
+    const response = await axios.get(fileUrl, {
+      responseType: "stream",
+    });
+
+    // Configure headers to force download
+    res.setHeader("Content-Disposition", `atachment; filename="${fileName}"`);
+    res.setHeader("Content-Type", response.headers["content-type"]);
+
+    // Pipe file directly to client
+    response.data.pipe(res);
+  } catch (error) {
+    next(error);
+  }
+}
