@@ -27,16 +27,18 @@ export const getUserInvoices = async (userId: string) => {
 export const getInvoiceById = async (id: string, userId: string) => {
   const invoice = await prisma.invoice.findFirst({
     where: {
-      id, userId,
+      id,
+      userId,
     },
   });
   return invoice;
-}
+};
 
 export const deleteInvoiceById = async (id: string, userId: string) => {
   const invoice = await prisma.invoice.findFirst({
     where: {
-      id, userId,
+      id,
+      userId,
     },
   });
 
@@ -46,5 +48,5 @@ export const deleteInvoiceById = async (id: string, userId: string) => {
     where: { id },
   });
 
-  return invoice
-}
+  return invoice;
+};
