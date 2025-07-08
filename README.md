@@ -92,3 +92,44 @@ npm run dev       # Desarrollo con recarga
 npm run build     # Compilación TypeScript
 npm run start     # Producción
 npx prisma ...    # Comandos Prisma
+
+## 💻 Instalación y uso local
+
+1. Clona el repositorio:
+```bash
+git clone https://github.com/tu-usuario/invoices_mngmt.git
+cd invoices_mngmt/backend
+
+2. Instala dependencias:
+```bash
+npm install
+
+3. Configura variables de entorno:
+```bash
+DATABASE_URL=postgresql://usuario:password@localhost:5432/facturas_db
+JWT_SECRET=tu_clave_secreta
+SALT_ROUNDS=10
+CLOUDINARY_CLOUD_NAME=xxx
+CLOUDINARY_API_KEY=xxx
+CLOUDINARY_API_SECRET=xxx
+
+4. Ejecuta migraciones:
+```bash
+npx prisma migrate dev --name init
+
+5. Iniciar servidor:
+```bash
+npm run dev
+
+## 📖 Documentación de la API
+
+- Pronto estará disponible una colección de Postman o documentación Swagger con todos los endpoints.
+
+## 📝 Licencia
+
+Este proyecto está bajo la licencia MIT. Libre para uso, modificación y distribución con atribución.
+
+## 🙋‍♂️ Autor
+
+Desarrollado por Mario Quirós  
+[https://github.com/MQuirosP]
