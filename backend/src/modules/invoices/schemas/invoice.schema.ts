@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createInvoiceSchemna = z.object({
+export const createInvoiceSchema = z.object({
   title: z.string().min(1, "Title is required"),
   issueDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
     message: "Invalid issue date",
@@ -13,6 +13,6 @@ export const createInvoiceSchemna = z.object({
   // fileType: z.enum(["PDF", "XML", "JPG", "PNG"], {
   //   message: "Invalid file type",
   // }),
-});
+}).strict();
 
-export type CreateInvoiceInput = z.infer<typeof createInvoiceSchemna>;
+export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;

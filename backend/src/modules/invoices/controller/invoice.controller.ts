@@ -1,6 +1,6 @@
 import { AppError } from "./../../../shared/utils/AppError";
 import { /*Request,*/ Response, NextFunction } from "express";
-import { createInvoiceSchemna } from "../schemas/invoice.schema";
+import { createInvoiceSchema } from "../schemas/invoice.schema";
 import {
   createInvoice,
   getUserInvoices,
@@ -16,10 +16,10 @@ export const create = async (
   next: NextFunction
 ) => {
   try {
-    const parsed = createInvoiceSchemna.parse(req.body);
+    const parsed = createInvoiceSchema.parse(req.body);
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
-    console.log(parsed);
+
     const file = req.file;
     if (!file) throw new AppError("File is required", 400);
 
