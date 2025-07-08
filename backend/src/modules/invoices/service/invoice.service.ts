@@ -1,8 +1,14 @@
 import { prisma } from "../../../config/prisma";
 import { CreateInvoiceInput } from "../schemas/invoice.schema";
 
+type CompleteInvoiceInput = CreateInvoiceInput & {
+  fileUrl: string;
+  fileType: string;
+};
+
+
 export const createInvoice = async (
-  data: CreateInvoiceInput,
+  data: CompleteInvoiceInput,
   userId: string
 ) => {
   const invoice = await prisma.invoice.create({

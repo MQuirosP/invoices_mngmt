@@ -9,10 +9,10 @@ export const createInvoiceSchemna = z.object({
     message: "Invalid expiration date",
   }),
   provider: z.string().min(1, "Provider is required"),
-  fileUrl: z.string().url("Invalid file URL"),
-  fileType: z.enum(["PDF", "XML", "JPG", "PNG"], {
-    message: "Invalid file type",
-  }),
+  // fileUrl: z.string().url("Invalid file URL"),
+  // fileType: z.enum(["PDF", "XML", "JPG", "PNG"], {
+  //   message: "Invalid file type",
+  // }),
 });
 
 export type CreateInvoiceInput = z.infer<typeof createInvoiceSchemna>;

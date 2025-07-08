@@ -1,8 +1,14 @@
 import { AppError } from "./../../../shared/utils/AppError";
 import { /*Request,*/ Response, NextFunction } from "express";
 import { createInvoiceSchemna } from "../schemas/invoice.schema";
-import { createInvoice, getUserInvoices, getInvoiceById, deleteInvoiceById } from "../service/invoice.service";
+import {
+  createInvoice,
+  getUserInvoices,
+  getInvoiceById,
+  deleteInvoiceById,
+} from "../service/invoice.service";
 import { AuthRequest } from "../../auth/middleware/auth.middleware";
+import { uploadToCloudinary } from "../../../shared/utils/uploadToCloudinary";
 
 export const create = async (
   req: AuthRequest,
@@ -13,8 +19,25 @@ export const create = async (
     const parsed = createInvoiceSchemna.parse(req.body);
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
+    console.log(parsed);
+    const file = req.file;
+    if (!file) throw new AppError("File is required", 400);
 
-    const invoice = await createInvoice(parsed, userId);
+    const { url, type } = await uploadToCloudinary(
+      file.buffer,
+      file.originalname,
+      file.mimetype
+    );
+
+    const invoice = await createInvoice(
+      {
+        ...parsed,
+        fileUrl: url,
+        fileType: type,
+      },
+      userId
+    );
+
     res.status(201).json({
       sucess: true,
       message: "Invoice created successfully",
@@ -45,7 +68,11 @@ export const list = async (
   }
 };
 
-export const show = async (req:AuthRequest, res: Response, next: NextFunction) => {
+export const show = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const userId = req.user?.id;
     const invoiceId = req.params.id;
@@ -60,14 +87,18 @@ export const show = async (req:AuthRequest, res: Response, next: NextFunction) =
     res.status(200).json({
       success: true,
       message: "Invoice retrieved successfully",
-      data: invoice
+      data: invoice,
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
-export const remove = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const remove = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const userId = req.user?.id;
     const invoiceId = req.params.id;
@@ -82,9 +113,9 @@ export const remove = async (req: AuthRequest, res: Response, next: NextFunction
     res.status(200).json({
       success: true,
       message: "Invoice deleted successfully",
-      data: deleted
-    })
+      data: deleted,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
