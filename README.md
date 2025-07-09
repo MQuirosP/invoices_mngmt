@@ -85,6 +85,36 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ---
 
+## 🔒 Validación de tipo MIME
+
+- Validación en `multer`
+  - Solo permite: `PDF`, `XML`, `JPG`, `PNG`
+  - Rechaza cualquier otro tipo con error 415
+  - Tamaño máximo: 5 MB
+- Seguridad reforzada en la carga de archivos
+
+## 📥 Descarga de facturas desde la nube
+
+- Endpoint: `GET /api/invoices/:id/download`
+  - Protegido por autenticación JWT
+  - Usa `axios` para obtener el archivo desde Cloudinary
+  - Enviado al cliente como `stream`
+- Headers de descarga:
+  - `Content-Disposition: attachment; filename="<titulo>.pdf"`
+  - `Content-Type` dinámico según el archivo
+- Beneficios:
+  - No se expone directamente la URL de Cloudinary
+  - Forza descarga en el navegador
+  - Control completo del acceso
+
+## 📌 Consideraciones
+
+- Se mantiene `fileType` para determinar la extensión esperada
+- El nombre del archivo se genera desde `title` de la factura
+- Posibilidad futura: usar la extensión desde la URL si fuera necesario
+
+---
+
 ## 🧪 Scripts
 
 ```bash
