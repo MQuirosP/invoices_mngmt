@@ -61,7 +61,7 @@ export const list = async (
     const invoices = await getUserInvoices(userId);
     res.status(200).json({
       success: true,
-      message: "Invoices retrieved successfully",
+      message: invoices.length ? "Invoices retrieved successfully" : "No invoices found",
       data: invoices,
     });
   } catch (error) {
