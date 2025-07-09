@@ -68,6 +68,10 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
   - Protegido por JWT  
   - Usa `axios` para obtener el archivo desde Cloudinary  
   - Enviado al cliente como `stream`  
+- `GET /api/invoices/:invoiceId/attachments/:attachmentId/download`  
+  - Descarga individual por ID de archivo adjunto  
+  - Verifica que el archivo pertenezca a la factura y al usuario  
+  - Devuelve stream seguro con headers adecuados  
 - Headers:
   - `Content-Disposition: attachment; filename="<titulo>.pdf"`  
   - `Content-Type` dinámico  
@@ -112,7 +116,8 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 - Se mantiene `fileType` para determinar la extensión esperada  
 - El nombre del archivo se genera desde `title` de la factura  
-- Posibilidad futura: usar la extensión desde la URL si fuera necesario  
+- Descarga ahora permite seleccionar un archivo específico por ID  
+- Posibilidad futura: descargar todos como archivo ZIP  
 
 ---
 
@@ -123,44 +128,63 @@ npm run dev       # Desarrollo con recarga
 npm run build     # Compilación TypeScript
 npm run start     # Producción
 npx prisma ...    # Comandos Prisma
+```
 
+---
 
 ## 💻 Instalación y uso local
 
 1. Clona el repositorio:
+
 ```bash
 git clone https://github.com/tu-usuario/invoices_mngmt.git
 cd invoices_mngmt/backend
+```
 
-2. Instala dependencias:
+2.Instala dependencias:
+
 ```bash
 npm install
+```
 
-3. Configura variables de entorno:
-```bash
+3.Configura variables de entorno:
+
+```env
 DATABASE_URL=postgresql://usuario:password@localhost:5432/facturas_db
 JWT_SECRET=tu_clave_secreta
 SALT_ROUNDS=10
 CLOUDINARY_CLOUD_NAME=xxx
 CLOUDINARY_API_KEY=xxx
 CLOUDINARY_API_SECRET=xxx
+```
 
-4. Ejecuta migraciones:
+4.Ejecuta migraciones:
+
 ```bash
 npx prisma migrate dev --name init
+```
 
-5. Iniciar servidor:
+5.Inicia el servidor:
+
 ```bash
 npm run dev
+```
+
+---
 
 ## 📖 Documentación de la API
 
 - Pronto estará disponible una colección de Postman o documentación Swagger con todos los endpoints.
 
+---
+
 ## 📝 Licencia
 
 Este proyecto está bajo la licencia MIT. Libre para uso, modificación y distribución con atribución.
 
+---
+
 ## 🙋‍♂️ Autor
 
-Desarrollado por Mario Quirós https://github.com/MQuirosP
+Desarrollado por Mario Quirós  
+<https://github.com/MQuirosP>
