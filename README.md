@@ -2,14 +2,16 @@
 
 Sistema de gestión de facturas y garantías con autenticación segura, validación robusta y almacenamiento en la nube.
 
+---
+
 ## 🚀 Tecnologías
 
-- Node.js + Express
-- TypeScript
-- Prisma ORM + PostgreSQL
-- JWT + Bcrypt
-- Zod para validaciones
-- Multer + Cloudinary para manejo de archivos
+- Node.js + Express  
+- TypeScript  
+- Prisma ORM + PostgreSQL  
+- JWT + Bcrypt  
+- Zod para validaciones  
+- Multer + Cloudinary para manejo de archivos  
 
 ---
 
@@ -41,77 +43,76 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ## 🔐 Autenticación
 
-- Registro: `POST /api/auth/register`
-- Login: `POST /api/auth/login`
-- Validación con Zod
-- Contraseñas encriptadas con Bcrypt
-- Tokens JWT
-- Ruta protegida: `GET /api/auth/me`
+- `POST /api/auth/register` – Registro de usuario  
+- `POST /api/auth/login` – Inicio de sesión  
+- `GET /api/auth/me` – Ruta protegida para obtener datos del usuario  
+- Validación con Zod  
+- Contraseñas encriptadas con Bcrypt  
+- Tokens JWT  
 
 ---
 
 ## 🧾 Facturas (`/api/invoices`)
 
-- `POST /`: Crear factura (requiere token y archivo PDF/XML/JPG)
-- `GET /`: Listar facturas del usuario
-- `GET /:id`: Obtener factura específica
-- `DELETE /:id`: Eliminar factura
-- Archivos subidos a Cloudinary (`resource_type: raw`)
-- Validación con Zod
-- Asociación automática con `userId`
+- `POST /` – Crear factura (requiere token y archivo PDF/XML/JPG)  
+- `GET /` – Listar facturas del usuario  
+- `GET /:id` – Obtener factura específica  
+- `DELETE /:id` – Eliminar factura  
+- Archivos subidos a Cloudinary (`resource_type: raw`)  
+- Validación con Zod  
+- Asociación automática con `userId`  
+
+### 📥 Descarga de facturas
+
+- `GET /api/invoices/:id/download`  
+  - Protegido por JWT  
+  - Usa `axios` para obtener el archivo desde Cloudinary  
+  - Enviado al cliente como `stream`  
+- Headers:
+  - `Content-Disposition: attachment; filename="<titulo>.pdf"`  
+  - `Content-Type` dinámico  
+- Beneficios:
+  - No se expone la URL de Cloudinary  
+  - Forza descarga en navegador  
+  - Control de acceso total  
 
 ---
 
 ## 🛠️ Garantías (`/api/warranties`)
 
-- `POST /`: Crear garantía asociada a factura
-- `GET /:invoiceId`: Obtener garantía
-- `PUT /:invoiceId`: Actualizar garantía
-- `DELETE /:invoiceId`: Eliminar garantía
-- Relación 1:1 con factura
-- Validación con Zod
+- `POST /` – Crear garantía asociada a factura  
+- `GET /:invoiceId` – Obtener garantía  
+- `PUT /:invoiceId` – Actualizar garantía  
+- `DELETE /:invoiceId` – Eliminar garantía  
+- Relación 1:1 con factura  
+- Validación con Zod  
 
 ---
 
 ## ☁️ Subida de Archivos
 
-- Archivos recibidos vía `form-data` con Multer
-- Convertidos a base64 y subidos a Cloudinary
-- Soporte para PDF, XML, JPG
+- Archivos recibidos vía `form-data` con Multer  
+- Convertidos a base64 y subidos a Cloudinary  
+- Soporte para PDF, XML, JPG  
 - Configuración de Cloudinary:
-  - `resource_type: "raw"`
-  - `overwrite: true`
-  - Activada opción: “Allow delivery of PDF and ZIP files”
+  - `resource_type: "raw"`  
+  - `overwrite: true`  
+  - Activada opción: “Allow delivery of PDF and ZIP files”  
+
+### 🔒 Validación de tipo MIME
+
+- Solo permite: `PDF`, `XML`, `JPG`, `PNG`  
+- Rechaza otros tipos con error 415  
+- Tamaño máximo: 5 MB  
+- Seguridad reforzada en la carga  
 
 ---
 
-## 🔒 Validación de tipo MIME
-
-- Validación en `multer`
-  - Solo permite: `PDF`, `XML`, `JPG`, `PNG`
-  - Rechaza cualquier otro tipo con error 415
-  - Tamaño máximo: 5 MB
-- Seguridad reforzada en la carga de archivos
-
-## 📥 Descarga de facturas desde la nube
-
-- Endpoint: `GET /api/invoices/:id/download`
-  - Protegido por autenticación JWT
-  - Usa `axios` para obtener el archivo desde Cloudinary
-  - Enviado al cliente como `stream`
-- Headers de descarga:
-  - `Content-Disposition: attachment; filename="<titulo>.pdf"`
-  - `Content-Type` dinámico según el archivo
-- Beneficios:
-  - No se expone directamente la URL de Cloudinary
-  - Forza descarga en el navegador
-  - Control completo del acceso
-
 ## 📌 Consideraciones
 
-- Se mantiene `fileType` para determinar la extensión esperada
-- El nombre del archivo se genera desde `title` de la factura
-- Posibilidad futura: usar la extensión desde la URL si fuera necesario
+- Se mantiene `fileType` para determinar la extensión esperada  
+- El nombre del archivo se genera desde `title` de la factura  
+- Posibilidad futura: usar la extensión desde la URL si fuera necesario  
 
 ---
 
@@ -122,6 +123,7 @@ npm run dev       # Desarrollo con recarga
 npm run build     # Compilación TypeScript
 npm run start     # Producción
 npx prisma ...    # Comandos Prisma
+
 
 ## 💻 Instalación y uso local
 
@@ -161,5 +163,4 @@ Este proyecto está bajo la licencia MIT. Libre para uso, modificación y distri
 
 ## 🙋‍♂️ Autor
 
-Desarrollado por Mario Quirós  
-[https://github.com/MQuirosP]
+Desarrollado por Mario Quirós https://github.com/MQuirosP
