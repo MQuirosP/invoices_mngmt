@@ -11,7 +11,7 @@ router.get("/:id", authenticate, show);
 router.delete("/:id", authenticate, remove)
 
 // Route for upload files
-router.post("/", authenticate, upload.single("file"), create);
+router.post("/", authenticate, upload.array("files", 5), create);
 
 // Route to downloadn invoice
 router.get("/:id/download", authenticate, download);

@@ -10,6 +10,7 @@ import {
 import { AuthRequest } from "../../auth/middleware/auth.middleware";
 import { uploadToCloudinary } from "../../../shared/utils/uploadToCloudinary";
 import axios from "axios";
+import { prisma } from "../../../config/prisma";
 
 export const create = async (
   req: AuthRequest,
@@ -21,27 +22,34 @@ export const create = async (
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
 
-    const file = req.file;
-    if (!file) throw new AppError("File is required", 400);
+    // Crear factura sin archivos
+    const invoice = await createInvoice(parsed, userId);
 
-    const { url, type } = await uploadToCloudinary(
-      file.buffer,
-      file.originalname,
-      file.mimetype
-    );
+    // Manejar archivos si existen 
+    const files = req.files as Express.Multer.File[] | undefined;
 
-    const invoice = await createInvoice(
-      {
-        ...parsed,
-        fileUrl: url,
-        fileType: type,
-      },
-      userId
-    );
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const { url, type } = await uploadToCloudinary(
+          file.buffer,
+          file.originalname,
+          file.mimetype
+        );
+
+        await prisma.attachment.create({
+          data: {
+            invoiceId: invoice.id,
+            url,
+            mimeType: type,
+            fileName: file.originalname,
+          },
+        });
+      }
+    }
 
     res.status(201).json({
-      sucess: true,
-      message: "Invoice created successfully",
+      success: true,
+      message: "Invoice created successfully with attachments",
       data: invoice,
     });
   } catch (error) {
@@ -133,28 +141,36 @@ export const download = async (
     if (!userId) throw new AppError("Unauthorized", 401);
     if (!invoiceId) throw new AppError("Invoice ID required", 400);
 
-    const invoice = await getInvoiceById(invoiceId, userId);
-    if (!invoice) throw new AppError("Invoice not found", 404);
-
-    const fileUrl = invoice.fileUrl;
-    const fileType = invoice.fileType;
-
-    // Infer base name from title and type
-    const fileExtensión = fileType.toLocaleLowerCase();
-    const fileName = `${invoice.title.replace(/\s+/g, "_")}.${fileExtensión}`;
-
-    // Download file from Coudinary as stream
-    const response = await axios.get(fileUrl, {
-      responseType: "stream",
+    // Cargar invoice junto con attachments
+    const invoice = await prisma.invoice.findFirst({
+      where: { id: invoiceId, userId },
+      include: { attachments: true },
     });
 
-    // Configure headers to force download
-    res.setHeader("Content-Disposition", `atachment; filename="${fileName}"`);
+    if (!invoice) throw new AppError("Invoice not found", 404);
+
+    // Si no hay attachments
+    if (!invoice.attachments || invoice.attachments.length === 0) {
+      throw new AppError("No attachments found for this invoice", 404);
+    }
+
+    // Tomar el primer attachment (o cambiar lógica si quieres otro)
+    const attachment = invoice.attachments[0];
+    const fileUrl = attachment.url;
+    const fileType = attachment.mimeType;
+
+    const fileExtension = fileType.split("/")[1] || "bin"; // por ejemplo "application/pdf" -> "pdf"
+    const fileName = `${invoice.title.replace(/\s+/g, "_")}.${fileExtension}`;
+
+    // Descargar el archivo como stream
+    const response = await axios.get(fileUrl, { responseType: "stream" });
+
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
     res.setHeader("Content-Type", response.headers["content-type"]);
 
-    // Pipe file directly to client
     response.data.pipe(res);
   } catch (error) {
     next(error);
   }
-}
+};
+

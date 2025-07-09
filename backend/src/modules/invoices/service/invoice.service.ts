@@ -1,14 +1,14 @@
 import { prisma } from "../../../config/prisma";
 import { CreateInvoiceInput } from "../schemas/invoice.schema";
 
-type CompleteInvoiceInput = CreateInvoiceInput & {
-  fileUrl: string;
-  fileType: string;
-};
+// type CompleteInvoiceInput = CreateInvoiceInput & {
+//   fileUrl: string;
+//   fileType: string;
+// };
 
 
 export const createInvoice = async (
-  data: CompleteInvoiceInput,
+  data: CreateInvoiceInput,
   userId: string
 ) => {
   const invoice = await prisma.invoice.create({
@@ -26,6 +26,10 @@ export const getUserInvoices = async (userId: string) => {
   const invoices = await prisma.invoice.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
+    include: {
+      attachments: true,
+      warranty: true
+    }
   });
   return invoices;
 };
