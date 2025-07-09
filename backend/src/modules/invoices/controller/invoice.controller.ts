@@ -6,10 +6,10 @@ import {
   getUserInvoices,
   getInvoiceById,
   deleteInvoiceById,
+  downloadAttachment,
 } from "../service/invoice.service";
 import { AuthRequest } from "../../auth/middleware/auth.middleware";
 import { uploadToCloudinary } from "../../../shared/utils/uploadToCloudinary";
-import axios from "axios";
 import { prisma } from "../../../config/prisma";
 
 export const create = async (
@@ -136,41 +136,20 @@ export const download = async (
 ) => {
   try {
     const userId = req.user?.id;
-    const invoiceId = req.params.id;
+    const invoiceId = req.params.invoiceId;
+    const attachmentId =req.params.attachmentId;
 
     if (!userId) throw new AppError("Unauthorized", 401);
-    if (!invoiceId) throw new AppError("Invoice ID required", 400);
+    if (!invoiceId || !attachmentId) throw new AppError("Missing IDs", 400);
 
-    // Cargar invoice junto con attachments
-    const invoice = await prisma.invoice.findFirst({
-      where: { id: invoiceId, userId },
-      include: { attachments: true },
-    });
-
-    if (!invoice) throw new AppError("Invoice not found", 404);
-
-    // Si no hay attachments
-    if (!invoice.attachments || invoice.attachments.length === 0) {
-      throw new AppError("No attachments found for this invoice", 404);
-    }
-
-    // Tomar el primer attachment (o cambiar lógica si quieres otro)
-    const attachment = invoice.attachments[0];
-    const fileUrl = attachment.url;
-    const fileType = attachment.mimeType;
-
-    const fileExtension = fileType.split("/")[1] || "bin"; // por ejemplo "application/pdf" -> "pdf"
-    const fileName = `${invoice.title.replace(/\s+/g, "_")}.${fileExtension}`;
-
-    // Descargar el archivo como stream
-    const response = await axios.get(fileUrl, { responseType: "stream" });
+    const { stream, mimeType, fileName } = await downloadAttachment(userId, invoiceId, attachmentId);
 
     res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
-    res.setHeader("Content-Type", response.headers["content-type"]);
+    res.setHeader("Content-Type", mimeType);
 
-    response.data.pipe(res);
+    stream.pipe(res);
+
   } catch (error) {
     next(error);
   }
-};
-
+}

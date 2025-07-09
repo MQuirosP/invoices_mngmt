@@ -1,5 +1,7 @@
 import { prisma } from "../../../config/prisma";
+import { AppError } from "../../../shared/utils/AppError";
 import { CreateInvoiceInput } from "../schemas/invoice.schema";
+import axios from "axios";
 
 // type CompleteInvoiceInput = CreateInvoiceInput & {
 //   fileUrl: string;
@@ -59,4 +61,31 @@ export const deleteInvoiceById = async (id: string, userId: string) => {
   });
 
   return invoice;
+};
+
+export const downloadAttachment = async (
+  userId: string,
+  invoiceId: string,
+  attachmentId: string
+) => {
+  const invoice = await prisma.invoice.findFirst({
+    where: { id: invoiceId, userId },
+    include: { attachments: true},
+  });
+
+  if (!invoice) throw new AppError("Invoice not found", 404);
+
+  const attachment = invoice.attachments.find(a => a.id === attachmentId);
+  if (!attachment) throw new AppError("Attachment not found", 404);
+
+  const response = await axios.get(attachment.url, { responseType: "stream"});
+
+  const ext = attachment.mimeType.split("/")[1] || "bin";
+  const fileName = `${invoice.title.replace(/\s+/g, "_")}.${ext}`;
+
+  return {
+    stream: response.data,
+    mimeType: response.headers["content-type"],
+    fileName
+  };
 };

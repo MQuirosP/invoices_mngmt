@@ -14,6 +14,6 @@ router.delete("/:id", authenticate, remove)
 router.post("/", authenticate, upload.array("files", 5), create);
 
 // Route to downloadn invoice
-router.get("/:id/download", authenticate, download);
+router.get("/:invoiceId/attachments/:attachmentId/download", authenticate, download);
 
 export default router;
