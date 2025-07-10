@@ -1,8 +1,8 @@
 import { RegisterInput, LoginInput } from "./auth.schemas";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { prisma } from "../../config/prisma";
-import { AppError } from "../../shared/utils/AppError";
+import { prisma } from "@/config/prisma";
+import { AppError } from "@/shared/utils/AppError";
 
 export const registerUser = async (data: RegisterInput) => {
   const { email, password, fullname } = data;

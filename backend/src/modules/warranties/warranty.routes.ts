@@ -5,7 +5,7 @@ import {
   update,
   remove,
 } from "./warranty.controller";
-import { authenticate } from "./../auth/auth.middleware";
+import { authenticate } from "@/modules/auth/auth.middleware";
 
 const router = Router();
 

@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.json && tsc-alias",
     "prisma": "prisma"
   },
   "keywords": [],
@@ -42,6 +42,8 @@
     "@types/express": "^5.0.3",
     "@types/express-fileupload": "^1.5.1",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/mime-types": "^3.0.1"
+    "@types/mime-types": "^3.0.1",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0"
   }
 }
