@@ -1,7 +1,7 @@
 import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError";
 import { CreateInvoiceInput } from "@/modules/invoices";
-import { ImportService } from "@/modules/imports/ocrImport.service";
+import { ImportService } from "@/modules/ocrImports/ocrImport.service";
 import axios from "axios";
 
 // type CompleteInvoiceInput = CreateInvoiceInput & {

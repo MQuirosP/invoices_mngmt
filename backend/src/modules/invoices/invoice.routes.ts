@@ -2,7 +2,7 @@ import { Router } from "express";
 import { create, download, list, remove, show } from "@/modules/invoices";
 import { authenticate } from "@/modules/auth";
 import { upload } from "@/shared/middleware/upload";
-import { importFromUrl } from "@/modules/imports";
+import { importFromUrl } from "@/modules/ocrImports";
 import { extractFromAttachment } from "@/modules/invoices/invoice.controller";
 
 const router = Router();
