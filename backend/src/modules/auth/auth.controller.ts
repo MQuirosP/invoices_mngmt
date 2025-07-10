@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { loginSchema, registerSchema } from "../schemas/auth.schemas";
-import { registerUser, loginUser } from "../service/auth.service";
+import { loginSchema, registerSchema } from "./auth.schemas";
+import { registerUser, loginUser } from "./auth.service";
 
 // Registro de usuario
 export const register = async (

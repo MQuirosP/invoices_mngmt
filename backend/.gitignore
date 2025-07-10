@@ -7,6 +7,7 @@ dist/
 
 # Keep environment variables out of version control
 .env
+backend/invoices-465501-c5f410e84e5f.json
 
 # Prisma files
 /generated/prisma

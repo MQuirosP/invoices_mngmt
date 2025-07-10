@@ -1,16 +1,16 @@
 import { /*Request,*/ Response, NextFunction } from "express";
-import { AppError } from "../../../shared/utils/AppError";
+import { AppError } from "../../shared/utils/AppError";
 import {
   createWarranty,
   getWarrantyByInvoice,
   updateWarranty,
   deleteWarranty,
-} from "../service/warranty.service";
+} from "./warranty.service";
 import {
   createWarrantySchema,
   updateWarrantySchema,
-} from "../schemas/warranty.schema";
-import { AuthRequest } from "../../auth/middleware/auth.middleware";
+} from "./warranty.schema";
+import { AuthRequest } from "./../auth/auth.middleware";
 
 export const create = async (
   req: AuthRequest,

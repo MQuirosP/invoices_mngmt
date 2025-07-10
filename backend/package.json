@@ -15,14 +15,19 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@cloudinary/url-gen": "^1.21.0",
+    "@google-cloud/vision": "^5.2.0",
     "@prisma/client": "^6.11.1",
     "@types/multer": "^2.0.0",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "express-fileupload": "^1.5.2",
+    "googleapis": "^152.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.1",
     "pg": "^8.16.3",
@@ -35,6 +40,8 @@
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10"
+    "@types/express-fileupload": "^1.5.1",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/mime-types": "^3.0.1"
   }
 }

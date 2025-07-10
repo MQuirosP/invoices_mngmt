@@ -1,6 +1,6 @@
-import { prisma } from "../../../config/prisma";
-import { AppError } from "../../../shared/utils/AppError";
-import { CreateInvoiceInput } from "../schemas/invoice.schema";
+import { prisma } from "../../config/prisma";
+import { AppError } from "../../shared/utils/AppError";
+import { CreateInvoiceInput } from "./invoice.schema";
 import axios from "axios";
 
 // type CompleteInvoiceInput = CreateInvoiceInput & {

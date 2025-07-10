@@ -1,16 +1,16 @@
-import { AppError } from "./../../../shared/utils/AppError";
+import { AppError } from "../../shared/utils/AppError";
 import { /*Request,*/ Response, NextFunction } from "express";
-import { createInvoiceSchema } from "../schemas/invoice.schema";
+import { createInvoiceSchema } from "./invoice.schema";
 import {
   createInvoice,
   getUserInvoices,
   getInvoiceById,
   deleteInvoiceById,
   downloadAttachment,
-} from "../service/invoice.service";
-import { AuthRequest } from "../../auth/middleware/auth.middleware";
-import { uploadToCloudinary } from "../../../shared/utils/uploadToCloudinary";
-import { prisma } from "../../../config/prisma";
+} from "./invoice.service";
+import { AuthRequest } from "../auth/auth.middleware";
+import { uploadToCloudinary } from "../../shared/utils/uploadToCloudinary";
+import { prisma } from "../../config/prisma";
 
 export const create = async (
   req: AuthRequest,

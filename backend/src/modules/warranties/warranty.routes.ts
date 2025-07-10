@@ -4,8 +4,8 @@ import {
   findByInvoice,
   update,
   remove,
-} from "../controller/warranty.controller";
-import { authenticate } from "../../auth/middleware/auth.middleware";
+} from "./warranty.controller";
+import { authenticate } from "./../auth/auth.middleware";
 
 const router = Router();
 

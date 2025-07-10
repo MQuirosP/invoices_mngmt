@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { create, download, list, remove, show } from "../controller/invoice.controller";
-import { authenticate } from "../../auth/middleware/auth.middleware";
-import { upload } from "../../../shared/middleware/upload";
+import { create, download, list, remove, show } from "./invoice.controller";
+import { authenticate } from "./../auth/auth.middleware";
+import { upload } from "../../shared/middleware/upload";
+import { importFromUrl } from "../imports/ocrImport.controller";
 
 const router = Router();
 
@@ -15,5 +16,9 @@ router.post("/", authenticate, upload.array("files", 5), create);
 
 // Route to downloadn invoice
 router.get("/:invoiceId/attachments/:attachmentId/download", authenticate, download);
+
+router.post('/import', authenticate, (req, res, next) => {
+  Promise.resolve(importFromUrl(req, res)).catch(next);
+})
 
 export default router;
