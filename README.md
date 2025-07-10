@@ -154,20 +154,20 @@ npx prisma ...    # Comandos Prisma
 
 ## 💻 Instalación y uso local
 
-1. Clona el repositorio:
+### Clona el repositorio
 
 ```bash
 git clone https://github.com/tu-usuario/invoices_mngmt.git
 cd invoices_mngmt/backend
 ```
 
-2. Instala dependencias:
+### Instala dependencias
 
 ```bash
 npm install
 ```
 
-3. Configura variables de entorno:
+### Configura variables de entorno
 
 ```env
 DATABASE_URL=postgresql://usuario:password@localhost:5432/facturas_db
@@ -179,13 +179,13 @@ CLOUDINARY_API_SECRET=xxx
 GOOGLE_APPLICATION_CREDENTIALS=./ruta/clave-ocr.json
 ```
 
-4. Ejecuta migraciones:
+### Ejecuta migraciones
 
 ```bash
 npx prisma migrate dev --name init
 ```
 
-5. Inicia el servidor:
+### Inicia el servidor
 
 ```bash
 npm run dev
@@ -201,11 +201,14 @@ npm run dev
 
 ## 📝 Licencia
 
-Este proyecto está bajo la licencia MIT. Libre para uso, modificación y distribución con atribución.
+- Este proyecto está bajo la licencia MIT. Libre para uso, modificación y distribución con atribución.
 
 ---
 
 ## 🙋‍♂️ Autor
 
-Desarrollado por Mario Quirós  
+### Desarrollado por Mario Quirós
+
+```bash
 <https://github.com/MQuirosP>
+```
