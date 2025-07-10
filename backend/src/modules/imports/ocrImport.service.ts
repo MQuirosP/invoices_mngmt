@@ -1,7 +1,7 @@
 import vision from "@google-cloud/vision";
 // import { v2 as cloudinary } from "cloudinary";
-import { extractMetadataFromText } from "../../shared/utils/extractMetadata";
-import { prisma } from "../../config/prisma";
+import { extractMetadataFromText } from "@/shared/utils/extractMetadata";
+import { prisma } from "@/config/prisma";
 import axios from "axios";
 
 export class ImportService {
@@ -34,6 +34,7 @@ export class ImportService {
         issueDate: metadata.issueDate,
         expiration: metadata.expiration ?? new Date(), // Provide a default or extract from metadata
         provider: metadata.provider ?? "Desconocido", // Provide a default or extract from metadata
+        extracted: true,
         attachments: {
           create: [
             {
@@ -59,4 +60,59 @@ export class ImportService {
 
     return newInvoice;
   }
+
+  async updateInvoiceFromCloudinaryUrl(url: string, invoiceId: string) {
+    const response = await axios.get(url, { responseType: "arraybuffer" });
+    const [result] = await this.visionClient.textDetection({
+      image: { content: Buffer.from(response.data) },
+    });
+
+    
+
+    const ocrText = result.fullTextAnnotation?.text;
+    if (!ocrText) throw new Error("No se pudo extraer texto del archivo");
+
+    const metadata = extractMetadataFromText(ocrText);
+    // const extParts = url.split(".");
+    // const ext =
+    //   extParts.length > 1 ? extParts.pop()!.split("?")[0].toLowerCase() : "";
+
+    const updatedInvoice = await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: {
+        title: metadata.title,
+        issueDate: metadata.issueDate,
+        expiration: metadata.expiration ?? new Date(),
+        provider: metadata.provider ?? "Desconocido",
+        extracted: true,
+        warranty: metadata.duration
+          ? {
+              upsert: {
+                update: {
+                  duration: metadata.duration,
+                  validUntil: new Date(
+                    metadata.issueDate.getTime() +
+                      metadata.duration * 86400000
+                  ),
+                },
+                create: {
+                  duration: metadata.duration,
+                  validUntil: new Date(
+                    metadata.issueDate.getTime() +
+                      metadata.duration * 86400000
+                  ),
+                },
+              },
+            }
+          : undefined,
+      },
+      include: {
+        attachments: true,
+        warranty: true,
+      },
+    });
+
+    return updatedInvoice;
+  }
 }
+

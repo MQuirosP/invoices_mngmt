@@ -1,10 +1,10 @@
-# 🧾 invoices-mngmt – Backend API
+# invoices-mngmt – Backend API
 
 Sistema de gestión de facturas y garantías con autenticación segura, validación robusta y almacenamiento en la nube.
 
 ---
 
-## 🚀 Tecnologías
+## Tecnologías
 
 - Node.js + Express  
 - TypeScript  
@@ -16,37 +16,37 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 - Arquitectura modular
 
 - src/
-  - app.ts                # Configuración principal de Express
-  - server.ts             # Punto de entrada del servidor
+  - app.ts                    # Configuración principal de Express
+  - server.ts                 # Punto de entrada del servidor
   - config/
-    - prisma.ts           # Cliente de Prisma
+    - prisma.ts               # Cliente de Prisma
   - routes/
-    - index.ts            # Rutas principales
+    - index.ts                # Rutas principales
   - modules/
-    - auth/               # Módulo de autenticación
-    - invoices/           # Módulo de facturas
-    - warranties/         # Módulo de garantías
-    - imports/            # Módulo para importación OCR
+    - auth/                   # Módulo de autenticación
+    - invoices/               # Módulo de facturas
+    - warranties/             # Módulo de garantías
+    - imports/                # Módulo para importación OCR
   - shared/
     - middleware/
-      - errorHandler.ts   # Middleware para manejo de errores
-      - upload.ts         #
+      - errorHandler.ts       # Middleware para manejo de errores
+      - upload.ts             # Middleware para subida de archivos
     - utils/
-      - AppError.ts       # Clase de error personalizada
-      - extractMetadata.ts # Utilidad para procesar texto extraído por OCR
+      - AppError.ts           # Clase de error personalizada
+      - extractMetadata.ts    # Utilidad para procesar texto extraído por OCR
       - uploadToCloudinary.ts # Utilidad para subir a cloudinary
 
 - prisma/
-  - schema.prisma         # Modelo de base de datos
+  - schema.prisma             # Modelo de base de datos
 
 ---
 
-## 🔐 Autenticación
+## Autenticación
 
 - `POST /api/auth/register` – Registro de usuario  
 - `POST /api/auth/login` – Inicio de sesión  
@@ -57,7 +57,7 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ---
 
-## 🧾 Facturas (`/api/invoices`)
+## Facturas (`/api/invoices`)
 
 - `POST /` – Crear factura (requiere token y archivo PDF/XML/JPG)  
 - `GET /` – Listar facturas del usuario  
@@ -67,19 +67,22 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 - Validación con Zod  
 - Asociación automática con `userId`  
 
-### 📥 Descarga de facturas
+### Descarga de facturas
 
 - `GET /api/invoices/:id/download`  
   - Protegido por JWT  
   - Usa `axios` para obtener el archivo desde Cloudinary  
   - Enviado al cliente como `stream`  
+
 - `GET /api/invoices/:invoiceId/attachments/:attachmentId/download`  
   - Descarga individual por ID de archivo adjunto  
   - Verifica que el archivo pertenezca a la factura y al usuario  
   - Devuelve stream seguro con headers adecuados  
+
 - Headers:
-  - `Content-Disposition: attachment; filename="<titulo>.pdf"`  
+  - `Content-Disposition: attachment; filename="<titulo>.<ext>"`  
   - `Content-Type` dinámico  
+
 - Beneficios:
   - No se expone la URL de Cloudinary  
   - Forza descarga en navegador  
@@ -87,7 +90,7 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ---
 
-## 📤 Importación por OCR (`/api/invoices/import`)
+## Importación por OCR (`/api/invoices/import`)
 
 - `POST /api/invoices/import` – Importa factura desde URL (PDF/JPG)  
 - Requiere token de autenticación  
@@ -96,12 +99,15 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
   - La factura (`title`, `issueDate`, `expiration`, `provider`)
   - La garantía si se infiere duración (`duration`, `validUntil`)
   - Un attachment con el archivo subido a Cloudinary
+
+- Validación extra para asegurar que la URL de attachment pertenezca a la factura (prevención de accesos inválidos)
+
 - Lógica encapsulada en el módulo `imports/` (servicio y controlador)
 - Utiliza utilidad `extractMetadataFromText()` para analizar el contenido extraído
 
 ---
 
-## 🛠️ Garantías (`/api/warranties`)
+## Garantías (`/api/warranties`)
 
 - `POST /` – Crear garantía asociada a factura  
 - `GET /:invoiceId` – Obtener garantía  
@@ -112,26 +118,26 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ---
 
-## ☁️ Subida de Archivos
+## Subida de Archivos
 
 - Archivos recibidos vía `form-data` con Multer  
 - Convertidos a base64 y subidos a Cloudinary  
-- Soporte para PDF, XML, JPG  
+- Soporte para PDF, XML, JPG, PNG  
 - Configuración de Cloudinary:
   - `resource_type: "raw"`  
   - `overwrite: true`  
   - Activada opción: “Allow delivery of PDF and ZIP files”  
 
-### 🔒 Validación de tipo MIME
+### Validación de tipo MIME
 
-- Solo permite: `PDF`, `XML`, `JPG`, `PNG`  
+- Solo permite: `application/pdf`, `application/xml`, `text/xml`, `image/jpeg`, `image/jpg`, `image/png`  
 - Rechaza otros tipos con error 415  
 - Tamaño máximo: 5 MB  
 - Seguridad reforzada en la carga  
 
 ---
 
-## 📌 Consideraciones
+## Consideraciones
 
 - Se mantiene `fileType` para determinar la extensión esperada  
 - El nombre del archivo se genera desde `title` de la factura  
@@ -141,13 +147,14 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ---
 
-## 🧪 Scripts
+## Scripts
 
 ```bash
 npm run dev       # Desarrollo con recarga
 npm run build     # Compilación TypeScript
 npm run start     # Producción
 npx prisma ...    # Comandos Prisma
+
 ```
 
 ---

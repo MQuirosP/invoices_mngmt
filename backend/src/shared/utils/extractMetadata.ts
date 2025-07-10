@@ -17,10 +17,12 @@ export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata 
   const title = lines[0] || 'Factura sin título';
 
   // 🔍 Line with key words
-  const providerMatch = lines.find(line =>
-    line.includes('tienda') || line.includes('proveedor') || line.includes('empresa')
-  );
-  const provider = providerMatch || 'Proveedor no identificado';
+const providerMatch = lines.slice(1).find(line =>
+  line.match(/(S\.A\.|Ltd|SRL|Comercial|Inversiones|Cédula Jurídica)/i)
+) || lines[1]; // fallback a segunda línea
+
+const provider = providerMatch || 'Proveedor no identificado';
+
 
   // 🔍 Date
   const dateRegex = /(\d{2}[\/\-\.]\d{2}[\/\-\.]\d{4})/;

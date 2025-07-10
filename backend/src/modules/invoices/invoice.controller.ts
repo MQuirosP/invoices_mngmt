@@ -7,10 +7,11 @@ import {
   getInvoiceById,
   deleteInvoiceById,
   downloadAttachment,
+  updateInvoiceFromOCR
 } from "./invoice.service";
-import { AuthRequest } from "../auth/auth.middleware";
-import { uploadToCloudinary } from "../../shared/utils/uploadToCloudinary";
-import { prisma } from "../../config/prisma";
+import { AuthRequest } from "@/modules/auth/auth.middleware";
+import { uploadToCloudinary } from "@/shared/utils/uploadToCloudinary";
+import { prisma } from "@/config/prisma";
 
 export const create = async (
   req: AuthRequest,
@@ -97,6 +98,32 @@ export const show = async (
       success: true,
       message: "Invoice retrieved successfully",
       data: invoice,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const extractFromAttachment = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    const invoiceId = req.params.invoiceId;
+    const { url } = req.body;
+
+    if (!userId || !invoiceId || !url) {
+      throw new AppError("Faltan datos requeridos", 400);
+    }
+
+    const updated = await updateInvoiceFromOCR(invoiceId, userId, url);
+
+    res.status(200).json({
+      success: true,
+      message: "Invoice updated from OCR successfully",
+      data: updated,
     });
   } catch (error) {
     next(error);

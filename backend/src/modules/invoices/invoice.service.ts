@@ -1,6 +1,7 @@
 import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError";
 import { CreateInvoiceInput } from "@/modules/invoices";
+import { ImportService } from "@/modules/imports/ocrImport.service";
 import axios from "axios";
 
 // type CompleteInvoiceInput = CreateInvoiceInput & {
@@ -61,6 +62,41 @@ export const deleteInvoiceById = async (id: string, userId: string) => {
   });
 
   return invoice;
+};
+
+export const updateInvoiceFromOCR = async (
+  invoiceId: string,
+  userId: string,
+  attachmentUrl: string
+) => {
+
+  const importService = new ImportService();
+
+
+  // Validar pertenencia de la factura al usuario
+  const invoice = await prisma.invoice.findFirst({
+    where: { id: invoiceId, userId },
+  });
+
+  if (!invoice) throw new AppError("Invoice not found", 404);
+
+  const invoiceWithAttachments = await prisma.invoice.findFirst({
+  where: { id: invoiceId, userId },
+  include: { attachments: true },
+});
+
+const isValidUrl = invoiceWithAttachments?.attachments.some(
+  (a) => a.url === attachmentUrl
+);
+if (!isValidUrl) throw new AppError("URL no corresponde a ningún attachment", 400);
+
+
+  const updated = await importService.updateInvoiceFromCloudinaryUrl(
+    attachmentUrl,
+    invoiceId
+  );
+
+  return updated;
 };
 
 export const downloadAttachment = async (

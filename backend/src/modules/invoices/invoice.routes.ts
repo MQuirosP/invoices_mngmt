@@ -3,6 +3,7 @@ import { create, download, list, remove, show } from "@/modules/invoices";
 import { authenticate } from "@/modules/auth";
 import { upload } from "@/shared/middleware/upload";
 import { importFromUrl } from "@/modules/imports";
+import { extractFromAttachment } from "@/modules/invoices/invoice.controller";
 
 const router = Router();
 
@@ -20,5 +21,7 @@ router.get("/:invoiceId/attachments/:attachmentId/download", authenticate, downl
 router.post('/import', authenticate, (req, res, next) => {
   Promise.resolve(importFromUrl(req, res)).catch(next);
 })
+
+router.post("/:invoiceId/extract", authenticate, extractFromAttachment);
 
 export default router;
