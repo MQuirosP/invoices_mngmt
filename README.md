@@ -12,6 +12,7 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 - JWT + Bcrypt  
 - Zod para validaciones  
 - Multer + Cloudinary para manejo de archivos  
+- Google Cloud Vision API para OCR
 
 ---
 
@@ -30,11 +31,15 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     - auth/               # Módulo de autenticación
     - invoices/           # Módulo de facturas
     - warranties/         # Módulo de garantías
+    - imports/            # Módulo para importación OCR
   - shared/
     - middleware/
       - errorHandler.ts   # Middleware para manejo de errores
+      - upload.ts         #
     - utils/
       - AppError.ts       # Clase de error personalizada
+      - extractMetadata.ts # Utilidad para procesar texto extraído por OCR
+      - uploadToCloudinary.ts # Utilidad para subir a cloudinary
 
 - prisma/
   - schema.prisma         # Modelo de base de datos
@@ -82,6 +87,20 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ---
 
+## 📤 Importación por OCR (`/api/invoices/import`)
+
+- `POST /api/invoices/import` – Importa factura desde URL (PDF/JPG)  
+- Requiere token de autenticación  
+- Procesa el archivo remoto con Google Cloud Vision API  
+- Extrae texto OCR y lo interpreta para crear automáticamente:
+  - La factura (`title`, `issueDate`, `expiration`, `provider`)
+  - La garantía si se infiere duración (`duration`, `validUntil`)
+  - Un attachment con el archivo subido a Cloudinary
+- Lógica encapsulada en el módulo `imports/` (servicio y controlador)
+- Utiliza utilidad `extractMetadataFromText()` para analizar el contenido extraído
+
+---
+
 ## 🛠️ Garantías (`/api/warranties`)
 
 - `POST /` – Crear garantía asociada a factura  
@@ -118,6 +137,7 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 - El nombre del archivo se genera desde `title` de la factura  
 - Descarga ahora permite seleccionar un archivo específico por ID  
 - Posibilidad futura: descargar todos como archivo ZIP  
+- OCR habilitado para automatizar ingreso de facturas desde imagen o PDF  
 
 ---
 
@@ -141,13 +161,13 @@ git clone https://github.com/tu-usuario/invoices_mngmt.git
 cd invoices_mngmt/backend
 ```
 
-2.Instala dependencias:
+2. Instala dependencias:
 
 ```bash
 npm install
 ```
 
-3.Configura variables de entorno:
+3. Configura variables de entorno:
 
 ```env
 DATABASE_URL=postgresql://usuario:password@localhost:5432/facturas_db
@@ -156,15 +176,16 @@ SALT_ROUNDS=10
 CLOUDINARY_CLOUD_NAME=xxx
 CLOUDINARY_API_KEY=xxx
 CLOUDINARY_API_SECRET=xxx
+GOOGLE_APPLICATION_CREDENTIALS=./ruta/clave-ocr.json
 ```
 
-4.Ejecuta migraciones:
+4. Ejecuta migraciones:
 
 ```bash
 npx prisma migrate dev --name init
 ```
 
-5.Inicia el servidor:
+5. Inicia el servidor:
 
 ```bash
 npm run dev
