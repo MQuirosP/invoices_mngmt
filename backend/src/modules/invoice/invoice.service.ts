@@ -1,6 +1,6 @@
 import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
-import { CreateInvoiceInput } from "@/modules/invoices";
+import { CreateInvoiceInput } from "@/modules/invoice";
 import axios from "axios";
 // import { OCRService } from "@/shared/services/ocr.service";
 import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";

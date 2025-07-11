@@ -1,6 +1,6 @@
 import { AppError } from "@/shared/utils/AppError.utils";
 import { /*Request,*/ Response, NextFunction } from "express";
-import { createInvoiceSchema } from "@/modules/invoices";
+import { createInvoiceSchema } from "@/modules/invoice";
 import {
   createInvoice,
   getUserInvoices,

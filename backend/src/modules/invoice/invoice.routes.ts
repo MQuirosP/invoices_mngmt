@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { create, download, list, remove, show } from "@/modules/invoices";
+import { create, download, list, remove, show } from "@/modules/invoice";
 import { authenticate } from "@/modules/auth";
 import { upload } from "@/shared/middleware/upload";
-import { importFromLocal, importFromUrl } from "@/modules/ocrImports";
-import { extractFromAttachment } from "@/modules/invoices/invoice.controller";
+import { importFromLocal, importFromUrl } from "@/modules/import";
+import { extractFromAttachment } from "@/modules/invoice/invoice.controller";
 
 const router = Router();
 

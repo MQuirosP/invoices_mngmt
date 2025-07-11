@@ -1,7 +1,7 @@
 import { prisma } from "@/config/prisma";
 import { OCRService } from "@/shared/services/ocr.service";
 import axios from "axios";
-import { updateInvoiceFromMetadata } from "@/modules/invoices/invoice.service";
+import { updateInvoiceFromMetadata } from "@/modules/invoice/invoice.service";
 import { uploadToCloudinary } from "../../shared";
 
 export class ImportService {
