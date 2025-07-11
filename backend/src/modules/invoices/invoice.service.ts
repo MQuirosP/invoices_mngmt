@@ -130,7 +130,7 @@ export const updateInvoiceFromOCR = async (
   }
 
   // Extract metadata from OCR Metadata
-  const metadata = await OCRService.extractMetadataFromImage(attachmentUrl);
+  const metadata = await OCRService.getMetadataFromUrl(attachmentUrl);
 
   // Update invoice from extracted metadata
   return updateInvoiceFromMetadata(invoiceId, metadata);

@@ -1,6 +1,9 @@
 import vision from "@google-cloud/vision";
 import axios from "axios";
-import { extractMetadataFromText, ExtractedInvoiceMetadata } from "@/shared/utils/extractMetadata.utils";
+import {
+  extractMetadataFromText,
+  ExtractedInvoiceMetadata,
+} from "@/shared/utils/extractMetadata.utils";
 
 const client = new vision.ImageAnnotatorClient();
 
@@ -22,12 +25,16 @@ export class OCRService {
     return detections[0].description || "";
   }
 
-  static async extractMetadataFromImage(url: string): Promise<ExtractedInvoiceMetadata> {
+  static async extractMetadataFromImage(
+    url: string
+  ): Promise<ExtractedInvoiceMetadata> {
     const text = await this.extractTextFromImage(url);
     return extractMetadataFromText(text);
   }
 
-  static async extractMetadataFromBuffer(buffer: Buffer): Promise<ExtractedInvoiceMetadata> {
+  static async extractMetadataFromBuffer(
+    buffer: Buffer
+  ): Promise<ExtractedInvoiceMetadata> {
     const [result] = await client.textDetection({
       image: { content: buffer },
     });
@@ -36,5 +43,13 @@ export class OCRService {
     if (!text) throw new Error("No se pudo extraer texto del archivo");
 
     return extractMetadataFromText(text);
+  }
+
+  static async getMetadataFromUrl(
+    url: string
+  ): Promise<ExtractedInvoiceMetadata> {
+    const response = await axios.get(url, { responseType: "arraybuffer" });
+    const buffer = Buffer.from(response.data);
+    return this.extractMetadataFromBuffer(buffer);
   }
 }

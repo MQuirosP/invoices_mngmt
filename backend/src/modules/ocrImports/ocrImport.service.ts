@@ -8,7 +8,7 @@ export class ImportService {
     const response = await axios.get(url, { responseType: "arraybuffer" });
     const buffer = Buffer.from(response.data);
 
-    const metadata = await OCRService.extractMetadataFromBuffer(buffer);
+    const metadata = await OCRService.getMetadataFromUrl(url);
 
     const extParts = url.split(".");
     const ext =
@@ -52,7 +52,7 @@ export class ImportService {
     const response = await axios.get(url, { responseType: "arraybuffer" });
     const buffer = Buffer.from(response.data);
 
-    const metadata = await OCRService.extractMetadataFromBuffer(buffer);
+    const metadata = await OCRService.getMetadataFromUrl(url);
 
     const updatedInvoice = await updateInvoiceFromMetadata(invoiceId, metadata);
 
