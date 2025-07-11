@@ -1,22 +1,33 @@
-# exclude node_modules directory
-# This directory contains all the dependencies installed by npm 
-node_modules
+# ─────────────────────────────
+# Node modules
+# ─────────────────────────────
+node_modules/
 
-# Build output directory
+# ─────────────────────────────
+# Build outputs
+# ─────────────────────────────
 dist/
+tsconfig.tsbuildinfo
 
-# Keep environment variables out of version control
+# ─────────────────────────────
+# Environment files & secrets
+# ─────────────────────────────
 .env
 backend/invoices-465501-c5f410e84e5f.json
 
-# Prisma files
+# ─────────────────────────────
+# Prisma
+# ─────────────────────────────
 /generated/prisma
 prisma/dev.db
 
-# Ignore logs
-logs
-*.logs
+# ─────────────────────────────
+# Logs
+# ─────────────────────────────
+logs/
+*.log
 
-# IDE files
+# ─────────────────────────────
+# IDE/editor settings
+# ─────────────────────────────
 .vscode/
-
