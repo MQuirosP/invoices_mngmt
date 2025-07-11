@@ -9,9 +9,13 @@ import {
   downloadAttachment,
   updateInvoiceFromOCR,
 } from "./invoice.service";
+import { ImportService } from "@/shared/services/import.service";
 import { AuthRequest } from "@/modules/auth/auth.middleware";
-import { uploadToCloudinary } from "@/shared/utils/uploadToCloudinary";
 import { prisma } from "@/config/prisma";
+import { CloudinaryService } from '../../shared/services/cloudinary.service';
+
+const importService = new ImportService();
+const cloudinary = new CloudinaryService()
 
 export const create = async (
   req: AuthRequest,
@@ -31,7 +35,7 @@ export const create = async (
 
     if (files && files.length > 0) {
       for (const file of files) {
-        const { url, type } = await uploadToCloudinary(
+        const { url, type } = await cloudinary.upload(
           file.buffer,
           file.originalname,
           file.mimetype
@@ -185,3 +189,60 @@ export const download = async (
     next(error);
   }
 };
+
+export const importFromLocal = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    const file = req.file;
+
+    if (!file || !userId) {
+      res.status(400).json({ message: "Missing file or user ID" });
+      return;
+    }
+
+    const invoice = await importService.importFromBuffer(
+      file.buffer,
+      userId,
+      file.originalname,
+      file.mimetype
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Invoice imported from local file",
+      data: invoice,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const importFromUrl = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { url } = req.body;
+    const userId = req.user?.id || "";
+
+    if (!url || !userId) {
+      res.status(400).json({ message: "Missing URL or user ID" });
+    }
+
+    const invoice = await importService.importFromUrl(url, userId);
+
+    res.status(201).json({
+      success: true,
+      message: "Invoice imported from Cloudinary URL",
+      data: invoice,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

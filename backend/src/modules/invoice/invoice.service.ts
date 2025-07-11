@@ -4,6 +4,10 @@ import { CreateInvoiceInput } from "@/modules/invoice";
 import axios from "axios";
 import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
 import { OCRService } from "@/shared/services/ocr.service";
+import { FileFetcherService } from "@/shared/services/fileFetcher.service";
+
+const fileFetcher = new FileFetcherService();
+const ocrService = new OCRService();
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -129,7 +133,8 @@ export const updateInvoiceFromOCR = async (
   }
 
   // Extract metadata from OCR Metadata
-  const metadata = await OCRService.getMetadataFromUrl(attachmentUrl);
+  const buffer = await fileFetcher.fetchBuffer(attachmentUrl);
+  const metadata = await ocrService.extractMetadataFromBuffer(buffer);
 
   // Update invoice from extracted metadata
   return updateInvoiceFromMetadata(invoiceId, metadata);
