@@ -2,7 +2,7 @@ import { Router } from "express";
 import { create, download, list, remove, show } from "@/modules/invoices";
 import { authenticate } from "@/modules/auth";
 import { upload } from "@/shared/middleware/upload";
-import { importFromUrl } from "@/modules/ocrImports";
+import { importFromLocal, importFromUrl } from "@/modules/ocrImports";
 import { extractFromAttachment } from "@/modules/invoices/invoice.controller";
 
 const router = Router();
@@ -14,6 +14,7 @@ router.delete("/:id", authenticate, remove);
 
 // Route for upload files
 router.post("/", authenticate, upload.array("files", 5), create);
+router.post("/import/local", authenticate, upload.single("file"), importFromLocal);
 
 // Route to downloadn invoice
 router.get(

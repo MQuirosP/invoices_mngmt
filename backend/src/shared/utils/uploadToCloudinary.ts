@@ -18,6 +18,7 @@ export const uploadToCloudinary = async (
 ): Promise<{ url: string; type: string }> => {
   try {
     const ext = mimeExtensionMap[mimetype];
+    console.log("📎 MIME Type recibido:", mimetype);
     if (!ext) throw new AppError("Unsupported file type", 415);
 
     const base64 = `data:${mimetype};base64,${fileBuffer.toString("base64")}`;
