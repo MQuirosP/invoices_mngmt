@@ -105,6 +105,11 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 - Lógica encapsulada en el módulo `imports/` (servicio y controlador)
 - Utiliza utilidad `extractMetadataFromText()` para analizar el contenido extraído
 
+- OCR sobre archivo ya subido también implementado:
+  - `POST /api/invoices/:id/import`
+  - Extrae texto desde attachment existente y actualiza la factura
+  - Marca `extracted: true`
+
 ---
 
 ## Garantías (`/api/warranties`)
@@ -144,6 +149,7 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 - Descarga ahora permite seleccionar un archivo específico por ID  
 - Posibilidad futura: descargar todos como archivo ZIP  
 - OCR habilitado para automatizar ingreso de facturas desde imagen o PDF  
+- Validación de ownership implementada en importación y descarga  
 
 ---
 
@@ -154,7 +160,6 @@ npm run dev       # Desarrollo con recarga
 npm run build     # Compilación TypeScript
 npm run start     # Producción
 npx prisma ...    # Comandos Prisma
-
 ```
 
 ---
