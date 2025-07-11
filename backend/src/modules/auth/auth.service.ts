@@ -1,4 +1,4 @@
-import { RegisterInput, LoginInput } from "./auth.schemas";
+import { RegisterInput, LoginInput } from "./auth.schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/config/prisma";

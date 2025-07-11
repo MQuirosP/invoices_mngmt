@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { loginSchema, registerSchema } from "./auth.schemas";
+import { loginSchema, registerSchema } from "./auth.schema";
 import { registerUser, loginUser } from "./auth.service";
 
 // Create user
