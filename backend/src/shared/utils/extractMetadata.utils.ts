@@ -9,6 +9,15 @@ export interface ExtractedInvoiceMetadata {
   validUntil?: Date;
 }
 
+export interface ExtractedMetadata {
+  title: string;
+  issueDate: Date;
+  expiration?: Date;
+  provider?: string;
+  duration?: number;
+  validUntil?: Date;
+}
+
 export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
@@ -28,6 +37,8 @@ export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata 
     expiration,
   };
 }
+
+
 
 function extractTitle(lines: string[]): string {
   return lines[0] || 'Factura sin título';
@@ -73,3 +84,5 @@ function parseDate(raw: string): Date {
   const parsed = new Date(`${y}-${m}-${d}`);
   return isNaN(parsed.getTime()) ? new Date() : parsed;
 }
+
+

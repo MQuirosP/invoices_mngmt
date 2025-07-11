@@ -2,6 +2,8 @@ import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { CreateInvoiceInput } from "@/modules/invoices";
 import axios from "axios";
+// import { OCRService } from "@/shared/services/ocr.service";
+import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
 import { OCRService } from "../../shared/services/ocr.service";
 
 export const createInvoice = async (
@@ -62,55 +64,76 @@ export const deleteInvoiceById = async (id: string, userId: string) => {
   return invoice;
 };
 
+export const updateInvoiceFromMetadata = async (
+  invoiceId: string,
+  metadata: ExtractedMetadata
+) => {
+  return prisma.invoice.update({
+    where: { id: invoiceId },
+    data: {
+      title: metadata.title,
+      issueDate: metadata.issueDate,
+      expiration: metadata.expiration ?? new Date(),
+      provider: metadata.provider ?? "Desconocido",
+      extracted: true,
+      warranty: metadata.duration
+        ? {
+            upsert: {
+              update: {
+                duration: metadata.duration,
+                validUntil:
+                  metadata.validUntil ??
+                  new Date(
+                    metadata.issueDate.getTime() + metadata.duration * 86400000
+                  ),
+              },
+              create: {
+                duration: metadata.duration,
+                validUntil:
+                  metadata.validUntil ??
+                  new Date(
+                    metadata.issueDate.getTime() + metadata.duration * 86400000
+                  ),
+              },
+            },
+          }
+        : undefined,
+    },
+    include: {
+      attachments: true,
+      warranty: true,
+    },
+  });
+};
+
 export const updateInvoiceFromOCR = async (
   invoiceId: string,
   userId: string,
   attachmentUrl: string
 ) => {
-  // Validar que la factura exista y pertenezca al usuario
-  const invoice = await prisma.invoice.findFirst({
-    where: { id: invoiceId, userId },
-    include: { attachments: true },
-  });
+  // Verificar que la factura existe y pertenece al usuario
+  const invoice = await getInvoiceById(invoiceId, userId);
+  if (!invoice) {
+    throw new AppError("Invoice not found or access denied", 404);
+  }
 
-  if (!invoice) throw new AppError("Invoice not found", 404);
-
-  const isValidUrl = invoice.attachments.some((a) => a.url === attachmentUrl);
-  if (!isValidUrl)
-    throw new AppError("Attachment URL does not belong to this invoice", 400);
-
-  // Extraer texto con OCR (asumiendo que tienes un servicio OCR)
-  const metadata = await OCRService.extractMetadataFromImage(attachmentUrl);
-
-
-  // Actualizar la factura y la garantía (si aplica)
-  const updatedInvoice = await prisma.invoice.update({
-    where: { id: invoiceId },
-    data: {
-      title: metadata.title,
-      issueDate: metadata.issueDate,
-      expiration: metadata.expiration,
-      provider: metadata.provider,
-      extracted: true,
-      warranty: metadata.duration
-  ? {
-      upsert: {
-        update: {
-          duration: metadata.duration,
-          validUntil: metadata.validUntil ?? undefined ,
-        },
-        create: {
-          duration: metadata.duration,
-          validUntil: metadata.validUntil ?? new Date(),
-        },
-      },
-    }
-  : undefined,
-
+  // Validar que el URL está entre los attachments de la factura
+  const attachment = await prisma.attachment.findFirst({
+    where: {
+      invoiceId,
+      url: attachmentUrl,
     },
   });
 
-  return updatedInvoice;
+  if (!attachment) {
+    throw new AppError("El archivo no pertenece a esta factura", 403);
+  }
+
+  // Extraer metadata usando OCR del attachment
+  const metadata = await OCRService.extractMetadataFromImage(attachmentUrl);
+
+  // Actualizar la factura con la metadata extraída
+  return updateInvoiceFromMetadata(invoiceId, metadata);
 };
 
 export const downloadAttachment = async (
