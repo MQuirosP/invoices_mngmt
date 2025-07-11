@@ -1,15 +1,8 @@
 import { prisma } from "@/config/prisma";
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/AppError.utils";
 import { CreateInvoiceInput } from "@/modules/invoices";
 import axios from "axios";
 import { OCRService } from "../../shared/services/ocr.service";
-import { extractMetadataFromText } from "../../shared";
-
-// type CompleteInvoiceInput = CreateInvoiceInput & {
-//   fileUrl: string;
-//   fileType: string;
-// };
-
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -87,9 +80,8 @@ export const updateInvoiceFromOCR = async (
     throw new AppError("Attachment URL does not belong to this invoice", 400);
 
   // Extraer texto con OCR (asumiendo que tienes un servicio OCR)
-  const text = await OCRService.extractTextFromImage(attachmentUrl);
+  const metadata = await OCRService.extractMetadataFromImage(attachmentUrl);
 
-  const metadata = extractMetadataFromText(text);
 
   // Actualizar la factura y la garantía (si aplica)
   const updatedInvoice = await prisma.invoice.update({

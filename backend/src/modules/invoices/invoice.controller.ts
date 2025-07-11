@@ -1,4 +1,4 @@
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/AppError.utils";
 import { /*Request,*/ Response, NextFunction } from "express";
 import { createInvoiceSchema } from "@/modules/invoices";
 import {

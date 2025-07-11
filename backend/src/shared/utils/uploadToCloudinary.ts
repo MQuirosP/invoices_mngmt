@@ -1,5 +1,5 @@
 import cloudinary from "@/config/cloudinary";
-import { AppError } from "./AppError";
+import { AppError } from "./AppError.utils";
 import path from "path";
 
 const mimeExtensionMap: Record<string, string> = {

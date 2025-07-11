@@ -1,6 +1,6 @@
 import vision from "@google-cloud/vision";
 // import { v2 as cloudinary } from "cloudinary";
-import { extractMetadataFromText } from "@/shared/utils/extractMetadata";
+import { extractMetadataFromText } from "@/shared/utils/extractMetadata.utils";
 import { prisma } from "@/config/prisma";
 import axios from "axios";
 

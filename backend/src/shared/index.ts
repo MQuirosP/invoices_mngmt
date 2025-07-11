@@ -1,5 +1,5 @@
 export * from './middleware/errorHandler'
 export * from './middleware/upload'
-export * from './utils/AppError'
-export * from './utils/extractMetadata'
+export * from './utils/AppError.utils'
+export * from './utils/extractMetadata.utils'
 export * from './utils/uploadToCloudinary'

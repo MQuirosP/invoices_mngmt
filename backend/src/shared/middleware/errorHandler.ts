@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/AppError.utils";
 
 /**
  * Middleware to handle errors in the application.
