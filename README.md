@@ -29,9 +29,8 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     - index.ts                # Rutas principales
   - modules/
     - auth/                   # Módulo de autenticación
-    - invoices/               # Módulo de facturas
-    - warranties/             # Módulo de garantías
-    - imports/                # Módulo para importación OCR
+    - invoice/               # Módulo de facturas
+    - warranty/             # Módulo de garantías
   - shared/
     - middleware/
       - errorHandler.ts       # Middleware para manejo de errores
@@ -44,7 +43,6 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     - utils/
       - AppError.ts           # Clase de error personalizada
       - extractMetadata.ts    # Utilidad para procesar texto extraído por OCR
-      - uploadToCloudinary.ts # Utilidad para subir a cloudinary
 
 - prisma/
   - schema.prisma             # Modelo de base de datos
