@@ -20,59 +20,34 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 - Arquitectura modular
 
-Directory structure:
-└── mquirosp-invoices_mngmt/
-    ├── README.md
-    ├── LICENSE
-    └── backend/
-        ├── package.json
-        ├── tsconfig.json
-        ├── prisma/
-        │   ├── schema.prisma
-        │   └── migrations/
-        │       ├── migration_lock.toml
-        └── src/
-            ├── app.ts
-            ├── server.ts
-            ├── config/
-            │   ├── cloudinary.ts
-            │   ├── index.ts
-            │   └── prisma.ts
-            ├── modules/
-            │   ├── auth/
-            │   │   ├── auth.controller.ts
-            │   │   ├── auth.middleware.ts
-            │   │   ├── auth.routes.ts
-            │   │   ├── auth.schema.ts
-            │   │   ├── auth.service.ts
-            │   │   └── index.ts
-            │   ├── invoice/
-            │   │   ├── index.ts
-            │   │   ├── invoice.controller.ts
-            │   │   ├── invoice.routes.ts
-            │   │   ├── invoice.schema.ts
-            │   │   └── invoice.service.ts
-            │   └── warranty/
-            │       ├── index.ts
-            │       ├── warranty.controller.ts
-            │       ├── warranty.routes.ts
-            │       ├── warranty.schema.ts
-            │       └── warranty.service.ts
-            ├── routes/
-            │   └── index.ts
-            └── shared/
-                ├── index.ts
-                ├── middleware/
-                │   ├── errorHandler.ts
-                │   └── upload.ts
-                ├── services/
-                │   ├── cloudinary.service.ts
-                │   ├── fileFetcher.service.ts
-                │   ├── import.service.ts
-                │   └── ocr.service.ts
-                └── utils/
-                    ├── AppError.utils.ts
-                    └── extractMetadata.utils.ts
+- src/
+  - app.ts                    # Configuración principal de Express
+  - server.ts                 # Punto de entrada del servidor
+  - config/
+    - prisma.ts               # Cliente de Prisma
+  - routes/
+    - index.ts                # Rutas principales
+  - modules/
+    - auth/                   # Módulo de autenticación
+    - invoices/               # Módulo de facturas
+    - warranties/             # Módulo de garantías
+    - imports/                # Módulo para importación OCR
+  - shared/
+    - middleware/
+      - errorHandler.ts       # Middleware para manejo de errores
+      - upload.ts             # Middleware para subida de archivos
+    - services/
+      - cloudinary.service.ts # Servicio para subir a cloudinary
+      - fileFetcher.service.ts# Servicio para obtener archivos
+      - import.service.ts     # Servicio para actualizar facturas
+      - ocr.service.ts        # Servicio para reconocimiento OCR
+    - utils/
+      - AppError.ts           # Clase de error personalizada
+      - extractMetadata.ts    # Utilidad para procesar texto extraído por OCR
+      - uploadToCloudinary.ts # Utilidad para subir a cloudinary
+
+- prisma/
+  - schema.prisma             # Modelo de base de datos
 
 ---
 
