@@ -1,8 +1,9 @@
 import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError";
 import { CreateInvoiceInput } from "@/modules/invoices";
-import { ImportService } from "@/modules/ocrImports/ocrImport.service";
 import axios from "axios";
+import { OCRService } from "../../shared/services/ocr.service";
+import { extractMetadataFromText } from "../../shared";
 
 // type CompleteInvoiceInput = CreateInvoiceInput & {
 //   fileUrl: string;
@@ -43,6 +44,10 @@ export const getInvoiceById = async (id: string, userId: string) => {
       id,
       userId,
     },
+    include: {
+      attachments: true,
+      warranty: true,
+     }
   });
   return invoice;
 };
@@ -69,34 +74,51 @@ export const updateInvoiceFromOCR = async (
   userId: string,
   attachmentUrl: string
 ) => {
-
-  const importService = new ImportService();
-
-
-  // Validar pertenencia de la factura al usuario
+  // Validar que la factura exista y pertenezca al usuario
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId, userId },
+    include: { attachments: true },
   });
 
   if (!invoice) throw new AppError("Invoice not found", 404);
 
-  const invoiceWithAttachments = await prisma.invoice.findFirst({
-  where: { id: invoiceId, userId },
-  include: { attachments: true },
-});
+  const isValidUrl = invoice.attachments.some((a) => a.url === attachmentUrl);
+  if (!isValidUrl)
+    throw new AppError("Attachment URL does not belong to this invoice", 400);
 
-const isValidUrl = invoiceWithAttachments?.attachments.some(
-  (a) => a.url === attachmentUrl
-);
-if (!isValidUrl) throw new AppError("URL no corresponde a ningún attachment", 400);
+  // Extraer texto con OCR (asumiendo que tienes un servicio OCR)
+  const text = await OCRService.extractTextFromImage(attachmentUrl);
 
+  const metadata = extractMetadataFromText(text);
 
-  const updated = await importService.updateInvoiceFromCloudinaryUrl(
-    attachmentUrl,
-    invoiceId
-  );
+  // Actualizar la factura y la garantía (si aplica)
+  const updatedInvoice = await prisma.invoice.update({
+    where: { id: invoiceId },
+    data: {
+      title: metadata.title,
+      issueDate: metadata.issueDate,
+      expiration: metadata.expiration,
+      provider: metadata.provider,
+      extracted: true,
+      warranty: metadata.duration
+  ? {
+      upsert: {
+        update: {
+          duration: metadata.duration,
+          validUntil: metadata.validUntil ?? undefined ,
+        },
+        create: {
+          duration: metadata.duration,
+          validUntil: metadata.validUntil ?? new Date(),
+        },
+      },
+    }
+  : undefined,
 
-  return updated;
+    },
+  });
+
+  return updatedInvoice;
 };
 
 export const downloadAttachment = async (

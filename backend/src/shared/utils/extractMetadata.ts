@@ -54,7 +54,7 @@ return {
   issueDate,
   duration,
   validUntil,
-  expiration
+  expiration,
 };
 }
 
