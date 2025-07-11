@@ -27,8 +27,8 @@ export const getUserInvoices = async (userId: string) => {
     orderBy: { createdAt: "desc" },
     include: {
       attachments: true,
-      warranty: true
-    }
+      warranty: true,
+    },
   });
   return invoices;
 };
@@ -42,7 +42,7 @@ export const getInvoiceById = async (id: string, userId: string) => {
     include: {
       attachments: true,
       warranty: true,
-     }
+    },
   });
   return invoice;
 };
@@ -129,10 +129,10 @@ export const updateInvoiceFromOCR = async (
     throw new AppError("El archivo no pertenece a esta factura", 403);
   }
 
-  // Extraer metadata usando OCR del attachment
+  // Extract metadata from OCR Metadata
   const metadata = await OCRService.extractMetadataFromImage(attachmentUrl);
 
-  // Actualizar la factura con la metadata extraída
+  // Update invoice from extracted metadata
   return updateInvoiceFromMetadata(invoiceId, metadata);
 };
 
@@ -143,15 +143,15 @@ export const downloadAttachment = async (
 ) => {
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId, userId },
-    include: { attachments: true},
+    include: { attachments: true },
   });
 
   if (!invoice) throw new AppError("Invoice not found", 404);
 
-  const attachment = invoice.attachments.find(a => a.id === attachmentId);
+  const attachment = invoice.attachments.find((a) => a.id === attachmentId);
   if (!attachment) throw new AppError("Attachment not found", 404);
 
-  const response = await axios.get(attachment.url, { responseType: "stream"});
+  const response = await axios.get(attachment.url, { responseType: "stream" });
 
   const ext = attachment.mimeType.split("/")[1] || "bin";
   const fileName = `${invoice.title.replace(/\s+/g, "_")}.${ext}`;
@@ -159,6 +159,6 @@ export const downloadAttachment = async (
   return {
     stream: response.data,
     mimeType: response.headers["content-type"],
-    fileName
+    fileName,
   };
 };

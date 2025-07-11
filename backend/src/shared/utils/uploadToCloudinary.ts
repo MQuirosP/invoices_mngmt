@@ -28,7 +28,7 @@ export const uploadToCloudinary = async (
       resource_type: "auto",
       folder: "invoices",
       type: "upload",
-      overwrite: true
+      overwrite: true,
     });
 
     return {

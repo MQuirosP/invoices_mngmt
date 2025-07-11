@@ -10,17 +10,21 @@ const router = Router();
 // router.post("/", authenticate, create);
 router.get("/", authenticate, list);
 router.get("/:id", authenticate, show);
-router.delete("/:id", authenticate, remove)
+router.delete("/:id", authenticate, remove);
 
 // Route for upload files
 router.post("/", authenticate, upload.array("files", 5), create);
 
 // Route to downloadn invoice
-router.get("/:invoiceId/attachments/:attachmentId/download", authenticate, download);
+router.get(
+  "/:invoiceId/attachments/:attachmentId/download",
+  authenticate,
+  download
+);
 
-router.post('/import', authenticate, (req, res, next) => {
+router.post("/import", authenticate, (req, res, next) => {
   Promise.resolve(importFromUrl(req, res)).catch(next);
-})
+});
 
 router.post("/:invoiceId/extract", authenticate, extractFromAttachment);
 

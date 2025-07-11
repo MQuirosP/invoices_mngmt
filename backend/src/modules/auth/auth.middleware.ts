@@ -24,9 +24,10 @@ export const authenticate = (
     if (!secret) {
       throw new AppError("JWT secret is not defined", 500);
     }
-    const decoded = jwt.verify(token, secret) as { 
-        sub: string; 
-        email: string };
+    const decoded = jwt.verify(token, secret) as {
+      sub: string;
+      email: string;
+    };
     req.user = {
       id: decoded.sub,
       email: decoded.email,

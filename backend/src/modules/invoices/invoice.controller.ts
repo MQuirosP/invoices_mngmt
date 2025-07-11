@@ -7,7 +7,7 @@ import {
   getInvoiceById,
   deleteInvoiceById,
   downloadAttachment,
-  updateInvoiceFromOCR
+  updateInvoiceFromOCR,
 } from "./invoice.service";
 import { AuthRequest } from "@/modules/auth/auth.middleware";
 import { uploadToCloudinary } from "@/shared/utils/uploadToCloudinary";
@@ -23,10 +23,10 @@ export const create = async (
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
 
-    // Crear factura sin archivos
+    // Create record without file
     const invoice = await createInvoice(parsed, userId);
 
-    // Manejar archivos si existen 
+    // Handle files if exist
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (files && files.length > 0) {
@@ -70,7 +70,9 @@ export const list = async (
     const invoices = await getUserInvoices(userId);
     res.status(200).json({
       success: true,
-      message: invoices.length ? "Invoices retrieved successfully" : "No invoices found",
+      message: invoices.length
+        ? "Invoices retrieved successfully"
+        : "No invoices found",
       data: invoices,
     });
   } catch (error) {
@@ -164,19 +166,22 @@ export const download = async (
   try {
     const userId = req.user?.id;
     const invoiceId = req.params.invoiceId;
-    const attachmentId =req.params.attachmentId;
+    const attachmentId = req.params.attachmentId;
 
     if (!userId) throw new AppError("Unauthorized", 401);
     if (!invoiceId || !attachmentId) throw new AppError("Missing IDs", 400);
 
-    const { stream, mimeType, fileName } = await downloadAttachment(userId, invoiceId, attachmentId);
+    const { stream, mimeType, fileName } = await downloadAttachment(
+      userId,
+      invoiceId,
+      attachmentId
+    );
 
     res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
     res.setHeader("Content-Type", mimeType);
 
     stream.pipe(res);
-
   } catch (error) {
     next(error);
   }
-}
+};

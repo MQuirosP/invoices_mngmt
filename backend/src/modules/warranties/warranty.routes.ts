@@ -1,10 +1,5 @@
 import { Router } from "express";
-import {
-  create,
-  findByInvoice,
-  update,
-  remove,
-} from "./warranty.controller";
+import { create, findByInvoice, update, remove } from "./warranty.controller";
 import { authenticate } from "@/modules/auth/auth.middleware";
 
 const router = Router();

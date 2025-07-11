@@ -23,25 +23,25 @@ export const errorHandler = (
     errorDetails = err.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
   }
 
-  // AppError personalizado
+  // Custom AppError
   else if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
   }
 
-  // JSON malformado
+  // Wrong JSON format
   else if (err.type === "entity.parse.failed") {
     statusCode = 400;
     message = "Invalid JSON format in request body";
   }
 
-  // Body demasiado grande
+  // Big Body
   else if (err.type === "entity.too.large") {
     statusCode = 413;
     message = "Request body is too large";
   }
 
-  // Otros errores inesperados
+  // Unexpected errors
   else if (err instanceof Error) {
     message = err.message;
   }

@@ -1,8 +1,5 @@
 import { prisma } from "@/config/prisma";
-import {
-  CreateWarrantyInput,
-  UpdateWarrantyInput,
-} from "./warranty.schema";
+import { CreateWarrantyInput, UpdateWarrantyInput } from "./warranty.schema";
 
 export const createWarranty = async (data: CreateWarrantyInput) => {
   const warranty = await prisma.warranty.create({

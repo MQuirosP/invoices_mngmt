@@ -6,10 +6,7 @@ import {
   updateWarranty,
   deleteWarranty,
 } from "./warranty.service";
-import {
-  createWarrantySchema,
-  updateWarrantySchema,
-} from "./warranty.schema";
+import { createWarrantySchema, updateWarrantySchema } from "./warranty.schema";
 import { AuthRequest } from "./../auth/auth.middleware";
 
 export const create = async (

@@ -11,7 +11,8 @@ export class ImportService {
     const metadata = await OCRService.extractMetadataFromBuffer(buffer);
 
     const extParts = url.split(".");
-    const ext = extParts.length > 1 ? extParts.pop()!.split("?")[0].toLowerCase() : "";
+    const ext =
+      extParts.length > 1 ? extParts.pop()!.split("?")[0].toLowerCase() : "";
 
     const newInvoice = await prisma.invoice.create({
       data: {

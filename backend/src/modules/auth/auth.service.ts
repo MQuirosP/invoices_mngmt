@@ -50,7 +50,7 @@ export const loginUser = async (data: LoginInput) => {
   const { email, password } = data;
 
   const user = await prisma.user.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (!user) {
@@ -65,7 +65,7 @@ export const loginUser = async (data: LoginInput) => {
   const token = jwt.sign(
     { sub: user.id, email: user.email },
     process.env.JWT_SECRET!,
-    { expiresIn: "7d" } 
+    { expiresIn: "7d" }
   );
 
   return {
@@ -73,5 +73,5 @@ export const loginUser = async (data: LoginInput) => {
     email: user.email,
     fullname: user.fullname,
     token,
-  }
-}
+  };
+};

@@ -1,5 +1,3 @@
-// src/modules/imports/utils/extractMetadata.util.ts
-
 export interface ExtractedInvoiceMetadata {
   expiration: Date;
   title: string;
@@ -18,8 +16,13 @@ export interface ExtractedMetadata {
   validUntil?: Date;
 }
 
-export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata {
-  const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+export function extractMetadataFromText(
+  text: string
+): ExtractedInvoiceMetadata {
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   const title = extractTitle(lines);
   const provider = extractProvider(lines);
@@ -38,17 +41,19 @@ export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata 
   };
 }
 
-
-
 function extractTitle(lines: string[]): string {
-  return lines[0] || 'Factura sin título';
+  return lines[0] || "Factura sin título";
 }
 
 function extractProvider(lines: string[]): string {
   return (
-    lines.slice(1).find((line) =>
-      /(S\.A\.|Ltd|SRL|Comercial|Inversiones|Cédula Jurídica)/i.test(line)
-    ) || lines[1] || 'Proveedor no identificado'
+    lines
+      .slice(1)
+      .find((line) =>
+        /(S\.A\.|Ltd|SRL|Comercial|Inversiones|Cédula Jurídica)/i.test(line)
+      ) ||
+    lines[1] ||
+    "Proveedor no identificado"
   );
 }
 
@@ -71,8 +76,8 @@ function extractWarranty(
   const unidad = match[2].toLowerCase();
 
   let duration: number;
-  if (unidad.startsWith('mes')) duration = cantidad * 30;
-  else if (unidad.startsWith('año')) duration = cantidad * 365;
+  if (unidad.startsWith("mes")) duration = cantidad * 30;
+  else if (unidad.startsWith("año")) duration = cantidad * 365;
   else duration = cantidad;
 
   const validUntil = new Date(issueDate.getTime() + duration * 86400000);
@@ -84,5 +89,3 @@ function parseDate(raw: string): Date {
   const parsed = new Date(`${y}-${m}-${d}`);
   return isNaN(parsed.getTime()) ? new Date() : parsed;
 }
-
-

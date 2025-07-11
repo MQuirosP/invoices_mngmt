@@ -11,11 +11,11 @@ authRouter.post("/login", login);
 
 // Protecting the routes with authentication middleware
 authRouter.get("/me", authenticate, (req: AuthRequest, res) => {
-    res.json({
-        success: true,
-        message: "User authenticated successfully",
-        user: req.user,
-    });
-})
+  res.json({
+    success: true,
+    message: "User authenticated successfully",
+    user: req.user,
+  });
+});
 
 export default authRouter;
