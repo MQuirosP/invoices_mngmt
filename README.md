@@ -20,32 +20,34 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 - Arquitectura modular
 
-- src/
-  - app.ts                    # Configuración principal de Express
-  - server.ts                 # Punto de entrada del servidor
-  - config/
-    - prisma.ts               # Cliente de Prisma
-  - routes/
-    - index.ts                # Rutas principales
-  - modules/
-    - auth/                   # Módulo de autenticación
-    - invoice/               # Módulo de facturas
-    - warranty/             # Módulo de garantías
-  - shared/
-    - middleware/
-      - errorHandler.ts       # Middleware para manejo de errores
-      - upload.ts             # Middleware para subida de archivos
-    - services/
-      - cloudinary.service.ts # Servicio para subir a cloudinary
-      - fileFetcher.service.ts# Servicio para obtener archivos
-      - import.service.ts     # Servicio para actualizar facturas
-      - ocr.service.ts        # Servicio para reconocimiento OCR
-    - utils/
-      - AppError.ts           # Clase de error personalizada
-      - extractMetadata.ts    # Utilidad para procesar texto extraído por OCR
+- `src/`
+  - `app.ts`                      # Configuración principal de Express
+  - `server.ts`                   # Punto de entrada del servidor
+  - `config/`
+    - `cloudinary.ts`             # Configuración de Cloudinary
+    - `prisma.ts`                 # Cliente de Prisma
+  - `routes/`
+    - `index.ts`                  # Router principal
+  - `modules/`
+    - `auth/`                     # Módulo de autenticación
+    - `invoice/`                  # Módulo de facturación
+    - `warranty/`                 # Módulo de garantías
+  - `shared/`
+    - `middleware/`
+      - `errorHandler.ts`         # Middleware para manejo de errores
+      - `upload.ts`               # Middleware para carga de archivos
+    - `services/`
+      - `cloudinary.service.ts`   # Servicio para subir archivos a Cloudinary
+      - `fileFetcher.service.ts`  # Servicio para obtener archivos desde URL
+      - `import.service.ts`       # Servicio para importar y actualizar facturas
+      - `ocr.service.ts`          # Servicio para reconocimiento de texto (OCR)
+    - `utils/`
+      - `AppError.utils.ts`       # Clase de error personalizada
+      - `extractMetadata.utils.ts`# Utilidad para extraer metadata desde texto OCR
 
-- prisma/
-  - schema.prisma             # Modelo de base de datos
+- `prisma/`
+  - `schema.prisma`               # Definición del modelo de base de datos
+  - `migrations/`                 # Historial de migraciones
 
 ---
 
