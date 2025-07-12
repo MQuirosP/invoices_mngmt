@@ -236,7 +236,7 @@ export const importFromUrl = async (
       res.status(400).json({ message: "Missing URL, invoice ID or user ID" });
       return;
     }
-
+    const importService = new ImportService();
     const invoice = await importService.updateFromUrl(url, invoiceId);
 
     res.status(201).json({
