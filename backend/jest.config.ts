@@ -12,7 +12,7 @@ const config: Config = {
   globals: {
     'ts-jest': {
       isolatedModules: true,
-      tsconfig: 'tsconfig.json',
+      tsconfig: 'tsconfig.test.json',
     },
   },
   coverageDirectory: 'coverage',

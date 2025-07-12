@@ -1,3 +1,5 @@
+/// <reference types="jest" />
+
 import { importFromUrl } from '../invoice.controller';
 import { ImportService } from '../../../shared/services/import.service';
 import { AuthRequest } from '../../auth/auth.middleware';

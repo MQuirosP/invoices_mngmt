@@ -115,7 +115,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "**/*.test.ts"
+    "tests"
   ],
   "exclude": [
     "node_modules",
