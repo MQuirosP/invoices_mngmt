@@ -7,7 +7,7 @@ export const register = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const parsed = registerSchema.parse(req.body);
     const result = await registerUser(parsed);
@@ -26,7 +26,7 @@ export const login = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const parsed = loginSchema.parse(req.body);
     const result = await loginUser(parsed);

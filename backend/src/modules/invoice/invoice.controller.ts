@@ -21,7 +21,7 @@ export const create = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const parsed = createInvoiceSchema.parse(req.body);
     const userId = req.user?.id;
@@ -66,7 +66,7 @@ export const list = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
@@ -88,7 +88,7 @@ export const show = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const userId = req.user?.id;
     const invoiceId = req.params.id;
@@ -114,7 +114,7 @@ export const extractFromAttachment = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const userId = req.user?.id;
     const invoiceId = req.params.invoiceId;
@@ -140,7 +140,7 @@ export const remove = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const userId = req.user?.id;
     const invoiceId = req.params.id;
@@ -166,7 +166,7 @@ export const download = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const userId = req.user?.id;
     const invoiceId = req.params.invoiceId;
@@ -225,16 +225,19 @@ export const importFromUrl = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const { url } = req.body;
+    const { invoiceId } = req.params;
+
     const userId = req.user?.id || "";
 
-    if (!url || !userId) {
-      res.status(400).json({ message: "Missing URL or user ID" });
+    if (!url || !userId || !invoiceId) {
+      res.status(400).json({ message: "Missing URL, invoice ID or user ID" });
+      return;
     }
 
-    const invoice = await importService.importFromUrl(url, userId);
+    const invoice = await importService.updateFromUrl(url, invoiceId);
 
     res.status(201).json({
       success: true,

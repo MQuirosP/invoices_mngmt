@@ -13,7 +13,7 @@ export const create = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const data = createWarrantySchema.parse(req.body);
     const warranty = await createWarranty(data);
@@ -31,7 +31,7 @@ export const findByInvoice = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const { invoiceId } = req.params;
     const warranty = await getWarrantyByInvoice(invoiceId);
@@ -50,7 +50,7 @@ export const update = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const { invoiceId } = req.params;
     const data = updateWarrantySchema.parse(req.body);
@@ -69,7 +69,7 @@ export const remove = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const { invoiceId } = req.params;
     const warranty = await deleteWarranty(invoiceId);

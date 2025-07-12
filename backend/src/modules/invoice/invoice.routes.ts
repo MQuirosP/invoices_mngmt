@@ -25,7 +25,7 @@ router.post("/:invoiceId/extract", authenticate, extractFromAttachment);
 // Invoice creation
 router.post("/", authenticate, upload.array("files", 5), create);
 router.post("/import/local", authenticate, upload.single("file"), importFromLocal);
-router.post("/import", authenticate, importFromUrl);
+router.post("/import/:invoiceId", authenticate, importFromUrl);
 
 // Delete invoice
 router.delete("/:id", authenticate, remove);
