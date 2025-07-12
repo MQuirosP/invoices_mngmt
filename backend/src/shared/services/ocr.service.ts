@@ -2,7 +2,7 @@ import vision from "@google-cloud/vision";
 import {
   ExtractedInvoiceMetadata,
   extractMetadataFromText,
-} from "../utils/extractMetadata.utils";
+} from "@/shared/utils/extractMetadata.utils";
 
 const client = new vision.ImageAnnotatorClient();
 
