@@ -6,6 +6,7 @@ import {
 import { OCRService } from "@/shared/services/ocr.service";
 import { updateInvoiceFromMetadata } from "@/modules/invoice/invoice.service";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
+import { getFileExtensionFromUrl } from "@/shared/utils/getFileExtensionFromUrl";
 
 export class ImportService {
   private fetcher = new FileFetcherService();
@@ -15,7 +16,7 @@ export class ImportService {
   async importFromUrl(url: string, userId: string) {
     const buffer = await this.fetcher.fetchBuffer(url);
     const metadata = await this.ocr.extractMetadataFromBuffer(buffer);
-    const ext = url.split(".").pop()!.split("?")[0].toLowerCase();
+    const ext = getFileExtensionFromUrl(url) || "bin";
     const uploadRes = await this.cloudinary.upload(
       buffer,
       metadata.title,
@@ -55,16 +56,7 @@ export class ImportService {
     const buffer = await this.fetcher.fetchBuffer(url);
     const metadata = await this.ocr.extractMetadataFromBuffer(buffer);
 
-    let ext = "";
-    try {
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname;
-      const lastSegment = pathname.split("/").pop() || "";
-      const dotIndex = lastSegment.lastIndexOf(".");
-      if (dotIndex !== -1) {
-        ext = lastSegment.substring(dotIndex + 1).toLowerCase();
-      }
-    } catch {}
+    let ext = getFileExtensionFromUrl(url);
 
     if (!ext || !Object.values(mimeExtensionMap).includes(ext)) {
       if (metadata.mimeType && mimeExtensionMap[metadata.mimeType]) {
@@ -111,7 +103,7 @@ export class ImportService {
     mimeType: string
   ) {
     const metadata = await this.ocr.extractMetadataFromBuffer(buffer);
-    const ext = originalName.split(".").pop()!.toLowerCase();
+    const ext = getFileExtensionFromUrl(originalName) || "bin";
     const uploadRes = await this.cloudinary.upload(
       buffer,
       metadata.title,

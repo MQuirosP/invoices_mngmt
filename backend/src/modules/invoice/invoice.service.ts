@@ -5,6 +5,7 @@ import axios from "axios";
 import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
 import { OCRService } from "@/shared/services/ocr.service";
 import { FileFetcherService } from "@/shared/services/fileFetcher.service";
+import { getFileExtensionFromUrl } from "@/shared/utils/getFileExtensionFromUrl";
 
 const fileFetcher = new FileFetcherService();
 const ocrService = new OCRService();
@@ -157,7 +158,7 @@ export const downloadAttachment = async (
 
   const response = await axios.get(attachment.url, { responseType: "stream" });
 
-  const ext = attachment.mimeType.split("/")[1] || "bin";
+  const ext = getFileExtensionFromUrl(attachment.url) || "bin";
   const fileName = `${invoice.title.replace(/\s+/g, "_")}.${ext}`;
 
   return {
