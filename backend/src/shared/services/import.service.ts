@@ -1,8 +1,11 @@
 import { prisma } from "@/config/prisma";
 import { FileFetcherService } from "@/shared/services/fileFetcher.service";
-import { CloudinaryService } from "@/shared/services/cloudinary.service";
+import {
+  CloudinaryService,
+} from "@/shared/services/cloudinary.service";
 import { OCRService } from "@/shared/services/ocr.service";
 import { updateInvoiceFromMetadata } from "@/modules/invoice/invoice.service";
+import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 
 export class ImportService {
   private fetcher = new FileFetcherService();
@@ -12,8 +15,12 @@ export class ImportService {
   async importFromUrl(url: string, userId: string) {
     const buffer = await this.fetcher.fetchBuffer(url);
     const metadata = await this.ocr.extractMetadataFromBuffer(buffer);
-    const ext = url.split('.').pop()!.split('?')[0].toLowerCase();
-    const uploadRes = await this.cloudinary.upload(buffer, metadata.title, `image/${ext}`);
+    const ext = url.split(".").pop()!.split("?")[0].toLowerCase();
+    const uploadRes = await this.cloudinary.upload(
+      buffer,
+      metadata.title,
+      `image/${ext}`
+    );
     return prisma.invoice.create({
       data: {
         userId,
@@ -22,23 +29,94 @@ export class ImportService {
         expiration: metadata.expiration,
         provider: metadata.provider,
         extracted: true,
-        attachments: { create: [{ url: uploadRes.url, mimeType: uploadRes.type, fileName: `${metadata.title}.${ext}` }] },
-        warranty: metadata.duration ? { create: { duration: metadata.duration, validUntil: metadata.validUntil! } } : undefined,
+        attachments: {
+          create: [
+            {
+              url: uploadRes.url,
+              mimeType: uploadRes.type,
+              fileName: `${metadata.title}.${ext}`,
+            },
+          ],
+        },
+        warranty: metadata.duration
+          ? {
+              create: {
+                duration: metadata.duration,
+                validUntil: metadata.validUntil!,
+              },
+            }
+          : undefined,
       },
       include: { attachments: true, warranty: true },
     });
   }
 
-  async updateFromUrl(url: string, invoiceId: string) {
+  async updateFromUrl(url: string, invoiceId: string, userId: string) {
     const buffer = await this.fetcher.fetchBuffer(url);
     const metadata = await this.ocr.extractMetadataFromBuffer(buffer);
+
+    let ext = "";
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      const lastSegment = pathname.split("/").pop() || "";
+      const dotIndex = lastSegment.lastIndexOf(".");
+      if (dotIndex !== -1) {
+        ext = lastSegment.substring(dotIndex + 1).toLowerCase();
+      }
+    } catch {}
+
+    if (!ext || !Object.values(mimeExtensionMap).includes(ext)) {
+      if (metadata.mimeType && mimeExtensionMap[metadata.mimeType]) {
+        ext = mimeExtensionMap[metadata.mimeType];
+      } else {
+        ext = "dat";
+      }
+    }
+
+    const mimeTypeEntry = Object.entries(mimeExtensionMap).find(
+      ([, extension]) => extension === ext
+    );
+    const mimeType = mimeTypeEntry ? mimeTypeEntry[0] : "application/octet-stream";
+
+    const fileName = metadata.title ? `${metadata.title}.${ext}` : `attachment.${ext}`;
+
+    const existingAttachment = await prisma.attachment.findFirst({
+      where: { invoiceId, url },
+    });
+
+    if (!existingAttachment) {
+      await prisma.attachment.create({
+        data: {
+          invoiceId,
+          url,
+          fileName,
+          mimeType,
+        },
+      });
+
+      await prisma.invoice.update({
+        where: { id: invoiceId },
+        data: { updatedAt: new Date() },
+      });
+    }
+
     return updateInvoiceFromMetadata(invoiceId, metadata);
   }
 
-  async importFromBuffer(buffer: Buffer, userId: string, originalName: string, mimeType: string) {
+  async importFromBuffer(
+    buffer: Buffer,
+    userId: string,
+    originalName: string,
+    mimeType: string
+  ) {
     const metadata = await this.ocr.extractMetadataFromBuffer(buffer);
-    const ext = originalName.split('.').pop()!.toLowerCase();
-    const uploadRes = await this.cloudinary.upload(buffer, metadata.title, mimeType);
+    const ext = originalName.split(".").pop()!.toLowerCase();
+    const uploadRes = await this.cloudinary.upload(
+      buffer,
+      metadata.title,
+      mimeType
+    );
     return prisma.invoice.create({
       data: {
         userId,
@@ -47,8 +125,23 @@ export class ImportService {
         expiration: metadata.expiration,
         provider: metadata.provider,
         extracted: true,
-        attachments: { create: [{ url: uploadRes.url, mimeType: uploadRes.type, fileName: `${metadata.title}.${ext}` }] },
-        warranty: metadata.duration ? { create: { duration: metadata.duration, validUntil: metadata.validUntil! } } : undefined,
+        attachments: {
+          create: [
+            {
+              url: uploadRes.url,
+              mimeType: uploadRes.type,
+              fileName: `${metadata.title}.${ext}`,
+            },
+          ],
+        },
+        warranty: metadata.duration
+          ? {
+              create: {
+                duration: metadata.duration,
+                validUntil: metadata.validUntil!,
+              },
+            }
+          : undefined,
       },
       include: { attachments: true, warranty: true },
     });

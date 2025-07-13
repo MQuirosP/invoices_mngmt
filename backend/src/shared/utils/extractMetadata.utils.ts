@@ -5,6 +5,7 @@ export interface ExtractedInvoiceMetadata {
   issueDate: Date;
   duration?: number; // days
   validUntil?: Date;
+  mimeType?: string;
 }
 
 export interface ExtractedMetadata {
@@ -14,6 +15,7 @@ export interface ExtractedMetadata {
   provider?: string;
   duration?: number;
   validUntil?: Date;
+  mimeType?: string;
 }
 
 export function extractMetadataFromText(

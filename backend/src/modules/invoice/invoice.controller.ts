@@ -230,14 +230,14 @@ export const importFromUrl = async (
     const { url } = req.body;
     const { invoiceId } = req.params;
 
-    const userId = req.user?.id || "";
+    const userId = req.user?.id;
 
     if (!url || !userId || !invoiceId) {
       res.status(400).json({ message: "Missing URL, invoice ID or user ID" });
       return;
     }
     const importService = new ImportService();
-    const invoice = await importService.updateFromUrl(url, invoiceId);
+    const invoice = await importService.updateFromUrl(url, invoiceId, userId);
 
     res.status(201).json({
       success: true,
