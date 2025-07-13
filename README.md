@@ -20,34 +20,75 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 - Arquitectura modular
 
-- `src/`
-  - `app.ts`                      # Configuración principal de Express
-  - `server.ts`                   # Punto de entrada del servidor
-  - `config/`
-    - `cloudinary.ts`             # Configuración de Cloudinary
-    - `prisma.ts`                 # Cliente de Prisma
-  - `routes/`
-    - `index.ts`                  # Router principal
-  - `modules/`
-    - `auth/`                     # Módulo de autenticación
-    - `invoice/`                  # Módulo de facturación
-    - `warranty/`                 # Módulo de garantías
-  - `shared/`
-    - `middleware/`
-      - `errorHandler.ts`         # Middleware para manejo de errores
-      - `upload.ts`               # Middleware para carga de archivos
-    - `services/`
-      - `cloudinary.service.ts`   # Servicio para subir archivos a Cloudinary
-      - `fileFetcher.service.ts`  # Servicio para obtener archivos desde URL
-      - `import.service.ts`       # Servicio para importar y actualizar facturas
-      - `ocr.service.ts`          # Servicio para reconocimiento de texto (OCR)
-    - `utils/`
-      - `AppError.utils.ts`       # Clase de error personalizada
-      - `extractMetadata.utils.ts`# Utilidad para extraer metadata desde texto OCR
-
-- `prisma/`
-  - `schema.prisma`               # Definición del modelo de base de datos
-  - `migrations/`                 # Historial de migraciones
+- `mquirosp-invoices_mngmt/`
+  - `README.md`
+  - `LICENSE`
+  - `backend/`
+    - `global.d.ts`
+    - `jest.config.ts`
+    - `package.json`
+    - `tsconfig.build.json`
+    - `tsconfig.json`
+    - `tsconfig.test.json`
+    - `prisma/`
+      - `schema.prisma`
+      - `migrations/`
+        - `migration_lock.toml`
+        - `20250706235007_init/`
+          - `migration.sql`
+        - `20250708025655_rename_extrated_to_extracted/`
+          - `migration.sql`
+        - `20250709024520_add_attachments_model/`
+          - `migration.sql`
+        - `20250709025629_remove_file_fields/`
+          - `migration.sql`
+    - `src/`
+      - `app.ts`
+      - `server.ts`
+      - `config/`
+        - `cloudinary.ts`
+        - `index.ts`
+        - `prisma.ts`
+      - `modules/`
+        - `auth/`
+          - `auth.controller.ts`
+          - `auth.middleware.ts`
+          - `auth.routes.ts`
+          - `auth.schema.ts`
+          - `auth.service.ts`
+          - `index.ts`
+        - `invoice/`
+          - `index.ts`
+          - `invoice.controller.ts`
+          - `invoice.routes.ts`
+          - `invoice.schema.ts`
+          - `invoice.service.ts`
+          - `__tests__/`
+            - `invoice.controller.test.ts`
+        - `warranty/`
+          - `index.ts`
+          - `warranty.controller.ts`
+          - `warranty.routes.ts`
+          - `warranty.schema.ts`
+          - `warranty.service.ts`
+      - `routes/`
+        - `index.ts`
+      - `shared/`
+        - `index.ts`
+        - `constants/`
+          - `mimeExtensionMap.ts`
+        - `middleware/`
+          - `errorHandler.ts`
+          - `upload.ts`
+        - `services/`
+          - `cloudinary.service.ts`
+          - `fileFetcher.service.ts`
+          - `import.service.ts`
+          - `ocr.service.ts`
+        - `utils/`
+          - `AppError.utils.ts`
+          - `extractMetadata.utils.ts`
+          - `getFileExtensionFromUrl.ts`
 
 ---
 
@@ -213,6 +254,20 @@ npm run dev
 ## 📖 Documentación de la API
 
 - Pronto estará disponible una colección de Postman o documentación Swagger con todos los endpoints.
+
+---
+
+## ✅ Próximos pasos sugeridos
+
+- Implementar soporte OCR para PDF con Google Cloud Storage (GCS)  
+- Añadir pruebas unitarias/integración para importación y descarga  
+- Mejorar manejo de errores  
+- Extender funcionalidad de actualización parcial (PATCH)  
+- Implementar paginación y filtros avanzados  
+- Añadir documentación Swagger/OpenAPI  
+- Crear interfaz web básica de prueba  
+- Mejorar seguridad en límites de archivos  
+- Soporte para más formatos de archivo  
 
 ---
 
