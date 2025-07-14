@@ -12,7 +12,7 @@ import {
 } from "./invoice.service";
 import { AuthRequest } from "@/modules/auth/auth.middleware";
 import { prisma } from "@/config/prisma";
-import { CloudinaryService } from '../../shared/services/cloudinary.service';
+import { CloudinaryService } from '@/shared/services/cloudinary.service';
 
 const cloudinary = new CloudinaryService()
 

@@ -3,15 +3,6 @@ import { AppError } from "@/shared/utils/AppError.utils";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import path from "path";
 
-// export const mimeExtensionMap: Record<string, string> = {
-//   "application/pdf": "pdf",
-//   "application/xml": "xml",
-//   "text/xml": "xml",
-//   "image/jpeg": "jpg",
-//   "image/jpg": "jpg",
-//   "image/png": "png",
-// };
-
 export class CloudinaryService {
   async upload(
     fileBuffer: Buffer,

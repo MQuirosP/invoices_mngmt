@@ -4,9 +4,9 @@ import { CreateInvoiceInput } from "@/modules/invoice";
 import axios from "axios";
 import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
 import { getFileExtension } from "@/shared/utils/getFileExtension";
-import { CloudinaryService } from "../../shared/services/cloudinary.service";
-import { ImportService } from '../../shared';
-import { mimeExtensionMap } from '../../shared/constants/mimeExtensionMap';
+import { CloudinaryService } from "@/shared/services/cloudinary.service";
+import { ImportService } from '@/shared/services/import.service';
+import { mimeExtensionMap } from '@/shared/constants/mimeExtensionMap';
 
 export const createInvoice = async (
   data: CreateInvoiceInput,

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import authRouter from "../modules/auth/auth.routes";
-import invoiceRouter from "../modules/invoice/invoice.routes";
-import warrantyRouter from "../modules/warranty/warranty.routes";
+import authRouter from "@/modules/auth/auth.routes";
+import invoiceRouter from "@/modules/invoice/invoice.routes";
+import warrantyRouter from "@/modules/warranty/warranty.routes";
 
 const router = Router();
 
