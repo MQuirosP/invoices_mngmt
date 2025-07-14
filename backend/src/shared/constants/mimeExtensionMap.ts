@@ -6,3 +6,9 @@ export const mimeExtensionMap: Record<string, string> = {
   "image/jpg": "jpg",
   "image/png": "png",
 };
+
+export const extensionMimeMap: Record<string, string> = Object.entries(mimeExtensionMap)
+  .reduce((acc, [mime, ext]) => {
+    acc[ext] = mime;
+    return acc;
+  }, {} as Record<string, string>);

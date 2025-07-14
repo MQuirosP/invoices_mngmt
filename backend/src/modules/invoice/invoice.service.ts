@@ -1,14 +1,20 @@
+// import { updateInvoiceFromMetadata } from '@/modules/invoice/invoice.service';
+// import { getInvoiceById } from './invoice.service';
 import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { CreateInvoiceInput } from "@/modules/invoice";
 import axios from "axios";
 import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
-import { OCRService } from "@/shared/services/ocr.service";
-import { FileFetcherService } from "@/shared/services/fileFetcher.service";
-import { getFileExtensionFromUrl } from "@/shared/utils/getFileExtensionFromUrl";
+// import { OCRService } from "@/shared/services/ocr.service";
+// import { FileFetcherService } from "@/shared/services/fileFetcher.service";
+import { getFileExtension } from "@/shared/utils/getFileExtension";
+// import { Cloudinary } from "@cloudinary/url-gen";
+import { CloudinaryService } from "../../shared/services/cloudinary.service";
+import { ImportService } from '../../shared';
+import { mimeExtensionMap } from '../../shared/constants/mimeExtensionMap';
 
-const fileFetcher = new FileFetcherService();
-const ocrService = new OCRService();
+// const fileFetcher = new FileFetcherService();
+// const ocrService = new OCRService();
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -22,6 +28,7 @@ export const createInvoice = async (
       userId,
     },
   });
+  console.log(invoice);
   return invoice;
 };
 
@@ -110,36 +117,36 @@ export const updateInvoiceFromMetadata = async (
   });
 };
 
-export const updateInvoiceFromOCR = async (
-  invoiceId: string,
-  userId: string,
-  attachmentUrl: string
-) => {
-  // Verificar que la factura existe y pertenece al usuario
-  const invoice = await getInvoiceById(invoiceId, userId);
-  if (!invoice) {
-    throw new AppError("Invoice not found or access denied", 404);
-  }
+// export const updateInvoiceFromOCR = async (
+//   invoiceId: string,
+//   userId: string,
+//   attachmentUrl: string
+// ) => {
+//   // Verificar que la factura existe y pertenece al usuario
+//   const invoice = await getInvoiceById(invoiceId, userId);
+//   if (!invoice) {
+//     throw new AppError("Invoice not found or access denied", 404);
+//   }
 
-  // Validar que el URL está entre los attachments de la factura
-  const attachment = await prisma.attachment.findFirst({
-    where: {
-      invoiceId,
-      url: attachmentUrl,
-    },
-  });
+//   // Validar que el URL está entre los attachments de la factura
+//   const attachment = await prisma.attachment.findFirst({
+//     where: {
+//       invoiceId,
+//       url: attachmentUrl,
+//     },
+//   });
 
-  if (!attachment) {
-    throw new AppError("El archivo no pertenece a esta factura", 403);
-  }
+//   if (!attachment) {
+//     throw new AppError("El archivo no pertenece a esta factura", 403);
+//   }
 
-  // Extract metadata from OCR Metadata
-  const buffer = await fileFetcher.fetchBuffer(attachmentUrl);
-  const metadata = await ocrService.extractMetadataFromBuffer(buffer);
+//   // Extract metadata from OCR Metadata
+//   const buffer = await fileFetcher.fetchBuffer(attachmentUrl);
+//   const metadata = await ocrService.extractMetadataFromBuffer(buffer);
 
-  // Update invoice from extracted metadata
-  return updateInvoiceFromMetadata(invoiceId, metadata);
-};
+//   // Update invoice from extracted metadata
+//   return updateInvoiceFromMetadata(invoiceId, metadata);
+// };
 
 export const downloadAttachment = async (
   userId: string,
@@ -158,7 +165,7 @@ export const downloadAttachment = async (
 
   const response = await axios.get(attachment.url, { responseType: "stream" });
 
-  const ext = getFileExtensionFromUrl(attachment.url) || "bin";
+  const ext = getFileExtension(attachment.url) || "bin";
   const fileName = `${invoice.title.replace(/\s+/g, "_")}.${ext}`;
 
   return {
@@ -167,3 +174,82 @@ export const downloadAttachment = async (
     fileName,
   };
 };
+
+export const createInvoiceFromBufferOCR = async (
+  buffer: Buffer,
+  userId: string,
+  originalName: string,
+  mimeType: string
+) => {
+  const imnportService = new ImportService();
+  const metadata = await imnportService.extractFromBuffer(buffer);
+  const ext = getFileExtension(originalName) || "bin";
+  const uploadRes = await new CloudinaryService().upload(
+    buffer,
+    metadata.title,
+    mimeType
+  );
+  return prisma.invoice.create({
+    data: {
+      userId,
+      title: metadata.title,
+      issueDate: metadata.issueDate,
+      expiration: metadata.expiration,
+      provider: metadata.provider,
+      extracted: true,
+      attachments: {
+        create: [
+          {
+            url: uploadRes.url,
+            mimeType,
+            fileName: `${metadata.title}.${ext}`,
+          },
+        ],
+      },
+      warranty: metadata.duration ?
+        {
+          create: {
+            duration: metadata.duration,
+            validUntil: metadata.validUntil!,
+          },
+        } : undefined,
+    },
+    include: { attachments: true, warranty: true },
+  })
+}
+
+export const updateInvoiceFromUrlOcr = async (
+  invoiceId: string,
+  userId: string,
+  url: string
+) => {
+  const invoice = await getInvoiceById(invoiceId, userId);
+  if (!invoice) throw new AppError("Invoice not found", 404);
+
+  const importService = new ImportService();
+  const metadata = await importService.extractFromUrl(url);
+  const existingAttachment = await prisma.attachment.findFirst({
+    where: { invoiceId, url },
+  });
+  console.log(existingAttachment)
+  if (!existingAttachment) {
+    const ext = getFileExtension(url) || "bin";
+    const mimeType = Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] || "application/octet-stream";
+    await prisma.attachment.create({
+      data: {
+        invoiceId,
+        url,
+        fileName: `${metadata.title}.${ext}`,
+        mimeType,
+      },
+    });
+
+    await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: { updatedAt: new Date() },
+    });
+  }
+
+  return updateInvoiceFromMetadata(invoiceId, metadata);
+}
+

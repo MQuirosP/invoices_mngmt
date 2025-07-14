@@ -7,7 +7,7 @@ import {
   show,
   importFromLocal,
   importFromUrl,
-  extractFromAttachment
+  // extractFromAttachment
 } from "@/modules/invoice";
 import { authenticate } from "@/modules/auth";
 import { upload } from "@/shared/middleware/upload";
@@ -20,7 +20,7 @@ router.get("/:id", authenticate, show); // OK
 
 // Attachments
 router.get("/:invoiceId/attachments/:attachmentId/download", authenticate, download); // OK
-router.post("/:invoiceId/extract", authenticate, extractFromAttachment); // OK from its own attachment
+// router.post("/:invoiceId/extract", authenticate, extractFromAttachment); // OK from its own attachment
 
 // Specific static route BEFORE dynamic ones
 router.post("/ocrscan", authenticate, upload.single("file"), importFromLocal); // OK

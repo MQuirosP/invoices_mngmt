@@ -22,7 +22,7 @@ export class CloudinaryService {
       const ext = mimeExtensionMap[mimetype];
       console.log("📎 MIME Type recibido:", mimetype);
       if (!ext) throw new AppError("Unsupported file type", 415);
-  
+      
       const base64 = `data:${mimetype};base64,${fileBuffer.toString("base64")}`;
       const baseName = path.basename(filename, path.extname(filename));
   
@@ -36,7 +36,7 @@ export class CloudinaryService {
   
       return {
         url: result.secure_url,
-        type: result.format.toUpperCase(),
+        type: mimetype,
       };
     } catch (error: any) {
       console.error("Error subiendo archivo", error.message);

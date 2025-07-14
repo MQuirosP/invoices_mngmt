@@ -7,14 +7,13 @@ import {
   getInvoiceById,
   deleteInvoiceById,
   downloadAttachment,
-  updateInvoiceFromOCR,
+  updateInvoiceFromUrlOcr,
+  createInvoiceFromBufferOCR,
 } from "./invoice.service";
-import { ImportService } from "@/shared/services/import.service";
 import { AuthRequest } from "@/modules/auth/auth.middleware";
 import { prisma } from "@/config/prisma";
 import { CloudinaryService } from '../../shared/services/cloudinary.service';
 
-const importService = new ImportService();
 const cloudinary = new CloudinaryService()
 
 export const create = async (
@@ -40,7 +39,7 @@ export const create = async (
           file.originalname,
           file.mimetype
         );
-
+        
         await prisma.attachment.create({
           data: {
             invoiceId: invoice.id,
@@ -110,31 +109,31 @@ export const show = async (
   }
 };
 
-export const extractFromAttachment = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const userId = req.user?.id;
-    const invoiceId = req.params.invoiceId;
-    const { url } = req.body;
+// export const extractFromAttachment = async (
+//   req: AuthRequest,
+//   res: Response,
+//   next: NextFunction
+// ): Promise<void> => {
+//   try {
+//     const userId = req.user?.id;
+//     const invoiceId = req.params.invoiceId;
+//     const { url } = req.body;
 
-    if (!userId || !invoiceId || !url) {
-      throw new AppError("Faltan datos requeridos", 400);
-    }
+//     if (!userId || !invoiceId || !url) {
+//       throw new AppError("Faltan datos requeridos", 400);
+//     }
 
-    const updated = await updateInvoiceFromOCR(invoiceId, userId, url);
+//     const updated = await updateInvoiceFromOCR(invoiceId, userId, url);
 
-    res.status(200).json({
-      success: true,
-      message: "Invoice updated from OCR successfully",
-      data: updated,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: "Invoice updated from OCR successfully",
+//       data: updated,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const remove = async (
   req: AuthRequest,
@@ -202,8 +201,7 @@ export const importFromLocal = async (
       res.status(400).json({ message: "Missing file or user ID" });
       return;
     }
-
-    const invoice = await importService.importFromBuffer(
+    const invoice = await createInvoiceFromBufferOCR(
       file.buffer,
       userId,
       file.originalname,
@@ -228,20 +226,19 @@ export const importFromUrl = async (
   try {
     const { url } = req.body;
     const { invoiceId } = req.params;
-
     const userId = req.user?.id;
 
     if (!url || !userId || !invoiceId) {
       res.status(400).json({ message: "Missing URL, invoice ID or user ID" });
       return;
     }
-    const importService = new ImportService();
-    const invoice = await importService.updateFromUrl(url, invoiceId, userId);
+
+    const updateInvoice = await updateInvoiceFromUrlOcr(invoiceId, userId, url);
 
     res.status(201).json({
       success: true,
       message: "Invoice imported from Cloudinary URL",
-      data: invoice,
+      data: updateInvoice,
     });
   } catch (error) {
     next(error);
