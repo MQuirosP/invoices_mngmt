@@ -12,10 +12,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Rutas principales
+// Main routes
 app.use("/api", routes);
 
-// Manejo de errores
+// Error handler
 app.use(errorHandler);
 
 export default app;
