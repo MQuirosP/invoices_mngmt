@@ -74,13 +74,13 @@ function extractWarranty(
 
   if (!match) return {};
 
-  const cantidad = parseInt(match[1]);
-  const unidad = match[2].toLowerCase();
+  const quantity = parseInt(match[1]);
+  const unit = match[2].toLowerCase();
 
   let duration: number;
-  if (unidad.startsWith("mes")) duration = cantidad * 30;
-  else if (unidad.startsWith("año")) duration = cantidad * 365;
-  else duration = cantidad;
+  if (unit.startsWith("mes")) duration = quantity * 30;
+  else if (unit.startsWith("año")) duration = quantity * 365;
+  else duration = quantity;
 
   const validUntil = new Date(issueDate.getTime() + duration * 86400000);
   return { duration, validUntil };

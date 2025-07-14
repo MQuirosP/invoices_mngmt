@@ -109,31 +109,6 @@ export const show = async (
   }
 };
 
-// export const extractFromAttachment = async (
-//   req: AuthRequest,
-//   res: Response,
-//   next: NextFunction
-// ): Promise<void> => {
-//   try {
-//     const userId = req.user?.id;
-//     const invoiceId = req.params.invoiceId;
-//     const { url } = req.body;
-
-//     if (!userId || !invoiceId || !url) {
-//       throw new AppError("Faltan datos requeridos", 400);
-//     }
-
-//     const updated = await updateInvoiceFromOCR(invoiceId, userId, url);
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Invoice updated from OCR successfully",
-//       data: updated,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 export const remove = async (
   req: AuthRequest,

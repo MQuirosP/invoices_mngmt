@@ -1,20 +1,12 @@
-// import { updateInvoiceFromMetadata } from '@/modules/invoice/invoice.service';
-// import { getInvoiceById } from './invoice.service';
 import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { CreateInvoiceInput } from "@/modules/invoice";
 import axios from "axios";
 import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
-// import { OCRService } from "@/shared/services/ocr.service";
-// import { FileFetcherService } from "@/shared/services/fileFetcher.service";
 import { getFileExtension } from "@/shared/utils/getFileExtension";
-// import { Cloudinary } from "@cloudinary/url-gen";
 import { CloudinaryService } from "../../shared/services/cloudinary.service";
 import { ImportService } from '../../shared';
 import { mimeExtensionMap } from '../../shared/constants/mimeExtensionMap';
-
-// const fileFetcher = new FileFetcherService();
-// const ocrService = new OCRService();
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -116,37 +108,6 @@ export const updateInvoiceFromMetadata = async (
     },
   });
 };
-
-// export const updateInvoiceFromOCR = async (
-//   invoiceId: string,
-//   userId: string,
-//   attachmentUrl: string
-// ) => {
-//   // Verificar que la factura existe y pertenece al usuario
-//   const invoice = await getInvoiceById(invoiceId, userId);
-//   if (!invoice) {
-//     throw new AppError("Invoice not found or access denied", 404);
-//   }
-
-//   // Validar que el URL está entre los attachments de la factura
-//   const attachment = await prisma.attachment.findFirst({
-//     where: {
-//       invoiceId,
-//       url: attachmentUrl,
-//     },
-//   });
-
-//   if (!attachment) {
-//     throw new AppError("El archivo no pertenece a esta factura", 403);
-//   }
-
-//   // Extract metadata from OCR Metadata
-//   const buffer = await fileFetcher.fetchBuffer(attachmentUrl);
-//   const metadata = await ocrService.extractMetadataFromBuffer(buffer);
-
-//   // Update invoice from extracted metadata
-//   return updateInvoiceFromMetadata(invoiceId, metadata);
-// };
 
 export const downloadAttachment = async (
   userId: string,
