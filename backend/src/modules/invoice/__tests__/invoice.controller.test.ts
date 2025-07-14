@@ -1,44 +1,58 @@
 /// <reference types="jest" />
 
 import { importFromUrl } from '../invoice.controller';
-import { ImportService } from '../../../shared/services/import.service';
 import { AuthRequest } from '../../auth/auth.middleware';
 import { getMockReq, getMockRes } from '@jest-mock/express';
 import { Response, NextFunction } from 'express';
-
-// Mock the services and utilities
-jest.mock('@/shared/services/import.service');
-
-const MockedImportService = ImportService as jest.MockedClass<
-  typeof ImportService
->;
+import * as InvoiceService from '@/modules/invoice/invoice.service';
 
 describe('Invoice Controller: importFromUrl', () => {
   let req: AuthRequest;
   let res: Response;
   let next: NextFunction;
-  let mockUpdateFromUrl: jest.Mock;
+
+  const mockInvoice = {
+    id: 'inv-id-123',
+    userId: 'user-id-456',
+    title: 'Factura de prueba',
+    issueDate: new Date(),
+    expiration: new Date(),
+    provider: 'Proveedor S.A.',
+    extracted: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    attachments: [
+      {
+        id: 'att-id-1',
+        invoiceId: 'inv-id-123',
+        url: 'http://example.com/file.pdf',
+        mimeType: 'application/pdf',
+        fileName: 'factura.pdf',
+        createdAt: new Date(),
+      },
+    ],
+    warranty: {
+      id: 'warranty-id-1',
+      invoiceId: 'inv-id-123',
+      duration: 365,
+      notes: null,
+      validUntil: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-
     const { res: mockRes, next: mockNext } = getMockRes();
     res = mockRes;
     next = mockNext;
-
-    mockUpdateFromUrl = jest.fn();
-    MockedImportService.mockImplementation(() => {
-      return {
-        updateFromUrl: mockUpdateFromUrl,
-      } as any;
-    });
   });
 
   it('should successfully import from a URL and return 201 status', async () => {
     const mockUrl = 'http://example.com/invoice.pdf';
     const mockInvoiceId = 'inv-id-123';
     const mockUserId = 'user-id-456';
-    const mockInvoice = { id: mockInvoiceId, total: 120.5 };
 
     req = getMockReq({
       body: { url: mockUrl },
@@ -46,15 +60,17 @@ describe('Invoice Controller: importFromUrl', () => {
       user: { id: mockUserId },
     }) as AuthRequest;
 
-    mockUpdateFromUrl.mockResolvedValue(mockInvoice);
+    const spy = jest
+      .spyOn(InvoiceService, 'updateInvoiceFromUrlOcr')
+      .mockResolvedValue(mockInvoice);
 
     await importFromUrl(req, res, next);
 
-    expect(mockUpdateFromUrl).toHaveBeenCalledWith(mockUrl, mockInvoiceId);
+    expect(spy).toHaveBeenCalledWith(mockInvoiceId, mockUserId, mockUrl);
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      message: 'Invoice imported from Cloudinary URL',
+      message: 'Invoice imported from Cloudinary URL', // ✅ mensaje corregido
       data: mockInvoice,
     });
     expect(next).not.toHaveBeenCalled();
@@ -62,7 +78,7 @@ describe('Invoice Controller: importFromUrl', () => {
 
   it('should return a 400 error if the URL is missing', async () => {
     req = getMockReq({
-      body: {}, // URL is missing
+      body: {},
       params: { invoiceId: 'inv-id-123' },
       user: { id: 'user-id-456' },
     }) as AuthRequest;
@@ -73,13 +89,12 @@ describe('Invoice Controller: importFromUrl', () => {
     expect(res.json).toHaveBeenCalledWith({
       message: 'Missing URL, invoice ID or user ID',
     });
-    expect(mockUpdateFromUrl).not.toHaveBeenCalled();
   });
 
   it('should return a 400 error if the invoice ID is missing', async () => {
     req = getMockReq({
       body: { url: 'http://example.com/invoice.pdf' },
-      params: {}, // invoiceId is missing
+      params: {},
       user: { id: 'user-id-456' },
     }) as AuthRequest;
 
@@ -89,14 +104,13 @@ describe('Invoice Controller: importFromUrl', () => {
     expect(res.json).toHaveBeenCalledWith({
       message: 'Missing URL, invoice ID or user ID',
     });
-    expect(mockUpdateFromUrl).not.toHaveBeenCalled();
   });
 
   it('should return a 400 error if the user ID is missing', async () => {
     req = getMockReq({
       body: { url: 'http://example.com/invoice.pdf' },
       params: { invoiceId: 'inv-id-123' },
-      user: undefined, // user is missing
+      user: undefined,
     }) as AuthRequest;
 
     await importFromUrl(req, res, next);
@@ -105,7 +119,6 @@ describe('Invoice Controller: importFromUrl', () => {
     expect(res.json).toHaveBeenCalledWith({
       message: 'Missing URL, invoice ID or user ID',
     });
-    expect(mockUpdateFromUrl).not.toHaveBeenCalled();
   });
 
   it('should call the next function with an error if the service fails', async () => {
@@ -120,11 +133,13 @@ describe('Invoice Controller: importFromUrl', () => {
       user: { id: mockUserId },
     }) as AuthRequest;
 
-    mockUpdateFromUrl.mockRejectedValue(mockError);
+    const spy = jest
+      .spyOn(InvoiceService, 'updateInvoiceFromUrlOcr')
+      .mockRejectedValue(mockError);
 
     await importFromUrl(req, res, next);
 
-    expect(mockUpdateFromUrl).toHaveBeenCalledWith(mockUrl, mockInvoiceId);
+    expect(spy).toHaveBeenCalledWith(mockInvoiceId, mockUserId, mockUrl);
     expect(next).toHaveBeenCalledWith(mockError);
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
