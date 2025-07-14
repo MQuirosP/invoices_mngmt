@@ -193,6 +193,54 @@ export const importFromLocal = async (
   }
 };
 
+export const importDataFromAttachment = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { invoiceId } = req.params;
+    const userId = req.user?.id;
+
+    if (!invoiceId || !userId) {
+      res.status(400).json({ message: "Missing invoice ID or user ID" });
+      return;
+    }
+
+    // Asegurar que la factura pertenece al usuario
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        id: invoiceId,
+        userId, // 👈 validación de propiedad
+      },
+      include: {
+        attachments: true,
+      },
+    });
+
+    if (!invoice) {
+      res.status(404).json({ message: "Invoice not found or access denied" });
+      return;
+    }
+
+    const attachment = invoice.attachments[0];
+    if (!attachment) {
+      res.status(404).json({ message: "No attachments found for this invoice" });
+      return;
+    }
+
+    const updateInvoice = await updateInvoiceFromUrlOcr(invoiceId, userId, attachment.url);
+
+    res.status(201).json({
+      success: true,
+      message: "Invoice imported from Cloudinary URL",
+      data: updateInvoice,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const importFromUrl = async (
   req: AuthRequest,
   res: Response,
@@ -219,4 +267,3 @@ export const importFromUrl = async (
     next(error);
   }
 };
-

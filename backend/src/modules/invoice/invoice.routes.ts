@@ -7,29 +7,34 @@ import {
   show,
   importFromLocal,
   importFromUrl,
-  // extractFromAttachment
+  importDataFromAttachment,
 } from "@/modules/invoice";
 import { authenticate } from "@/modules/auth";
 import { upload } from "@/shared/middleware/upload";
 
 const router = Router();
+// ====================
+// Public invoice access
+// ====================
+router.get("/", authenticate, list);                 // List invoices
+router.get("/:id", authenticate, show);              // Get single invoice
+router.delete("/:id", authenticate, remove);         // Delete invoice
 
-// List & detail routes
-router.get("/", authenticate, list); // OK
-router.get("/:id", authenticate, show); // OK
-
+// ====================
 // Attachments
-router.get("/:invoiceId/attachments/:attachmentId/download", authenticate, download); // OK
-// router.post("/:invoiceId/extract", authenticate, extractFromAttachment); // OK from its own attachment
+// ====================
+router.get("/:invoiceId/attachments/:attachmentId/download", authenticate, download);
 
-// Specific static route BEFORE dynamic ones
-router.post("/ocrscan", authenticate, upload.single("file"), importFromLocal); // OK
-router.post("/import/:invoiceId", authenticate, importFromUrl); // OK from any url
+// ====================
+// Import / OCR
+// ====================
+router.post("/ocrscan", authenticate, upload.single("file"), importFromLocal);         // From local file
+router.post("/import/:invoiceId", authenticate, importFromUrl);                        // From URL
+router.post("/extract/:invoiceId", authenticate, importDataFromAttachment);            // From own attachment
 
+// ====================
 // Invoice creation
-router.post("/", authenticate, upload.array("files", 5), create); // OK by user
-
-// Delete invoice
-router.delete("/:id", authenticate, remove);
+// ====================
+router.post("/", authenticate, upload.array("files", 5), create);  // Create with optional files
 
 export default router;
