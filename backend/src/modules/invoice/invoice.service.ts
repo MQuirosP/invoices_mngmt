@@ -156,8 +156,7 @@ export const createInvoiceFromBufferOCR = async (
 ) => {
   const imnportService = new ImportService();
   const metadata = await imnportService.extractFromBuffer(buffer);
-  const ext = getFileExtension(originalName) || "bin";
-  const filename = generateRandomFilename(ext);
+  const filename = generateRandomFilename(mimeType);
   const uploadRes = await new CloudinaryService().upload(
     buffer,
     filename,
