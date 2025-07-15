@@ -2,8 +2,6 @@ import cloudinary from "@/config/cloudinary";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import { logError } from "../utils/logger";
-import path from "path";
-import { getFileExtension } from "../utils/getFileExtension";
 
 export class CloudinaryService {
   async upload(
