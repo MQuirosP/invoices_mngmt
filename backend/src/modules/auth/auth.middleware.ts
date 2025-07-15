@@ -3,11 +3,13 @@ import jwt from "jsonwebtoken";
 import { AppError } from "@/shared/utils/AppError.utils";
 
 export interface AuthRequest extends Request {
+  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
   user?: {
     id: string;
     email: string;
   };
 }
+
 
 export const authenticate = (
   req: AuthRequest,
