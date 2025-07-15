@@ -15,11 +15,9 @@ import { prisma } from "@/config/prisma";
 import { CloudinaryService } from '@/shared/services/cloudinary.service';
 import { requireUserId } from "@/shared/utils/requireUserId";
 import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
-// import { mimeExtensionMap } from "../../shared/constants/mimeExtensionMap";
+import { mimeExtensionMap } from "../../shared/constants/mimeExtensionMap";
 
 const cloudinary = new CloudinaryService()
-
-import { validateRealMime } from "@/shared/utils/validateRealMime"; // 👈 nuevo import
 
 export const create = async (
   req: AuthRequest,
@@ -31,23 +29,28 @@ export const create = async (
     const userId = requireUserId(req);
     if (!userId) throw new AppError("User not authenticated", 401);
 
+    // Create invoice record
     const invoice = await createInvoice(parsed, userId);
+
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (files && files.length > 0) {
       for (const file of files) {
-        // 👮 Validación MIME real
-        const { mime, ext } = await validateRealMime(file.buffer, file.mimetype);
-        const filename = generateRandomFilename(mime);
+        const randomFilename = generateRandomFilename(file.mimetype);
 
-        const { url } = await cloudinary.upload(file.buffer, filename, mime, userId);
+        const { url, type } = await cloudinary.upload(
+          file.buffer,
+          randomFilename,
+          file.mimetype,
+          userId
+        );
 
         await prisma.attachment.create({
           data: {
             invoiceId: invoice.id,
             url,
-            mimeType: mime,
-            fileName: `${filename}.${ext}`
+            mimeType: type,
+            fileName: `${randomFilename}.${mimeExtensionMap[type]}`
           },
         });
       }
@@ -62,7 +65,6 @@ export const create = async (
     next(error);
   }
 };
-
 
 export const list = async (
   req: AuthRequest,
