@@ -15,9 +15,8 @@ export class CloudinaryService {
       const ext = mimeExtensionMap[mimetype];
       if (!ext) throw new AppError("Unsupported file type", 415);
 
-      // Generar nombre random seguro
+      // Secure random name
       const randomName = crypto.randomBytes(16).toString("hex");
-      // Aquí creamos el public_id con nombre random + extensión
       const publicId = `${randomName}`;
 
       const base64 = `data:${mimetype};base64,${fileBuffer.toString("base64")}`;
@@ -25,7 +24,7 @@ export class CloudinaryService {
       const result = await cloudinary.uploader.upload(base64, {
         public_id: publicId,
         resource_type: "auto",
-        folder: `${userId}`, // opcional porque ya está en public_id
+        folder: `${userId}`,
         type: "upload",
         overwrite: false,
       });
