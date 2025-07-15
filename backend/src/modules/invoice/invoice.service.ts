@@ -9,6 +9,7 @@ import { ImportService } from "@/shared/services/import.service";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import { invoiceIncludeOptions } from "./invoice.query";
 import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
+import { validateRealMime } from "../../shared/utils/validateRealMime";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -56,14 +57,17 @@ export const deleteInvoiceById = async (invoiceId: string, userId: string) => {
   const cloudinaryService = new CloudinaryService();
 
   for (const attachment of invoice.attachments) {
-    await cloudinaryService.delete(userId, attachment.fileName, attachment.mimeType);
+    await cloudinaryService.delete(
+      userId,
+      attachment.fileName,
+      attachment.mimeType
+    );
   }
 
   await prisma.invoice.delete({ where: { id: invoiceId } });
 
   return invoice;
 };
-
 
 export const updateInvoiceFromMetadata = async (
   invoiceId: string,
@@ -137,14 +141,17 @@ export const createInvoiceFromBufferOCR = async (
   originalName: string,
   mimeType: string
 ) => {
+  const { mime, ext } = await validateRealMime(buffer, mimeType);
   const imnportService = new ImportService();
   const metadata = await imnportService.extractFromBuffer(buffer);
-  const filename = generateRandomFilename(mimeType);
+  const filename = generateRandomFilename(mime); // ✅ usa el MIME validado
   const uploadRes = await new CloudinaryService().upload(
     buffer,
     filename,
-    mimeType, userId
-  );
+    mime,
+    userId
+  ); // ✅ usa el MIME validado
+
   return prisma.invoice.create({
     data: {
       userId,
@@ -157,8 +164,8 @@ export const createInvoiceFromBufferOCR = async (
         create: [
           {
             url: uploadRes.url,
-            mimeType,
-            fileName: filename,
+            mimeType: mime, 
+            fileName: `${filename}.${ext}`,
           },
         ],
       },

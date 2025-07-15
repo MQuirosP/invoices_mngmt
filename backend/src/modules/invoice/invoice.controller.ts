@@ -12,12 +12,14 @@ import {
 } from "./invoice.service";
 import { AuthRequest } from "@/modules/auth/auth.middleware";
 import { prisma } from "@/config/prisma";
-import { CloudinaryService } from '@/shared/services/cloudinary.service';
+// import { CloudinaryService } from "@/shared/services/cloudinary.service";
 import { requireUserId } from "@/shared/utils/requireUserId";
-import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
-import { mimeExtensionMap } from "../../shared/constants/mimeExtensionMap";
+// import { generateRandomFilename } from "@/shared/utils/generateRandomFilename";
+// import { mimeExtensionMap } from "../../shared/constants/mimeExtensionMap";
+// import { validateRealMime } from "@/shared/utils/validateRealMime";
+import { AttachmentService } from "../../shared/services/attachment.service";
 
-const cloudinary = new CloudinaryService()
+// const cloudinary = new CloudinaryService();
 
 export const create = async (
   req: AuthRequest,
@@ -36,23 +38,7 @@ export const create = async (
 
     if (files && files.length > 0) {
       for (const file of files) {
-        const randomFilename = generateRandomFilename(file.mimetype);
-
-        const { url, type } = await cloudinary.upload(
-          file.buffer,
-          randomFilename,
-          file.mimetype,
-          userId
-        );
-
-        await prisma.attachment.create({
-          data: {
-            invoiceId: invoice.id,
-            url,
-            mimeType: type,
-            fileName: `${randomFilename}.${mimeExtensionMap[type]}`
-          },
-        });
+        await AttachmentService.uploadValidated(file, invoice.id, userId);
       }
     }
 
@@ -229,11 +215,17 @@ export const importDataFromAttachment = async (
 
     const attachment = invoice.attachments[0];
     if (!attachment) {
-      res.status(404).json({ message: "No attachments found for this invoice" });
+      res
+        .status(404)
+        .json({ message: "No attachments found for this invoice" });
       return;
     }
 
-    const updateInvoice = await updateInvoiceFromUrlOcr(invoiceId, userId, attachment.url);
+    const updateInvoice = await updateInvoiceFromUrlOcr(
+      invoiceId,
+      userId,
+      attachment.url
+    );
 
     res.status(201).json({
       success: true,

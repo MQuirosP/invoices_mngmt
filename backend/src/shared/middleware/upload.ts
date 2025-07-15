@@ -1,16 +1,10 @@
 import multer, { FileFilterCallback } from "multer";
+import { mimeExtensionMap } from "../constants/mimeExtensionMap";
 
 // Use of memory storage to directly upload to cloudinary
 const storage = multer.memoryStorage();
 
-const allowedMimeTypes = [
-  "application/pdf",
-  "application/xml",
-  "text/xml",
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-];
+const allowedMimeTypes = Object.keys(mimeExtensionMap);
 
 const fileFilter = (
   req: Express.Request,
