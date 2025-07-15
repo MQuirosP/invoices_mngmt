@@ -73,9 +73,7 @@ export const deleteInvoiceById = async (invoiceId: string, userId: string) => {
   const cloudinaryService = new CloudinaryService();
 
   for (const attachment of invoice.attachments) {
-    const publicId = `${userId}/${attachment.fileName}`;
-    const mimetype = attachment.mimeType;
-    await cloudinaryService.delete(publicId, mimetype);
+    await cloudinaryService.delete(userId, attachment.fileName, attachment.mimeType);
   }
 
   await prisma.invoice.delete({ where: { id: invoiceId } });

@@ -1,3 +1,4 @@
 backend/invoices-465501-c5f410e84e5f.json
 .idx/dev.nix
 .vscode/settings.json
+backend/src/shared/services/CLEARDATA.sql
