@@ -55,7 +55,7 @@ export class CloudinaryService {
 
   await cloudinary.uploader.destroy(publicId, {
     resource_type,
-    invalidate: true, // útil si usas CDN
+    invalidate: true,
   });
 }
 }
