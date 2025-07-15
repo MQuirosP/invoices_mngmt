@@ -59,7 +59,7 @@ export const deleteInvoiceById = async (invoiceId: string, userId: string, userR
 
   for (const attachment of invoice.attachments) {
     await cloudinaryService.delete(
-      userId,
+      invoice.userId,
       attachment.fileName,
       attachment.mimeType
     );
