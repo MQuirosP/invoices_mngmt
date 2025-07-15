@@ -1,30 +1,35 @@
 import cloudinary from "@/config/cloudinary";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
-import path from "path";
+import crypto from "crypto";
+// import path from "path";
 
 export class CloudinaryService {
   async upload(
     fileBuffer: Buffer,
     filename: string,
-    mimetype: string
+    mimetype: string,
+    userId: string
   ): Promise<{ url: string; type: string }> {
     try {
       const ext = mimeExtensionMap[mimetype];
-      console.log("📎 MIME Type recibido:", mimetype);
       if (!ext) throw new AppError("Unsupported file type", 415);
-      
+
+      // Generar nombre random seguro
+      const randomName = crypto.randomBytes(16).toString("hex");
+      // Aquí creamos el public_id con nombre random + extensión
+      const publicId = `${randomName}`;
+
       const base64 = `data:${mimetype};base64,${fileBuffer.toString("base64")}`;
-      const baseName = path.basename(filename, path.extname(filename));
-  
+
       const result = await cloudinary.uploader.upload(base64, {
-        public_id: baseName,
+        public_id: publicId,
         resource_type: "auto",
-        folder: "invoices",
+        folder: `${userId}`, // opcional porque ya está en public_id
         type: "upload",
-        overwrite: true,
+        overwrite: false,
       });
-  
+
       return {
         url: result.secure_url,
         type: mimetype,
@@ -33,4 +38,5 @@ export class CloudinaryService {
       console.error("Error subiendo archivo", error.message);
       throw new AppError(error.message || "Cloudinary upload failed");
     }
-  };}
+  }
+}

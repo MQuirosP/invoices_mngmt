@@ -139,7 +139,7 @@ export const createInvoiceFromBufferOCR = async (
   const uploadRes = await new CloudinaryService().upload(
     buffer,
     metadata.title,
-    mimeType
+    mimeType, userId
   );
   return prisma.invoice.create({
     data: {
