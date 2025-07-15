@@ -18,6 +18,7 @@ import { requireUserId } from "@/shared/utils/requireUserId";
 // import { mimeExtensionMap } from "../../shared/constants/mimeExtensionMap";
 // import { validateRealMime } from "@/shared/utils/validateRealMime";
 import { AttachmentService } from "../../shared/services/attachment.service";
+import { Role } from "@prisma/client";
 
 // const cloudinary = new CloudinaryService();
 
@@ -112,7 +113,7 @@ export const remove = async (
     if (!userId) throw new AppError("Unauthorized", 401);
     if (!invoiceId) throw new AppError("Invoice ID required", 400);
 
-    const deleted = await deleteInvoiceById(invoiceId, userId);
+    const deleted = await deleteInvoiceById(invoiceId, userId, req.user?.role as Role);
 
     if (!deleted) throw new AppError("Invoice not found", 404);
 

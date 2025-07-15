@@ -10,6 +10,7 @@ import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import { invoiceIncludeOptions } from "./invoice.query";
 import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
 import { validateRealMime } from "../../shared/utils/validateRealMime";
+import { Role } from "@prisma/client";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -46,9 +47,9 @@ export const getInvoiceById = async (id: string, userId: string) => {
   return invoice;
 };
 
-export const deleteInvoiceById = async (invoiceId: string, userId: string) => {
+export const deleteInvoiceById = async (invoiceId: string, userId: string, userRole: Role) => {
   const invoice = await prisma.invoice.findFirst({
-    where: { id: invoiceId, userId },
+    where: { id: invoiceId },
     include: { attachments: true },
   });
 
