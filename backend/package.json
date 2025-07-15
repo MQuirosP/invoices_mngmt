@@ -34,6 +34,8 @@
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
     "prisma": "^6.11.1",
+    "sharp": "^0.34.3",
+    "tesseract.js": "^6.0.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3",
     "zod": "^3.25.74"
