@@ -8,6 +8,7 @@ import { CloudinaryService } from "@/shared/services/cloudinary.service";
 import { ImportService } from "@/shared/services/import.service";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import { invoiceIncludeOptions } from "./invoice.query";
+import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -44,22 +45,44 @@ export const getInvoiceById = async (id: string, userId: string) => {
   return invoice;
 };
 
-export const deleteInvoiceById = async (id: string, userId: string) => {
+// export const deleteInvoiceById = async (id: string, userId: string) => {
+//   const invoice = await prisma.invoice.findFirst({
+//     where: {
+//       id,
+//       userId,
+//     },
+//   });
+
+//   if (!invoice) return null;
+
+//   await prisma.invoice.delete({
+//     where: { id },
+//   });
+
+//   return invoice;
+// };
+
+export const deleteInvoiceById = async (invoiceId: string, userId: string) => {
   const invoice = await prisma.invoice.findFirst({
-    where: {
-      id,
-      userId,
-    },
+    where: { id: invoiceId, userId },
+    include: { attachments: true },
   });
 
   if (!invoice) return null;
 
-  await prisma.invoice.delete({
-    where: { id },
-  });
+  const cloudinaryService = new CloudinaryService();
+
+  for (const attachment of invoice.attachments) {
+    const publicId = `${userId}/${attachment.fileName}`;
+    const mimetype = attachment.mimeType;
+    await cloudinaryService.delete(publicId, mimetype);
+  }
+
+  await prisma.invoice.delete({ where: { id: invoiceId } });
 
   return invoice;
 };
+
 
 export const updateInvoiceFromMetadata = async (
   invoiceId: string,
@@ -136,9 +159,10 @@ export const createInvoiceFromBufferOCR = async (
   const imnportService = new ImportService();
   const metadata = await imnportService.extractFromBuffer(buffer);
   const ext = getFileExtension(originalName) || "bin";
+  const filename = generateRandomFilename(ext);
   const uploadRes = await new CloudinaryService().upload(
     buffer,
-    metadata.title,
+    filename,
     mimeType, userId
   );
   return prisma.invoice.create({
@@ -154,7 +178,7 @@ export const createInvoiceFromBufferOCR = async (
           {
             url: uploadRes.url,
             mimeType,
-            fileName: `${metadata.title}.${ext}`,
+            fileName: filename,
           },
         ],
       },
@@ -184,17 +208,18 @@ export const updateInvoiceFromUrlOcr = async (
   const existingAttachment = await prisma.attachment.findFirst({
     where: { invoiceId, url },
   });
-  console.log(existingAttachment);
   if (!existingAttachment) {
     const ext = getFileExtension(url) || "bin";
     const mimeType =
       Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] ||
       "application/octet-stream";
+    const filename = generateRandomFilename(ext);
+
     await prisma.attachment.create({
       data: {
         invoiceId,
         url,
-        fileName: `${metadata.title}.${ext}`,
+        fileName: filename,
         mimeType,
       },
     });

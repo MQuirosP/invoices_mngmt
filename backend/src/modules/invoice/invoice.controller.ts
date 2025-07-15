@@ -14,6 +14,7 @@ import { AuthRequest } from "@/modules/auth/auth.middleware";
 import { prisma } from "@/config/prisma";
 import { CloudinaryService } from '@/shared/services/cloudinary.service';
 import { requireUserId } from "@/shared/utils/requireUserId";
+import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
 
 const cloudinary = new CloudinaryService()
 
@@ -27,30 +28,33 @@ export const create = async (
     const userId = requireUserId(req);
     if (!userId) throw new AppError("User not authenticated", 401);
 
-    // Create record without file
+    // Create invoice record
     const invoice = await createInvoice(parsed, userId);
 
-    // Handle files if exist
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (files && files.length > 0) {
       for (const file of files) {
+        const randomFilename = generateRandomFilename(file.mimetype);
+
         const { url, type } = await cloudinary.upload(
           file.buffer,
-          file.originalname,
-          file.mimetype
+          randomFilename,
+          file.mimetype,
+          userId
         );
-        
+
         await prisma.attachment.create({
           data: {
             invoiceId: invoice.id,
             url,
             mimeType: type,
-            fileName: file.originalname,
+            fileName: randomFilename, // <- Aquí ya va el nombre seguro
           },
         });
       }
     }
+
     res.status(201).json({
       success: true,
       message: "Invoice created successfully with attachments",
