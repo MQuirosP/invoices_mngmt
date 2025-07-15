@@ -11,30 +11,51 @@ import {
 } from "@/modules/invoice";
 import { authenticate } from "@/modules/auth";
 import { upload } from "@/shared/middleware/upload";
+import { validateParams } from "../../shared/middleware/validateParams";
 
 const router = Router();
 // ====================
 // Public invoice access
 // ====================
-router.get("/", authenticate, list);                 // List invoices
-router.get("/:id", authenticate, show);              // Get single invoice
-router.delete("/:id", authenticate, remove);         // Delete invoice
+router.get("/:id", authenticate, validateParams(["id"]) , show); // Get single invoice
+router.get("/", authenticate, list); // List invoices
+router.delete(
+  "/:id",
+  authenticate,
+  validateParams(["id"]),
+  remove
+); // Delete invoice
 
 // ====================
 // Attachments
 // ====================
-router.get("/:invoiceId/attachments/:attachmentId/download", authenticate, download);
+router.get(
+  "/:invoiceId/attachments/:attachmentId/download",
+  authenticate,
+  validateParams(["invoiceId", "attachmentId"]),
+  download
+);
 
 // ====================
 // Import / OCR
 // ====================
-router.post("/ocrscan", authenticate, upload.single("file"), importFromLocal);         // From local file
-router.post("/import/:invoiceId", authenticate, importFromUrl);                        // From URL
-router.post("/extract/:invoiceId", authenticate, importDataFromAttachment);            // From own attachment
+router.post("/ocrscan", authenticate, upload.single("file"), importFromLocal); // From local file
+router.post(
+  "/import/:invoiceId",
+  authenticate,
+  validateParams(["invoiceId"]),
+  importFromUrl
+); // From URL
+router.post(
+  "/extract/:invoiceId",
+  authenticate,
+  validateParams(["invoiceId"]),
+  importDataFromAttachment
+); // From own attachment
 
 // ====================
 // Invoice creation
 // ====================
-router.post("/", authenticate, upload.array("files", 5), create);  // Create with optional files
+router.post("/", authenticate, upload.array("files", 5), create); // Create with optional files
 
 export default router;

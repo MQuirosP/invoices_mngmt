@@ -5,8 +5,9 @@ import axios from "axios";
 import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
 import { getFileExtension } from "@/shared/utils/getFileExtension";
 import { CloudinaryService } from "@/shared/services/cloudinary.service";
-import { ImportService } from '@/shared/services/import.service';
-import { mimeExtensionMap } from '@/shared/constants/mimeExtensionMap';
+import { ImportService } from "@/shared/services/import.service";
+import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
+import { invoiceIncludeOptions } from "./invoice.query";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -20,7 +21,6 @@ export const createInvoice = async (
       userId,
     },
   });
-  console.log(invoice);
   return invoice;
 };
 
@@ -28,10 +28,7 @@ export const getUserInvoices = async (userId: string) => {
   const invoices = await prisma.invoice.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
-    include: {
-      attachments: true,
-      warranty: true,
-    },
+    include: invoiceIncludeOptions,
   });
   return invoices;
 };
@@ -42,10 +39,7 @@ export const getInvoiceById = async (id: string, userId: string) => {
       id,
       userId,
     },
-    include: {
-      attachments: true,
-      warranty: true,
-    },
+    include: invoiceIncludeOptions,
   });
   return invoice;
 };
@@ -102,10 +96,7 @@ export const updateInvoiceFromMetadata = async (
           }
         : undefined,
     },
-    include: {
-      attachments: true,
-      warranty: true,
-    },
+    include: invoiceIncludeOptions,
   });
 };
 
@@ -167,17 +158,18 @@ export const createInvoiceFromBufferOCR = async (
           },
         ],
       },
-      warranty: metadata.duration ?
-        {
-          create: {
-            duration: metadata.duration,
-            validUntil: metadata.validUntil!,
-          },
-        } : undefined,
+      warranty: metadata.duration
+        ? {
+            create: {
+              duration: metadata.duration,
+              validUntil: metadata.validUntil!,
+            },
+          }
+        : undefined,
     },
-    include: { attachments: true, warranty: true },
-  })
-}
+    include: invoiceIncludeOptions,
+  });
+};
 
 export const updateInvoiceFromUrlOcr = async (
   invoiceId: string,
@@ -192,10 +184,12 @@ export const updateInvoiceFromUrlOcr = async (
   const existingAttachment = await prisma.attachment.findFirst({
     where: { invoiceId, url },
   });
-  console.log(existingAttachment)
+  console.log(existingAttachment);
   if (!existingAttachment) {
     const ext = getFileExtension(url) || "bin";
-    const mimeType = Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] || "application/octet-stream";
+    const mimeType =
+      Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] ||
+      "application/octet-stream";
     await prisma.attachment.create({
       data: {
         invoiceId,
@@ -212,5 +206,4 @@ export const updateInvoiceFromUrlOcr = async (
   }
 
   return updateInvoiceFromMetadata(invoiceId, metadata);
-}
-
+};

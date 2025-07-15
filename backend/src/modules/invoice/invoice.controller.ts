@@ -13,6 +13,7 @@ import {
 import { AuthRequest } from "@/modules/auth/auth.middleware";
 import { prisma } from "@/config/prisma";
 import { CloudinaryService } from '@/shared/services/cloudinary.service';
+import { requireUserId } from "@/shared/utils/requireUserId";
 
 const cloudinary = new CloudinaryService()
 
@@ -23,7 +24,7 @@ export const create = async (
 ): Promise<void> => {
   try {
     const parsed = createInvoiceSchema.parse(req.body);
-    const userId = req.user?.id;
+    const userId = requireUserId(req);
     if (!userId) throw new AppError("User not authenticated", 401);
 
     // Create record without file
@@ -50,7 +51,6 @@ export const create = async (
         });
       }
     }
-
     res.status(201).json({
       success: true,
       message: "Invoice created successfully with attachments",
@@ -67,7 +67,7 @@ export const list = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = requireUserId(req);
     if (!userId) throw new AppError("User not authenticated", 401);
 
     const invoices = await getUserInvoices(userId);
@@ -89,7 +89,7 @@ export const show = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = requireUserId(req);
     const invoiceId = req.params.id;
 
     if (!userId) throw new AppError("Unauthorized", 401);
@@ -109,14 +109,13 @@ export const show = async (
   }
 };
 
-
 export const remove = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = requireUserId(req);
     const invoiceId = req.params.id;
 
     if (!userId) throw new AppError("Unauthorized", 401);
@@ -142,7 +141,7 @@ export const download = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = requireUserId(req);
     const invoiceId = req.params.invoiceId;
     const attachmentId = req.params.attachmentId;
 
@@ -170,7 +169,7 @@ export const importFromLocal = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = requireUserId(req);
     const file = req.file;
     if (!file || !userId) {
       res.status(400).json({ message: "Missing file or user ID" });
@@ -200,7 +199,7 @@ export const importDataFromAttachment = async (
 ): Promise<void> => {
   try {
     const { invoiceId } = req.params;
-    const userId = req.user?.id;
+    const userId = requireUserId(req);
 
     if (!invoiceId || !userId) {
       res.status(400).json({ message: "Missing invoice ID or user ID" });
@@ -249,7 +248,7 @@ export const importFromUrl = async (
   try {
     const { url } = req.body;
     const { invoiceId } = req.params;
-    const userId = req.user?.id;
+    const userId = requireUserId(req);
 
     if (!url || !userId || !invoiceId) {
       res.status(400).json({ message: "Missing URL, invoice ID or user ID" });
