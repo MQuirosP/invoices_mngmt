@@ -18,6 +18,7 @@ model User {
   email       String      @unique
   password    String
   fullname    String
+  role        Role        @default(USER)
   invoices    Invoice[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -57,4 +58,10 @@ model Attachment {
   invoiceId   String
   invoice     Invoice   @relation(fields: [invoiceId], references: [id],      onDelete: Cascade)
   createdAt   DateTime  @default(now())
+  }
+
+  enum Role {
+    ADMIN
+    MANAGER
+    USER
   }

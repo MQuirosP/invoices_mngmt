@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import { RegisterInput, LoginInput } from "./auth.schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -5,7 +6,7 @@ import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
 
 export const registerUser = async (data: RegisterInput) => {
-  const { email, password, fullname } = data;
+  const { email, password, fullname, role = "USER" } = data;
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -25,6 +26,7 @@ export const registerUser = async (data: RegisterInput) => {
       email,
       password: hashedPassword,
       fullname,
+      role,
     },
   });
 
@@ -33,6 +35,7 @@ export const registerUser = async (data: RegisterInput) => {
     {
       sub: user.id,
       email: user.email,
+      role: user.role as Role,
     },
     process.env.JWT_SECRET!,
     { expiresIn: "7d" }
@@ -42,6 +45,7 @@ export const registerUser = async (data: RegisterInput) => {
     id: user.id,
     email: user.email,
     fullname: user.fullname,
+    role,
     token,
   };
 };
@@ -63,7 +67,7 @@ export const loginUser = async (data: LoginInput) => {
   }
 
   const token = jwt.sign(
-    { sub: user.id, email: user.email },
+    { sub: user.id, email: user.email, role: user.role as Role },
     process.env.JWT_SECRET!,
     { expiresIn: "7d" }
   );
@@ -72,6 +76,7 @@ export const loginUser = async (data: LoginInput) => {
     id: user.id,
     email: user.email,
     fullname: user.fullname,
+    role: user.role,
     token,
   };
 };

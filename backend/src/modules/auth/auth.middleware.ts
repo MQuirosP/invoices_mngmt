@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AppError } from "@/shared/utils/AppError.utils";
+import { Role } from "@prisma/client";
 
 export interface AuthRequest extends Request {
   files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
   user?: {
     id: string;
     email: string;
+    role: Role
   };
 }
 
@@ -29,10 +31,12 @@ export const authenticate = (
     const decoded = jwt.verify(token, secret) as {
       sub: string;
       email: string;
+      role: Role;
     };
     req.user = {
       id: decoded.sub,
       email: decoded.email,
+      role: decoded.role,
     };
     next();
   } catch (error) {

@@ -12,6 +12,7 @@ import {
 import { authenticate } from "@/modules/auth";
 import { upload } from "@/shared/middleware/upload";
 import { validateParams } from "../../shared/middleware/validateParams";
+import { requireRole } from "../../shared/middleware/requireRole";
 
 const router = Router();
 // ====================
@@ -22,9 +23,11 @@ router.get("/", authenticate, list); // List invoices
 router.delete(
   "/:id",
   authenticate,
+  requireRole(["ADMIN"]),
   validateParams(["id"]),
   remove
-); // Delete invoice
+);
+; // Delete invoice
 
 // ====================
 // Attachments
