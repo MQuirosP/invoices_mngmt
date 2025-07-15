@@ -15,6 +15,7 @@ import { prisma } from "@/config/prisma";
 import { CloudinaryService } from '@/shared/services/cloudinary.service';
 import { requireUserId } from "@/shared/utils/requireUserId";
 import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
+import { mimeExtensionMap } from "../../shared/constants/mimeExtensionMap";
 
 const cloudinary = new CloudinaryService()
 
@@ -49,7 +50,7 @@ export const create = async (
             invoiceId: invoice.id,
             url,
             mimeType: type,
-            fileName: randomFilename, // <- Aquí ya va el nombre seguro
+            fileName: `${randomFilename}.${mimeExtensionMap[type]}`
           },
         });
       }

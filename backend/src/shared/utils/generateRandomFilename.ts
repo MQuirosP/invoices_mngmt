@@ -6,5 +6,5 @@ export function generateRandomFilename(mimetype: string): string {
   if (!extension) throw new Error(`Unsupported MIME type: ${mimetype}`);
 
   const randomName = crypto.randomBytes(16).toString("hex");
-  return `${randomName}.${extension}`;
+  return `${randomName}`;
 }
