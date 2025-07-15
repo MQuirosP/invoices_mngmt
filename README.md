@@ -92,110 +92,102 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ---
 
-## Autenticación
+## 🔐 Autenticación
 
-- `POST /api/auth/register` – Registro de usuario  
-- `POST /api/auth/login` – Inicio de sesión  
-- `GET /api/auth/me` – Ruta protegida para obtener datos del usuario  
-- Validación con Zod  
-- Contraseñas encriptadas con Bcrypt  
-- Tokens JWT  
+- Registro: `POST /api/auth/register`
+- Login: `POST /api/auth/login`
+- Datos autenticados: `GET /api/auth/me`
 
----
+Características:
 
-## Facturas (`/api/invoices`)
-
-- `POST /` – Crear factura (requiere token y archivo PDF/XML/JPG)  
-- `GET /` – Listar facturas del usuario  
-- `GET /:id` – Obtener factura específica  
-- `DELETE /:id` – Eliminar factura  
-- Archivos subidos a Cloudinary (`resource_type: raw`)  
-- Validación con Zod  
-- Asociación automática con `userId`  
-
-### Descarga de facturas
-
-- `GET /api/invoices/:id/download`  
-  - Protegido por JWT  
-  - Usa `axios` para obtener el archivo desde Cloudinary  
-  - Enviado al cliente como `stream`  
-
-- `GET /api/invoices/:invoiceId/attachments/:attachmentId/download`  
-  - Descarga individual por ID de archivo adjunto  
-  - Verifica que el archivo pertenezca a la factura y al usuario  
-  - Devuelve stream seguro con headers adecuados  
-
-- Headers:
-  - `Content-Disposition: attachment; filename="<titulo>.<ext>"`  
-  - `Content-Type` dinámico  
-
-- Beneficios:
-  - No se expone la URL de Cloudinary  
-  - Forza descarga en navegador  
-  - Control de acceso total  
+- Validación con Zod
+- Contraseñas hasheadas con bcrypt
+- JWT con `sub`, `email`, expiración segura
+- Middleware `authenticate` para proteger rutas
 
 ---
 
-## Importación por OCR (`/api/invoices/import`)
+## 🧾 Gestión de facturas (`/api/invoices`)
 
-- `POST /api/invoices/import` – Importa factura desde URL (PDF/JPG)  
-- Requiere token de autenticación  
-- Procesa el archivo remoto con Google Cloud Vision API  
-- Extrae texto OCR y lo interpreta para crear automáticamente:
-  - La factura (`title`, `issueDate`, `expiration`, `provider`)
-  - La garantía si se infiere duración (`duration`, `validUntil`)
-  - Un attachment con el archivo subido a Cloudinary
+- `POST /` → Crear factura con o sin archivos
+- `GET /` → Listar facturas propias
+- `GET /:id` → Obtener detalle
+- `DELETE /:id` → Borrar factura y sus archivos
 
-- Validación extra para asegurar que la URL de attachment pertenezca a la factura (prevención de accesos inválidos)
-
-- Lógica encapsulada en el módulo `imports/` (servicio y controlador)
-- Utiliza utilidad `extractMetadataFromText()` para analizar el contenido extraído
-
-- OCR sobre archivo ya subido también implementado:
-  - `POST /api/invoices/:id/import`
-  - Extrae texto desde attachment existente y actualiza la factura
-  - Marca `extracted: true`
+✅ Incluye adjuntos (`attachments`) y garantía (`warranty`) en las respuestas  
+✅ Validación MIME declarada + real (buffer)
 
 ---
 
-## Garantías (`/api/warranties`)
+## 📎 Archivos adjuntos (Attachments)
 
-- `POST /` – Crear garantía asociada a factura  
-- `GET /:invoiceId` – Obtener garantía  
-- `PUT /:invoiceId` – Actualizar garantía  
-- `DELETE /:invoiceId` – Eliminar garantía  
-- Relación 1:1 con factura  
-- Validación con Zod  
+- Multer configurado con `memoryStorage`
+- Validación MIME binaria con `file-type`
+- Tipos permitidos: PDF, XML, JPG, PNG
+- Tamaño máximo: 5MB
+- Subida directa a Cloudinary (`resource_type: raw`)
+- Nombre generado aleatoriamente (`generateRandomFilename`)
+- Registrados en la base como `Attachment` con metadata
 
----
+### 📥 Descargas
 
-## Subida de Archivos
+- `GET /api/invoices/:id/download` → Descarga principal
+- `GET /api/invoices/:invoiceId/attachments/:attachmentId/download` → Descarga por archivo
 
-- Archivos recibidos vía `form-data` con Multer  
-- Convertidos a base64 y subidos a Cloudinary  
-- Soporte para PDF, XML, JPG, PNG  
-- Configuración de Cloudinary:
-  - `resource_type: "raw"`  
-  - `overwrite: true`  
-  - Activada opción: “Allow delivery of PDF and ZIP files”  
-
-### Validación de tipo MIME
-
-- Solo permite: `application/pdf`, `application/xml`, `text/xml`, `image/jpeg`, `image/jpg`, `image/png`  
-- Rechaza otros tipos con error 415  
-- Tamaño máximo: 5 MB  
-- Seguridad reforzada en la carga  
+🔐 Verifica propiedad del usuario  
+📎 Descarga como `stream` con `Content-Disposition` seguro  
+🌐 No se expone la URL pública de Cloudinary
 
 ---
 
-## Consideraciones
+## 🧠 Importación automática con OCR (`/api/invoices/import`)
 
-- Se mantiene `fileType` para determinar la extensión esperada  
-- El nombre del archivo se genera desde `title` de la factura  
-- Descarga ahora permite seleccionar un archivo específico por ID  
-- Posibilidad futura: descargar todos como archivo ZIP  
-- OCR habilitado para automatizar ingreso de facturas desde imagen o PDF  
-- Validación de ownership implementada en importación y descarga  
+- OCR desde buffer o URL (`Vision API`, `Tesseract`)
+- Extrae texto y genera factura + garantía + attachment
+- Servicios desacoplados (`OCRFactory`, `ImportService`)
+- Validación MIME antes de procesar OCR
+- OCR también disponible sobre archivo existente (`POST /:id/import-url`)
+
+---
+
+## ⏳ Gestión de garantías (`/api/warranties`)
+
+- `POST`, `PUT`, `GET`, `DELETE`
+- Relación 1:1 con factura
+- Campos: `duration`, `validUntil`, `notes`
+- Eliminación en cascada con factura
+
+---
+
+## 🧪 Testing y calidad
+
+- Unit tests con Jest (`invoice.controller.test.ts`)
+- Supertest para integración de OCR y subida
+- Validación de errores, cobertura de casos límite
+
+---
+
+## 📖 Documentación
+
+- README interactivo
+- Swagger/OpenAPI en desarrollo (`swagger-jsdoc`)
+- Postman Collection planeada
+
+---
+
+## 🧭 Próximas mejoras (roadmap)
+
+- ✅ Validación MIME binaria implementada
+- ✅ OCR modular con fallback y configuración vía `.env`
+- ✅ Refactor para servicios de attachments centralizados
+
+-- ZIP de múltiples archivos  
+-- Paginación y filtros en listado  
+-- Endpoint PATCH parcial  
+-- Dashboard API para métricas  
+-- UI mínima en React/Vite  
+-- OCR para PDFs en Google Cloud Storage  
+-- Swagger completo y colección Postman pública
 
 ---
 
