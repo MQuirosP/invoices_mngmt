@@ -13,7 +13,7 @@ import {
 import { AuthRequest } from "@/modules/auth/auth.middleware";
 import { prisma } from "@/config/prisma";
 import { requireUserId } from "@/shared/utils/requireUserId";
-import { AttachmentService } from "@/shared/services/attachment.service";
+// import { AttachmentService } from "@/shared/services/attachment.service";
 import { Role } from "@prisma/client";
 
 export const create = async (
@@ -34,11 +34,11 @@ export const create = async (
       files
     );
 
-    if (files && files.length > 0) {
-      for (const file of files) {
-        await AttachmentService.uploadValidated(file, invoice.id, userId);
-      }
-    }
+    // if (files && files.length > 0) {
+    //   for (const file of files) {
+    //     await AttachmentService.uploadValidated(file, invoice.id, userId);
+    //   }
+    // }
 
     res.status(201).json({
       success: true,
