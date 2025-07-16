@@ -9,8 +9,8 @@ import { ImportService } from "@/shared/services/import.service";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import { invoiceIncludeOptions } from "./invoice.query";
 import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
-import { validateRealMime } from "../../shared/utils/validateRealMime";
 import { Role } from "@prisma/client";
+import { AttachmentService } from "../../shared/services/attachment.service";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -142,18 +142,11 @@ export const createInvoiceFromBufferOCR = async (
   originalName: string,
   mimeType: string
 ) => {
-  const { mime, ext } = await validateRealMime(buffer, mimeType);
-  const imnportService = new ImportService();
-  const metadata = await imnportService.extractFromBuffer(buffer);
-  const filename = generateRandomFilename(mime); // ✅ usa el MIME validado
-  const uploadRes = await new CloudinaryService().upload(
-    buffer,
-    filename,
-    mime,
-    userId
-  ); // ✅ usa el MIME validado
+  const importService = new ImportService();
+  const metadata = await importService.extractFromBuffer(buffer);
 
-  return prisma.invoice.create({
+  // Paso 1: Crear la factura
+  const invoice = await prisma.invoice.create({
     data: {
       userId,
       title: metadata.title,
@@ -161,15 +154,6 @@ export const createInvoiceFromBufferOCR = async (
       expiration: metadata.expiration,
       provider: metadata.provider,
       extracted: true,
-      attachments: {
-        create: [
-          {
-            url: uploadRes.url,
-            mimeType: mime, 
-            fileName: `${filename}.${ext}`,
-          },
-        ],
-      },
       warranty: metadata.duration
         ? {
             create: {
@@ -181,7 +165,25 @@ export const createInvoiceFromBufferOCR = async (
     },
     include: invoiceIncludeOptions,
   });
+
+  // Paso 2: Subir el archivo y vincularlo a la factura
+  const attachment = await AttachmentService.uploadValidated(
+    {
+      buffer,
+      mimetype: mimeType,
+      originalname: originalName,
+    },
+    invoice.id, // ✅ ahora sí tenés el invoiceId
+    userId
+  );
+
+  // Paso 3: devolver la factura con su attachment incluido
+  return {
+    ...invoice,
+    attachments: [attachment],
+  };
 };
+
 
 export const updateInvoiceFromUrlOcr = async (
   invoiceId: string,

@@ -3,15 +3,29 @@ import { CloudinaryService } from "./cloudinary.service";
 import { generateRandomFilename } from "../utils/generateRandomFilename";
 // import { mimeExtensionMap } from "../constants/mimeExtensionMap";
 import { prisma } from "@/config/prisma";
+import { logger } from "../utils/logger";
 
 export class AttachmentService {
-  static async uploadValidated(file: Express.Multer.File, invoiceId: string, userId: string) {
-    const { mime, ext } = await validateRealMime(file.buffer, file.mimetype);
-    const filename = generateRandomFilename(mime);
-    const cloudinary = new CloudinaryService();
-    const { url } = await cloudinary.upload(file.buffer, filename, mime, userId);
+  static async uploadValidated(
+    file: { buffer: Buffer; mimetype: string; originalname: string },
+    invoiceId: string,
+    userId: string
+  ) {
+    const { buffer, mimetype, originalname } = file;
 
-    return prisma.attachment.create({
+    // Validate real MIME from buffer
+    const { mime, ext } = await validateRealMime(buffer, mimetype);
+
+    // Random file name generate
+    logger.info({originalname}, "Original file received");
+    const filename = generateRandomFilename(mime);
+    logger.info({filename, ext}, "Random filename generated");
+    // Upload to cloudinary
+    const cloudinary = new CloudinaryService();
+    const { url } = await cloudinary.upload(buffer, filename, mime, userId);
+
+    // Record attachment on DB
+    const attachment = await prisma.attachment.create({
       data: {
         invoiceId,
         url,
@@ -19,5 +33,7 @@ export class AttachmentService {
         fileName: `${filename}.${ext}`,
       },
     });
+
+    return attachment;
   }
 }
