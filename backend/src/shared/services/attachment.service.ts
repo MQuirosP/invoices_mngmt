@@ -1,4 +1,4 @@
-import { validateRealMime } from "../utils/validateRealMime";
+import { validateRealMime } from "@/shared/utils/validateRealMime";
 import { CloudinaryService } from "./cloudinary.service";
 import { generateRandomFilename } from "../utils/generateRandomFilename";
 // import { mimeExtensionMap } from "../constants/mimeExtensionMap";
