@@ -8,9 +8,10 @@ import { CloudinaryService } from "@/shared/services/cloudinary.service";
 import { ImportService } from "@/shared/services/import.service";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import { invoiceIncludeOptions } from "./invoice.query";
-import { generateRandomFilename } from "../../shared/utils/generateRandomFilename";
+import { generateRandomFilename } from "@/shared/utils/generateRandomFilename";
 import { Role } from "@prisma/client";
-import { AttachmentService } from "../../shared/services/attachment.service";
+import { AttachmentService } from "@/shared/services/attachment.service";
+import { logger } from "@/shared/utils/logger";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -25,6 +26,28 @@ export const createInvoice = async (
     },
   });
   return invoice;
+};
+
+export const createInvoiceWithFiles = async (
+  parsed: CreateInvoiceInput,
+  userId: string,
+  files?: Express.Multer.File[]
+) => {
+  const invoice = await createInvoice(parsed, userId);
+
+  const uploaded: string[] = [];
+  if (files && files.length > 0) {
+    for (const file of files) {
+      const result = await AttachmentService.uploadValidated(file, invoice.id, userId);
+      uploaded.push(result.fileName);
+    }
+  }
+  logger.info(`🧾 Invoice ${invoice.id} created by ${userId} with files: ${uploaded.join(", ")}`);
+
+  return {
+    invoice,
+    uploadedFiles: uploaded,
+  };
 };
 
 export const getUserInvoices = async (userId: string) => {
@@ -145,7 +168,7 @@ export const createInvoiceFromBufferOCR = async (
   const importService = new ImportService();
   const metadata = await importService.extractFromBuffer(buffer);
 
-  // Paso 1: Crear la factura
+  // Create invoice record
   const invoice = await prisma.invoice.create({
     data: {
       userId,
@@ -166,18 +189,18 @@ export const createInvoiceFromBufferOCR = async (
     include: invoiceIncludeOptions,
   });
 
-  // Paso 2: Subir el archivo y vincularlo a la factura
+  // Upload file & attach to invoice
   const attachment = await AttachmentService.uploadValidated(
     {
       buffer,
       mimetype: mimeType,
       originalname: originalName,
     },
-    invoice.id, // ✅ ahora sí tenés el invoiceId
+    invoice.id,
     userId
   );
 
-  // Paso 3: devolver la factura con su attachment incluido
+  // Return invoice with attachment
   return {
     ...invoice,
     attachments: [attachment],

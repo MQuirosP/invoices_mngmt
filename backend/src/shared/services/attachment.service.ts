@@ -1,9 +1,9 @@
 import { validateRealMime } from "@/shared/utils/validateRealMime";
 import { CloudinaryService } from "./cloudinary.service";
-import { generateRandomFilename } from "../utils/generateRandomFilename";
+import { generateRandomFilename } from "@/shared/utils/generateRandomFilename";
 // import { mimeExtensionMap } from "../constants/mimeExtensionMap";
 import { prisma } from "@/config/prisma";
-import { logger } from "../utils/logger";
+import { logger } from "@/shared/utils/logger";
 
 export class AttachmentService {
   static async uploadValidated(

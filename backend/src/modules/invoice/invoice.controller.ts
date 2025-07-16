@@ -2,25 +2,19 @@ import { AppError } from "@/shared/utils/AppError.utils";
 import { /*Request,*/ Response, NextFunction } from "express";
 import { createInvoiceSchema } from "@/modules/invoice";
 import {
-  createInvoice,
   getUserInvoices,
   getInvoiceById,
   deleteInvoiceById,
   downloadAttachment,
   updateInvoiceFromUrlOcr,
   createInvoiceFromBufferOCR,
+  createInvoiceWithFiles,
 } from "./invoice.service";
 import { AuthRequest } from "@/modules/auth/auth.middleware";
 import { prisma } from "@/config/prisma";
-// import { CloudinaryService } from "@/shared/services/cloudinary.service";
 import { requireUserId } from "@/shared/utils/requireUserId";
-// import { generateRandomFilename } from "@/shared/utils/generateRandomFilename";
-// import { mimeExtensionMap } from "../../shared/constants/mimeExtensionMap";
-// import { validateRealMime } from "@/shared/utils/validateRealMime";
-import { AttachmentService } from "../../shared/services/attachment.service";
+import { AttachmentService } from "@/shared/services/attachment.service";
 import { Role } from "@prisma/client";
-
-// const cloudinary = new CloudinaryService();
 
 export const create = async (
   req: AuthRequest,
@@ -33,9 +27,12 @@ export const create = async (
     if (!userId) throw new AppError("User not authenticated", 401);
 
     // Create invoice record
-    const invoice = await createInvoice(parsed, userId);
-
     const files = req.files as Express.Multer.File[] | undefined;
+    const { invoice, uploadedFiles } = await createInvoiceWithFiles(
+      parsed,
+      userId,
+      files
+    );
 
     if (files && files.length > 0) {
       for (const file of files) {
@@ -45,7 +42,7 @@ export const create = async (
 
     res.status(201).json({
       success: true,
-      message: "Invoice created successfully with attachments",
+      message: `Invoice created with ${uploadedFiles.length} attachment(s)`,
       data: invoice,
     });
   } catch (error) {
@@ -113,7 +110,11 @@ export const remove = async (
     if (!userId) throw new AppError("Unauthorized", 401);
     if (!invoiceId) throw new AppError("Invoice ID required", 400);
 
-    const deleted = await deleteInvoiceById(invoiceId, userId, req.user?.role as Role);
+    const deleted = await deleteInvoiceById(
+      invoiceId,
+      userId,
+      req.user?.role as Role
+    );
 
     if (!deleted) throw new AppError("Invoice not found", 404);
 
@@ -198,11 +199,11 @@ export const importDataFromAttachment = async (
       return;
     }
 
-    // Asegurar que la factura pertenece al usuario
+    // Asure invoice belongs to user
     const invoice = await prisma.invoice.findFirst({
       where: {
         id: invoiceId,
-        userId, // 👈 validación de propiedad
+        userId,
       },
       include: {
         attachments: true,
