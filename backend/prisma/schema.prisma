@@ -52,6 +52,7 @@ model Attachment {
   invoiceId String
   createdAt DateTime @default(now())
   invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  @@unique([invoiceId, fileName])
 }
 
 enum Role {

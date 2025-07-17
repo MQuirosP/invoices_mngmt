@@ -43,9 +43,14 @@ export const createInvoiceWithFiles = async (
     }
   }
   logger.info(`🧾 Invoice ${invoice.id} created by ${userId} with files: ${uploaded.join(", ")}`);
+  const invoiceWithRelations = await prisma.invoice.findUnique({
+    where: { id: invoice.id },
+    include: invoiceIncludeOptions,
+  });
 
+  if (!invoiceWithRelations) throw new AppError("Failed to retrieve invoice attarchments", 404)
   return {
-    invoice,
+    invoice: invoiceWithRelations,
     uploadedFiles: uploaded,
   };
 };
@@ -207,7 +212,6 @@ export const createInvoiceFromBufferOCR = async (
   };
 };
 
-
 export const updateInvoiceFromUrlOcr = async (
   invoiceId: string,
   userId: string,
@@ -237,10 +241,10 @@ export const updateInvoiceFromUrlOcr = async (
       },
     });
 
-    await prisma.invoice.update({
-      where: { id: invoiceId },
-      data: { updatedAt: new Date() },
-    });
+    // await prisma.invoice.update({
+    //   where: { id: invoiceId },
+    //   data: { updatedAt: new Date() },
+    // });
   }
 
   return updateInvoiceFromMetadata(invoiceId, metadata);

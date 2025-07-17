@@ -18,7 +18,7 @@ export class AttachmentService {
 
     // Random file name generate
     logger.info({originalname}, "Original file received");
-    const filename = generateRandomFilename(mime);
+    const filename = generateRandomFilename(mime, invoiceId);
     logger.info({filename, ext}, "Random filename generated");
     // Upload to cloudinary
     const cloudinary = new CloudinaryService();
