@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo.dev",
+    "sourceMap": true,
+    "noEmitOnError": true,
+    "isolatedModules": true,
+    // "watchOptions": {
+    //   "watchFile": "useFsEvents",
+    //   "fallbackPolling": "dynamicPriority"
+    // }
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts"
+  ]
+}
