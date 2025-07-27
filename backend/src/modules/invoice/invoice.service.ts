@@ -38,17 +38,26 @@ export const createInvoiceWithFiles = async (
   const uploaded: string[] = [];
   if (files && files.length > 0) {
     for (const file of files) {
-      const result = await AttachmentService.uploadValidated(file, invoice.id, userId);
+      const result = await AttachmentService.uploadValidated(
+        file,
+        invoice.id,
+        userId
+      );
       uploaded.push(result.fileName);
     }
   }
-  logger.info(`🧾 Invoice ${invoice.id} created by ${userId} with files: ${uploaded.join(", ")}`);
+  logger.info(
+    `🧾 Invoice ${invoice.id} created by ${userId} with files: ${uploaded.join(
+      ", "
+    )}`
+  );
   const invoiceWithRelations = await prisma.invoice.findUnique({
     where: { id: invoice.id },
     include: invoiceIncludeOptions,
   });
 
-  if (!invoiceWithRelations) throw new AppError("Failed to retrieve invoice attarchments", 404)
+  if (!invoiceWithRelations)
+    throw new AppError("Failed to retrieve invoice attarchments", 404);
   return {
     invoice: invoiceWithRelations,
     uploadedFiles: uploaded,
@@ -75,7 +84,11 @@ export const getInvoiceById = async (id: string, userId: string) => {
   return invoice;
 };
 
-export const deleteInvoiceById = async (invoiceId: string, userId: string, userRole: Role) => {
+export const deleteInvoiceById = async (
+  invoiceId: string,
+  userId: string,
+  userRole: Role
+) => {
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId },
     include: { attachments: true },
@@ -194,8 +207,27 @@ export const createInvoiceFromBufferOCR = async (
     include: invoiceIncludeOptions,
   });
 
+  if (metadata.items?.length) {
+    await prisma.invoiceItem.createMany({
+      data: metadata.items.map((item) => ({
+        ...item,
+        invoiceId: invoice.id,
+      })),
+    });
+  }
+
+  if (metadata.items?.length) {
+  await prisma.invoiceItem.deleteMany({ where: { invoiceId: invoice.id } }); // opcional: limpiar antes
+  await prisma.invoiceItem.createMany({
+    data: metadata.items.map((item) => ({
+      ...item,
+      invoiceId: invoice.id,
+    })),
+  });
+}
+
   // Upload file & attach to invoice
-  const attachment = await AttachmentService.uploadValidated(
+  await AttachmentService.uploadValidated(
     {
       buffer,
       mimetype: mimeType,
@@ -204,12 +236,10 @@ export const createInvoiceFromBufferOCR = async (
     invoice.id,
     userId
   );
-
+  
+  const fullInvoice = await getInvoiceById(invoice.id, userId);
   // Return invoice with attachment
-  return {
-    ...invoice,
-    attachments: [attachment],
-  };
+  return fullInvoice
 };
 
 export const updateInvoiceFromUrlOcr = async (

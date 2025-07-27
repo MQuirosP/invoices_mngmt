@@ -6,6 +6,7 @@ export interface ExtractedInvoiceMetadata {
   duration?: number; // days
   validUntil?: Date;
   mimeType?: string;
+  items?: InvoiceItemInput[];
 }
 
 export interface ExtractedMetadata {
@@ -16,6 +17,13 @@ export interface ExtractedMetadata {
   duration?: number;
   validUntil?: Date;
   mimeType?: string;
+}
+
+export interface InvoiceItemInput {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
 }
 
 export function extractMetadataFromText(
@@ -30,6 +38,7 @@ export function extractMetadataFromText(
   const provider = extractProvider(lines);
   const issueDate = extractIssueDate(text);
   const { duration, validUntil } = extractWarranty(text, issueDate);
+  const items = extractItems(text);
 
   const expiration = validUntil ?? issueDate;
 
@@ -40,6 +49,7 @@ export function extractMetadataFromText(
     duration,
     validUntil,
     expiration,
+    items,
   };
 }
 
@@ -84,6 +94,43 @@ function extractWarranty(
 
   const validUntil = new Date(issueDate.getTime() + duration * 86400000);
   return { duration, validUntil };
+}
+
+export function extractItems(text: string): InvoiceItemInput[] {
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  // console.log("📄 OCR Lines:");
+  // lines.forEach((line, index) => {
+  //   console.log(`${index.toString().padStart(3, " ")}: ${line}`);
+  // });
+
+  const items: InvoiceItemInput[] = [];
+
+  // Regex para detectar líneas que terminan con: precio cantidad total
+  const itemLineRegex = /([\d.,]+)\s+(\d+)\s+([\d.,]+)$/;
+
+  for (const line of lines) {
+    const match = line.match(itemLineRegex);
+    if (match) {
+      const [_, priceStr, qtyStr, totalStr] = match;
+
+      const description = line.replace(itemLineRegex, "").trim();
+
+      const item: InvoiceItemInput = {
+        description,
+        unitPrice: parseFloat(priceStr.replace(",", "")),
+        quantity: parseInt(qtyStr),
+        total: parseFloat(totalStr.replace(",", "")),
+      };
+
+      items.push(item);
+    }
+  }
+
+  return items;
 }
 
 function parseDate(raw: string): Date {

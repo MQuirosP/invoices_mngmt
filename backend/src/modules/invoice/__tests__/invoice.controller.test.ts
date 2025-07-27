@@ -40,6 +40,18 @@ describe('Invoice Controller: importFromUrl', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     },
+    items: [
+  {
+    id: "item-id-1",
+    invoiceId: "inv-id-123",
+    description: "Producto A",
+    quantity: 2,
+    unitPrice: 1500,
+    total: 3000,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+],
   };
 
   beforeEach(() => {

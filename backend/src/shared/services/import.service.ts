@@ -4,9 +4,9 @@ import { FileFetcherService } from "@/shared/services/fileFetcher.service";
 import { OCRFactory, OCRProvider } from "./ocr.factory";
 // import Tesseract from "tesseract.js";
 
-const provider = process.env.OCR_PROVIDER || "local";
+const provider = process.env.OCR_PROVIDER || "tesseract";
 
-
+console.log(`Using OCR provider: ${provider}`)
 export class ImportService {
   private fetcher = new FileFetcherService();
   private ocr = OCRFactory.create(provider as OCRProvider);

@@ -10,6 +10,7 @@ export class OCRService {
   async extractMetadataFromBuffer(
     buffer: Buffer
   ): Promise<ExtractedInvoiceMetadata> {
+    console.log(`Using OCR provider: Google Cloud Vision`)
     const [result] = await client.textDetection({ image: { content: buffer } });
     const text = result.fullTextAnnotation?.text;
     if (!text) throw new Error("No text extracted");

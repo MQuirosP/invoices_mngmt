@@ -8,50 +8,64 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
+  id        String          @id @default(uuid())
+  email     String          @unique
   password  String
   fullname  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  role      Role      @default(USER)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  role      Role            @default(USER)
   invoices  Invoice[]
 }
 
 model Invoice {
-  id          String       @id @default(uuid())
+  id          String        @id @default(uuid())
   userId      String
   title       String
   issueDate   DateTime
   expiration  DateTime
   provider    String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  extracted   Boolean      @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  extracted   Boolean       @default(false)
   attachments Attachment[]
-  user        User         @relation(fields: [userId], references: [id])
+  user        User          @relation(fields: [userId], references: [id])
   warranty    Warranty?
+  items       InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String        @id @default(uuid())
+  invoiceId   String
+  description String
+  quantity    Int
+  unitPrice   Float
+  total       Float
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  Invoice     Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model Warranty {
-  id         String   @id @default(uuid())
-  invoiceId  String   @unique
+  id         String         @id @default(uuid())
+  invoiceId  String         @unique
   duration   Int
   notes      String?
   validUntil DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  invoice    Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  invoice    Invoice        @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model Attachment {
-  id        String   @id @default(uuid())
+  id        String          @id @default(uuid())
   url       String
   mimeType  String
   fileName  String
   invoiceId String
-  createdAt DateTime @default(now())
-  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+  invoice   Invoice         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   @@unique([invoiceId, fileName])
 }
 

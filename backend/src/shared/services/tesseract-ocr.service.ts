@@ -9,6 +9,7 @@ export class TesseractOCRService {
   async extractMetadataFromBuffer(
     buffer: Buffer
   ): Promise<ExtractedInvoiceMetadata> {
+    console.log(`Using OCR provider: Tesseract.js`);
     // Preprocesar la imagen para mejorar OCR
     const preprocessedBuffer = await sharp(buffer)
       .resize({ width: 1500 })      // Redimensionar para mejor lectura
@@ -23,7 +24,7 @@ export class TesseractOCRService {
 
     try {
       // Cargar el worker (incluye idioma)
-      await worker.load();
+      // await worker.load();
 
       // Inicializar idioma
       await worker.reinitialize("spa");
@@ -39,7 +40,7 @@ export class TesseractOCRService {
       if (!text) {
         throw new Error("No se extrajo texto con Tesseract.js");
       }
-
+      
       // Extraer metadatos con tu función custom
       return extractMetadataFromText(text);
     } finally {
