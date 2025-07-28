@@ -2,7 +2,7 @@ import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { CreateInvoiceInput } from "@/modules/invoice";
 import axios from "axios";
-import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
+// import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
 import { getFileExtension } from "@/shared/utils/getFileExtension";
 import { CloudinaryService } from "@/shared/services/cloudinary.service";
 import { ImportService } from "@/shared/services/import.service";
@@ -12,6 +12,7 @@ import { generateRandomFilename } from "@/shared/utils/generateRandomFilename";
 import { Role } from "@prisma/client";
 import { AttachmentService } from "@/shared/services/attachment.service";
 import { logger } from "@/shared/utils/logger";
+import { ExtractedInvoiceMetadata } from "@/shared/ocr/ocr.types";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -113,7 +114,7 @@ export const deleteInvoiceById = async (
 
 export const updateInvoiceFromMetadata = async (
   invoiceId: string,
-  metadata: ExtractedMetadata
+  metadata: ExtractedInvoiceMetadata
 ) => {
   return prisma.invoice.update({
     where: { id: invoiceId },
@@ -252,6 +253,7 @@ export const updateInvoiceFromUrlOcr = async (
 
   const importService = new ImportService();
   const metadata = await importService.extractFromUrl(url);
+
   const existingAttachment = await prisma.attachment.findFirst({
     where: { invoiceId, url },
   });
@@ -260,8 +262,7 @@ export const updateInvoiceFromUrlOcr = async (
     const mimeType =
       Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] ||
       "application/octet-stream";
-    const filename = generateRandomFilename(ext);
-
+    const filename = generateRandomFilename(mimeType);
     await prisma.attachment.create({
       data: {
         invoiceId,
@@ -270,12 +271,22 @@ export const updateInvoiceFromUrlOcr = async (
         mimeType,
       },
     });
-
-    // await prisma.invoice.update({
-    //   where: { id: invoiceId },
-    //   data: { updatedAt: new Date() },
-    // });
   }
 
-  return updateInvoiceFromMetadata(invoiceId, metadata);
+  await updateInvoiceFromMetadata(invoiceId, metadata);
+
+  await prisma.invoiceItem.deleteMany({ where: { invoiceId } });
+
+  console.log(metadata.items)
+  if (metadata.items?.length) {
+    await prisma.invoiceItem.createMany({
+      data: metadata.items.map((item) => ({
+        ...item,
+        invoiceId,
+      })),
+    });
+  }
+
+  const fullInvoice = await getInvoiceById(invoiceId, userId);
+  return fullInvoice;
 };

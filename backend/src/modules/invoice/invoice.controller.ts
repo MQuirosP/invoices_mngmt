@@ -226,7 +226,7 @@ export const importDataFromAttachment = async (
     const updateInvoice = await updateInvoiceFromUrlOcr(
       invoiceId,
       userId,
-      attachment.url
+      attachment.url,
     );
 
     res.status(201).json({
