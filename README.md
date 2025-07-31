@@ -20,75 +20,116 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 - Arquitectura modular
 
-- `mquirosp-invoices_mngmt/`
-  - `README.md`
-  - `LICENSE`
-  - `backend/`
-    - `global.d.ts`
-    - `jest.config.ts`
-    - `package.json`
-    - `tsconfig.build.json`
-    - `tsconfig.json`
-    - `tsconfig.test.json`
-    - `prisma/`
-      - `schema.prisma`
-      - `migrations/`
-        - `migration_lock.toml`
-        - `20250706235007_init/`
-          - `migration.sql`
-        - `20250708025655_rename_extrated_to_extracted/`
-          - `migration.sql`
-        - `20250709024520_add_attachments_model/`
-          - `migration.sql`
-        - `20250709025629_remove_file_fields/`
-          - `migration.sql`
-    - `src/`
-      - `app.ts`
-      - `server.ts`
-      - `config/`
-        - `cloudinary.ts`
-        - `index.ts`
-        - `prisma.ts`
-      - `modules/`
-        - `auth/`
-          - `auth.controller.ts`
-          - `auth.middleware.ts`
-          - `auth.routes.ts`
-          - `auth.schema.ts`
-          - `auth.service.ts`
-          - `index.ts`
-        - `invoice/`
-          - `index.ts`
-          - `invoice.controller.ts`
-          - `invoice.routes.ts`
-          - `invoice.schema.ts`
-          - `invoice.service.ts`
-          - `__tests__/`
-            - `invoice.controller.test.ts`
-        - `warranty/`
-          - `index.ts`
-          - `warranty.controller.ts`
-          - `warranty.routes.ts`
-          - `warranty.schema.ts`
-          - `warranty.service.ts`
-      - `routes/`
-        - `index.ts`
-      - `shared/`
-        - `index.ts`
-        - `constants/`
-          - `mimeExtensionMap.ts`
-        - `middleware/`
-          - `errorHandler.ts`
-          - `upload.ts`
-        - `services/`
-          - `cloudinary.service.ts`
-          - `fileFetcher.service.ts`
-          - `import.service.ts`
-          - `ocr.service.ts`
-        - `utils/`
-          - `AppError.utils.ts`
-          - `extractMetadata.utils.ts`
-          - `getFileExtensionFromUrl.ts`
+## mquirosp-invoices_mngmt
+
+- README.md
+- LICENSE
+- render.yaml
+- backend/
+
+## backend/
+
+- global.d.ts
+- jest.config.ts
+- package.json
+- tsconfig.build.json
+- tsconfig.dev.json
+- tsconfig.json
+- tsconfig.test.json
+- prisma/
+  - schema.prisma
+  - migrations/
+    - migration_lock.toml
+    - 20250706235007_init/
+      - migration.sql
+    - 20250708025655_rename_extrated_to_extracted/
+      - migration.sql
+    - 20250709024520_add_attachments_model/
+      - migration.sql
+    - 20250709025629_remove_file_fields/
+      - migration.sql
+    - 20250713222846_add_cascade_attachment_model/
+      - migration.sql
+    - 20250713223153_add_cascade_warranty_model/
+      - migration.sql
+    - 20250715210145_add_user_role/
+      - migration.sql
+    - 20250726230951_add_invoice_items/
+      - migration.sql
+    - 20250730235818_add_item_warranty_fields/
+      - migration.sql
+
+## src/
+
+- app.ts
+- server.ts
+- config/
+  - cloudinary.ts
+  - index.ts
+  - prisma.ts
+- routes/
+  - index.ts
+
+## modules/
+
+- auth/
+  - auth.controller.ts
+  - auth.middleware.ts
+  - auth.routes.ts
+  - auth.schema.ts
+  - auth.service.ts
+  - index.ts
+- invoice/
+  - index.ts
+  - invoice.controller.ts
+  - invoice.query.ts
+  - invoice.routes.ts
+  - invoice.schema.ts
+  - invoice.service.ts
+  - invoiceItems.schema.ts
+  - __tests__/
+    - invoice.controller.test.ts
+- warranty/
+  - index.ts
+  - warranty.controller.ts
+  - warranty.routes.ts
+  - warranty.schema.ts
+  - warranty.service.ts
+
+## shared/
+
+- index.ts
+- constants/
+  - mimeExtensionMap.ts
+  - roles.ts
+- middleware/
+  - errorHandler.ts
+  - requireRole.ts
+  - upload.ts
+  - validateParams.ts
+- ocr/
+  - index.ts
+  - ocr.factory.ts
+  - ocr.types.ts
+  - ocr.utils.ts
+  - ocr.providers/
+    - aws.ts
+    - gcp.ts
+    - tesseract.ts
+- services/
+  - attachment.service.ts
+  - cloudinary.service.ts
+  - fileFetcher.service.ts
+  - import.service.ts
+- types/
+  - auth.ts
+- utils/
+  - AppError.utils.ts
+  - generateRandomFilename.ts
+  - getFileExtension.ts
+  - logger.ts
+  - requireUserId.ts
+  - validateRealMime.ts
 
 ---
 
