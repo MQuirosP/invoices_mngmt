@@ -124,28 +124,28 @@ export const updateInvoiceFromMetadata = async (
       expiration: metadata.expiration ?? new Date(),
       provider: metadata.provider ?? "Desconocido",
       extracted: true,
-      warranty: metadata.duration
-        ? {
-            upsert: {
-              update: {
-                duration: metadata.duration,
-                validUntil:
-                  metadata.validUntil ??
-                  new Date(
-                    metadata.issueDate.getTime() + metadata.duration * 86400000
-                  ),
-              },
-              create: {
-                duration: metadata.duration,
-                validUntil:
-                  metadata.validUntil ??
-                  new Date(
-                    metadata.issueDate.getTime() + metadata.duration * 86400000
-                  ),
-              },
-            },
-          }
-        : undefined,
+      // warranty: metadata.duration
+      //   ? {
+      //       upsert: {
+      //         update: {
+      //           duration: metadata.duration,
+      //           validUntil:
+      //             metadata.validUntil ??
+      //             new Date(
+      //               metadata.issueDate.getTime() + metadata.duration * 86400000
+      //             ),
+      //         },
+      //         create: {
+      //           duration: metadata.duration,
+      //           validUntil:
+      //             metadata.validUntil ??
+      //             new Date(
+      //               metadata.issueDate.getTime() + metadata.duration * 86400000
+      //             ),
+      //         },
+      //       },
+      //     }
+      //   : undefined,
     },
     include: invoiceIncludeOptions,
   });
@@ -196,14 +196,14 @@ export const createInvoiceFromBufferOCR = async (
       expiration: metadata.expiration,
       provider: metadata.provider,
       extracted: true,
-      warranty: metadata.duration
-        ? {
-            create: {
-              duration: metadata.duration,
-              validUntil: metadata.validUntil!,
-            },
-          }
-        : undefined,
+      // warranty: metadata.duration
+      //   ? {
+      //       create: {
+      //         duration: metadata.duration,
+      //         validUntil: metadata.validUntil!,
+      //       },
+      //     }
+      //   : undefined,
     },
     include: invoiceIncludeOptions,
   });
@@ -277,15 +277,14 @@ export const updateInvoiceFromUrlOcr = async (
 
   await prisma.invoiceItem.deleteMany({ where: { invoiceId } });
 
-  console.log(metadata.items)
   if (metadata.items?.length) {
-    await prisma.invoiceItem.createMany({
-      data: metadata.items.map((item) => ({
-        ...item,
-        invoiceId,
-      })),
-    });
-  }
+  await prisma.invoiceItem.createMany({
+  data: metadata.items.map((item) => ({
+    ...item,
+    invoiceId: invoice.id,
+  })),
+});
+}
 
   const fullInvoice = await getInvoiceById(invoiceId, userId);
   return fullInvoice;

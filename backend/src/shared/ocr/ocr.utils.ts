@@ -1,10 +1,11 @@
-// shared/ocr/ocr.utils.ts
 import axios from "axios";
 import sharp from "sharp";
 import { ExtractedInvoiceMetadata, InvoiceItemInput } from "./ocr.types";
 
 export const fetchBuffer = async (url: string): Promise<Buffer> => {
-  const res = await axios.get<ArrayBuffer>(url, { responseType: "arraybuffer" });
+  const res = await axios.get<ArrayBuffer>(url, {
+    responseType: "arraybuffer",
+  });
   return Buffer.from(res.data);
 };
 
@@ -21,14 +22,19 @@ export const logOCR = (msg: string, data?: any) => {
   console.log(`🧠 OCR: ${msg}`, data || "");
 };
 
-export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata {
-  const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
-
+export function extractMetadataFromText(
+  text: string
+): ExtractedInvoiceMetadata {
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  console.log(lines)
   const title = extractTitle(lines);
   const provider = extractProvider(lines);
   const issueDate = extractIssueDate(text);
   const { duration, validUntil } = extractWarranty(text, issueDate);
-  const items = extractItems(lines);
+  const items = extractItems(lines, issueDate);
   const expiration = validUntil ?? issueDate;
 
   return {
@@ -62,30 +68,67 @@ function extractProvider(lines: string[]): string {
   return (
     lines.find((line) =>
       /(S\.A\.|Ltd|SRL|Comercial|Inversiones|Cédula Jurídica)/i.test(line)
-    ) || lines[1] || "Proveedor no identificado"
+    ) ||
+    lines[1] ||
+    "Proveedor no identificado"
   );
 }
 
-function extractItems(lines: string[]): InvoiceItemInput[] {
+function extractItems(lines: string[], issueDate: Date): InvoiceItemInput[] {
   const regex = /([\d.,]+)\s+(\d+)\s+([\d.,]+)$/;
-  return lines
-    .map((line) => {
-      const match = line.match(regex);
-      if (!match) return null;
-      const [_, priceStr, qtyStr, totalStr] = match;
-      return {
-        description: line.replace(regex, "").trim(),
-        unitPrice: parseFloat(priceStr.replace(",", "")),
-        quantity: parseInt(qtyStr),
-        total: parseFloat(totalStr.replace(",", "")),
-      };
-    })
-    .filter(Boolean) as InvoiceItemInput[];
+  const items: InvoiceItemInput[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const match = line.match(regex);
+    if (!match) continue;
+
+    const [_, priceStr, qtyStr, totalStr] = match;
+    const description = line.replace(regex, "").trim();
+
+    // Buscar hasta 3 líneas siguientes que contengan info de garantía
+    const nextLines = lines.slice(i + 1, i + 4);
+    const warrantyLine = nextLines.find((l) =>
+      /garant[ií]a|vigencia|válida|cubre/i.test(l)
+    );
+
+    const { duration, validUntil } = warrantyLine
+      ? extractWarranty(warrantyLine, issueDate)
+      : {};
+
+    if (warrantyLine && !duration) {
+      logOCR("⚠️ No se pudo extraer duración de garantía:", warrantyLine);
+    }
+
+    items.push({
+      description,
+      quantity: parseInt(qtyStr),
+      unitPrice: parseFloat(priceStr.replace(",", "")),
+      total: parseFloat(totalStr.replace(",", "")),
+      warrantyDuration: duration ?? (warrantyLine ? 365 : null),
+      warrantyValidUntil: validUntil ?? (warrantyLine
+        ? new Date(issueDate.getTime() + 365 * 864e5)
+        : null),
+      warrantyNotes: warrantyLine,
+    });
+  }
+
+  return items;
 }
 
-function extractWarranty(text: string, issueDate: Date): { duration?: number; validUntil?: Date } {
-  const durationRegex = /(?:garant[ií]a|vigencia|válida|cubre)\s*(?:por\s*)?(\d+)\s*(d[ií]as|meses|años?)/i;
-  const match = text.toLowerCase().match(durationRegex);
+function extractWarranty(
+  text: string,
+  issueDate: Date
+): { duration?: number; validUntil?: Date } {
+  const lowered = text.toLowerCase();
+
+  const primary =
+    /(?:garant[ií]a|vigencia|válida|cubre)\s*(?:por\s*)?(\d+)\s*(d[ií]as?|mes(?:es)?|a(?:ños?)?)/i;
+  let match = lowered.match(primary);
+
+  if (!match && /garant[ií]a/i.test(lowered)) {
+    match = lowered.match(/(\d+)\s*(d[ií]as?|mes(?:es)?|a(?:ños?)?)/i);
+  }
 
   if (!match) return {};
 

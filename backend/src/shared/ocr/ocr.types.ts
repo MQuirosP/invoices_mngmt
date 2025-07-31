@@ -3,6 +3,11 @@ export interface InvoiceItemInput {
     quantity: number;
     unitPrice: number;
     total: number;
+
+    warrantyDuration?: number | null;
+  warrantyValidUntil?: Date | null;
+  warrantyNotes?: string | null;
+
 }
 
 export interface ExtractedInvoiceMetadata {
