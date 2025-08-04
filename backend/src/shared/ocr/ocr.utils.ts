@@ -1,10 +1,10 @@
 import axios from "axios";
 import sharp from "sharp";
 import { ExtractedInvoiceMetadata } from "./ocr.types";
-import { extractItems } from "./helpers/extractItems";
-import { extractProvider } from "./helpers/extractProvider";
-import { extractIssueDate } from "./helpers/extractIssueDate";
-import { extractWarranty } from "./helpers/extractWarranty";
+import { extractItems } from "./extractors/extractItems";
+import { extractProvider } from "./extractors/extractProvider";
+import { extractIssueDate } from "./extractors/extractIssueDate";
+import { extractWarranty } from "./extractors/extractWarranty";
 
 export const fetchBuffer = async (url: string): Promise<Buffer> => {
   const res = await axios.get<ArrayBuffer>(url, {
