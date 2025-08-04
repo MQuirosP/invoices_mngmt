@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
+import { hashPassword } from "@/shared/utils/hashPassword";
 
 export const registerUser = async (data: RegisterInput) => {
   const { email, password, fullname, role = "USER" } = data;
@@ -18,7 +19,7 @@ export const registerUser = async (data: RegisterInput) => {
 
   // Hash password
   const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  const hashedPassword = await hashPassword(password, saltRounds);
 
   // Create user
   const user = await prisma.user.create({
