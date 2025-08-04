@@ -4,6 +4,7 @@ export const invoiceIncludeOptions = {
   items: {
     select: {
       description: true,
+      quantity: true,
       unitPrice: true,
       warrantyDuration: true,
       warrantyValidUntil: true,
