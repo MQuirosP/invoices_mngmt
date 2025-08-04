@@ -23,9 +23,9 @@ export class AttachmentService {
     const { mime, ext } = await validateRealMime(buffer, mimetype);
 
     // Random file name generate
-    logger.info({ invoiceId, userId, originalname }, "📥 File received");
+    logger.info({ invoiceId, userId, originalname }, "File received");
     const filename = generateRandomFilename(mime, invoiceId);
-    logger.info({ invoiceId, userId, filename, ext }, "📦 Filename generated")
+    logger.info({ invoiceId, userId, filename, ext }, "Filename generated")
     // Upload to cloudinary
     const cloudinary = new CloudinaryService();
     const { url } = await cloudinary.upload(buffer, filename, mime, userId);
