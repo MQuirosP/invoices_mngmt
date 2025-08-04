@@ -44,7 +44,7 @@ export const logger = pino({
   },
 });
 
-
+// To delete
 export const logError = (err: unknown, context: string) => {
   logger.error({ error: formatError(err) }, context);
 };
