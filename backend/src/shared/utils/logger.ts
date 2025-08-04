@@ -20,7 +20,7 @@ function formatError(err: unknown): string {
 }
 
 export const logger = pino({
-  level: "info",
+  level: process.env.LOG_LEVEL ?? "info",
   base: undefined, // no pid, no hostname
   timestamp: pino.stdTimeFunctions.isoTime,
   formatters: {

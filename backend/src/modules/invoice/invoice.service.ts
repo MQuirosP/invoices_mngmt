@@ -54,11 +54,11 @@ export const createInvoiceWithFiles = async (
       uploaded.push(result.fileName);
     }
   }
-  logger.info(
-    `🧾 Invoice ${invoice.id} created by ${userId} with files: ${uploaded.join(
-      ", "
-    )}`
-  );
+  logger.info({
+  invoiceId: invoice.id,
+  userId,
+  files: uploaded,
+}, "🧾 Invoice created with attachments");
   const invoiceWithRelations = await prisma.invoice.findUnique({
     where: { id: invoice.id },
     include: invoiceIncludeOptions,
