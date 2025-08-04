@@ -42,14 +42,12 @@ describe('Invoice Controller: importFromUrl', () => {
     },
     items: [
   {
-    id: "item-id-1",
-    invoiceId: "inv-id-123",
     description: "Producto A",
     quantity: 2,
     unitPrice: 1500,
-    total: 3000,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    warrantyDuration: 365,
+    warrantyValidUntil: new Date(),
+    warrantyNotes: "Garantía de 1 año",
   },
 ],
   };

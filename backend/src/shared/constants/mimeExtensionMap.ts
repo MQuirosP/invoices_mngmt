@@ -1,6 +1,7 @@
-// @/shared/constants/mimeMaps.ts
-
-export const mimeMetadataMap: Record<string, { ext: string; label: string; safe: boolean }> = {
+export const mimeMetadataMap: Record<
+  string,
+  { ext: string; label: string; safe: boolean }
+> = {
   "application/pdf": { ext: "pdf", label: "PDF", safe: true },
   "application/xml": { ext: "xml", label: "XML (application)", safe: true },
   "text/xml": { ext: "xml", label: "XML (text)", safe: true },
@@ -16,8 +17,12 @@ export const mimeMetadataMap: Record<string, { ext: string; label: string; safe:
     label: "Excel XLSX",
     safe: true,
   },
-  // ⚠️ MIME genéricos no seguros
-  "application/octet-stream": { ext: "bin", label: "Binary Stream", safe: false },
+  // Insecure generic MIME types
+  "application/octet-stream": {
+    ext: "bin",
+    label: "Binary Stream",
+    safe: false,
+  },
 };
 
 export const mimeExtensionMap: Record<string, string> = Object.fromEntries(

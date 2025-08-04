@@ -18,7 +18,7 @@ export function extractItems(
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // 🧮 Caso clásico
+    // Classic item line case
     if (isItemLine(line)) {
       const match = line.match(regexPatterns.itemLine)!;
       const [_, priceStr, qtyStr, totalStr] = match;
@@ -43,7 +43,6 @@ export function extractItems(
       continue;
     }
 
-    // 🆕 Caso estructurado tipo Refrigeración Omega
     const normalized = normalizeNumericLine(line);
     const structured = matchStructuredItem(normalized);
     if (structured) {
@@ -52,10 +51,6 @@ export function extractItems(
       const { duration, validUntil } = warrantyLine
         ? extractWarranty(warrantyLine, issueDate)
         : {};
-
-      // Opcional: validar coherencia de total
-      // const expectedTotal = structured.unitPrice * structured.quantity;
-      // const isValid = Math.abs(expectedTotal - structured.total) < 1;
 
       items.push({
         description: structured.description,

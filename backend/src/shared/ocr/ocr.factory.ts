@@ -11,7 +11,7 @@ export class OCRFactory {
       case "tesseract":
         return new TesseractOCRProvider();
       default:
-        throw new Error(`Proveedor OCR no soportado: ${provider}`);
+        throw new Error(`Unsupported OCR provider: ${provider}`);
     }
   }
 }

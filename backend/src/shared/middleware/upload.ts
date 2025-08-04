@@ -4,8 +4,6 @@ import { mimeExtensionMap } from "../constants/mimeExtensionMap";
 // Use of memory storage to directly upload to cloudinary
 const storage = multer.memoryStorage();
 
-// const allowedMimeTypes = Object.keys(mimeExtensionMap);
-
 const fileFilter = (
   req: Express.Request,
   file: Express.Multer.File,

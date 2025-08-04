@@ -16,5 +16,5 @@ export function extractProvider(lines: string[]): string {
     regexPatterns.providerFallback.test(line)
   );
 
-  return fallback?.trim() ?? "Proveedor no identificado";
+  return fallback?.trim() ?? "Unidentified provider";
 }

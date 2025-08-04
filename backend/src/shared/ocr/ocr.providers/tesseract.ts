@@ -1,4 +1,3 @@
-// shared/ocr/ocr.providers/tesseract.ts
 import Tesseract from "tesseract.js";
 import { OCRProvider } from "../ocr.types";
 import { extractMetadataFromText } from '@/shared/ocr/extractors/extractMetadata';
@@ -6,13 +5,13 @@ import { logOCR } from "@/shared/ocr/preprocessing";
 
 export class TesseractOCRProvider implements OCRProvider {
   async extract(buffer: Buffer) {
-    logOCR("Usando Tesseract.js");
+    logOCR("Using Tesseract.js");
     const worker = await Tesseract.createWorker(["spa"]);
     await worker.reinitialize("spa");
     await worker.setParameters({ tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK });
     const { data: { text } } = await worker.recognize(buffer);
     await worker.terminate();
-    if (!text) throw new Error("No se extrajo texto");
+    if (!text) throw new Error("No text was extracted");
     return extractMetadataFromText(text);
   }
 }
