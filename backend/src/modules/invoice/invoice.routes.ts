@@ -9,10 +9,10 @@ import {
   importFromUrl,
   importDataFromAttachment,
 } from "@/modules/invoice";
-import { authenticate } from "@/modules/auth";
+import { authenticate } from "@/modules/auth/auth.middleware";
 import { upload } from "@/shared/middleware/upload";
-import { validateParams } from "../../shared/middleware/validateParams";
-import { requireRole } from "../../shared/middleware/requireRole";
+import { validateParams } from "@/shared/middleware/validateParams";
+import { requireRole } from "@/shared/middleware/requireRole";
 
 const router = Router();
 // ====================

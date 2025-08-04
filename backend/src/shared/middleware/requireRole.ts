@@ -1,6 +1,6 @@
 import { NextFunction, Response } from "express";
-import { AuthRequest } from "@/shared/types/auth"; // 👈 asegúrate de tener esta interfaz
 import { AppError } from "@/shared/utils/AppError.utils";
+import { AuthRequest } from "../../modules/auth/auth.types";
 
 /**
  * Middleware para verificar que el usuario tenga el rol adecuado

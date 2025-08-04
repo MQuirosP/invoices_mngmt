@@ -10,7 +10,7 @@ import {
   createInvoiceFromBufferOCR,
   createInvoiceWithFiles,
 } from "./invoice.service";
-import { AuthRequest } from "@/modules/auth/auth.middleware";
+import { AuthRequest } from "@/modules/auth/auth.types";
 import { prisma } from "@/config/prisma";
 import { requireUserId } from "@/shared/utils/requireUserId";
 // import { AttachmentService } from "@/shared/services/attachment.service";

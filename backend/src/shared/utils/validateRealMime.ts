@@ -1,16 +1,16 @@
-import { fileTypeFromBuffer } from "file-type";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { mimeMetadataMap } from "@/shared/constants/mimeExtensionMap";
 import { logger } from "@/shared";
 
 /**
  * Checks whether the declared MIME matches the actual MIME of the file
- */
+*/
 export const validateRealMime = async (
   buffer: Buffer,
   declaredMime: string,
   filename?: string
 ): Promise<{ mime: string; ext: string }> => {
+  const { fileTypeFromBuffer } = await import("file-type");
   const detected = await fileTypeFromBuffer(buffer);
 
   if (!detected) {

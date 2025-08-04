@@ -1,17 +1,18 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { Role } from "@prisma/client";
 import { logger } from "@/shared";
+import { AuthRequest } from "./auth.types";
 
-export interface AuthRequest extends Request {
-  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
-  user?: {
-    id: string;
-    email: string;
-    role: Role;
-  };
-}
+// export interface AuthRequest extends Request {
+//   files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
+//   user?: {
+//     id: string;
+//     email: string;
+//     role: Role;
+//   };
+// }
 
 export const authenticate = (
   req: AuthRequest,
@@ -64,3 +65,5 @@ export const authenticate = (
     return next(new AppError("Invalid or expired token", 401));
   }
 };
+
+export { AuthRequest };
