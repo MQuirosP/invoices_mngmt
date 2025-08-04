@@ -16,7 +16,6 @@ export function extractMetadataFromText(
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
-  console.log(lines);
   const title = extractTitle(lines);
   const provider = extractProvider(lines);
   const issueDate = extractIssueDate(text);
