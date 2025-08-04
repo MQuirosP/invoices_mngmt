@@ -5,15 +5,6 @@ import { Role } from "@prisma/client";
 import { logger } from "@/shared";
 import { AuthRequest } from "./auth.types";
 
-// export interface AuthRequest extends Request {
-//   files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
-//   user?: {
-//     id: string;
-//     email: string;
-//     role: Role;
-//   };
-// }
-
 export const authenticate = (
   req: AuthRequest,
   res: Response,

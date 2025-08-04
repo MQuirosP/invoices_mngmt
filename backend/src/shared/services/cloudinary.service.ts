@@ -26,6 +26,10 @@ export class CloudinaryService {
         overwrite: true,
       });
 
+      if (!result.secure_url) {
+        throw new AppError("Cloudinary upload failed");
+      } 
+
       return {
         url: result.secure_url,
         type: mimetype,

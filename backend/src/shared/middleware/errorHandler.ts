@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { AuthRequest } from '@/modules/auth/auth.types';
+import { Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { AppError } from "@/shared/utils/AppError.utils";
-import { logError } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logger";
 
 /**
  * Middleware to handle errors in the application.
@@ -9,10 +10,11 @@ import { logError } from "@/shared/utils/logger";
  */
 export const errorHandler = (
   error: any,
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
+
   let statusCode = 500;
   let message = "Internal Server Error";
   let errorDetails: string | string[] = [];
@@ -48,14 +50,17 @@ export const errorHandler = (
   }
 
   // Logging básico (puedes reemplazar con winston/pino si quieres)
-  logError(error, `${req.method} ${req.path} [${statusCode}]`);
-  // console.error("❌ Error capturado:", {
-  //   path: req.path,
-  //   method: req.method,
-  //   statusCode,
-  //   message,
-  //   stack: error.stack,
-  // });
+  // logError(error, `${req.method} ${req.path} [${statusCode}]`);
+  logger.error({
+  name: error.name,
+  message,
+  statusCode,
+  stack: error.stack,
+  path: req.originalUrl,
+  method: req.method,
+  userId: req.user?.id,
+  action: "UNHANDLED_ERROR",
+});
 
   res.status(statusCode).json({
     success: false,

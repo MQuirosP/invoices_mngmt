@@ -10,6 +10,13 @@ export class AttachmentService {
     invoiceId: string,
     userId: string
   ) {
+    logger.info({
+      userId,
+      invoiceId,
+      fileName: file.originalname,
+      mimetype: file.mimetype,
+      action: "ATTACHMENT_UPLOAD_ATTEMPT",
+    });
     const { buffer, mimetype, originalname } = file;
 
     // Validate real MIME from buffer
@@ -23,6 +30,11 @@ export class AttachmentService {
     const cloudinary = new CloudinaryService();
     const { url } = await cloudinary.upload(buffer, filename, mime, userId);
 
+    if (!url) {
+      logger.warn({ invoiceId, fileName: file.originalname, action: "ATTACHMENT_UPLOAD_FAILED" });
+      throw new Error("Attachment upload failed");
+    }
+
     // Record attachment on DB
     const attachment = await prisma.attachment.create({
       data: {
@@ -32,7 +44,7 @@ export class AttachmentService {
         fileName: `${filename}.${ext}`,
       },
     });
-
+    logger.info({ invoiceId, fileName: file.originalname, action: "ATTACHMENT_UPLOAD_SUCCESS" });
     return attachment;
   }
 }
