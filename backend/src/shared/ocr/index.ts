@@ -1,5 +1,5 @@
 import { OCRFactory } from "./ocr.factory";
-import { preprocessImage, fetchBuffer, logOCR } from "./ocr.utils";
+import { preprocessImage, fetchBuffer, logOCR } from "./preprocessing";
 
 export const extractMetadataFromUrl = async (url: string) => {
   const buffer = await fetchBuffer(url);

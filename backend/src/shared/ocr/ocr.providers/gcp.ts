@@ -1,7 +1,7 @@
 // shared/ocr/ocr.providers/gcp.ts
 import vision from "@google-cloud/vision";
 import { OCRProvider } from "../ocr.types";
-import { extractMetadataFromText, logOCR } from "../ocr.utils";
+import { extractMetadataFromText, logOCR } from "../extractors/extractMetadata";
 
 const client = new vision.ImageAnnotatorClient();
 
