@@ -6,9 +6,8 @@ import {
   matchStructuredItem,
   normalizeNumericLine,
   regexPatterns,
-} from "../ocr.patterns";
+} from '@/shared/ocr/patterns/matchers';
 import { InvoiceItemInput } from "../ocr.types";
-// import { logOCR } from "./ocr.utils";
 
 export function extractItems(
   lines: string[],

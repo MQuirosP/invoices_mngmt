@@ -1,4 +1,4 @@
-import { regexPatterns } from "../ocr.patterns";
+import { regexPatterns } from "@/shared/ocr/patterns";
 
 export function extractProvider(lines: string[]): string {
   const emisorLine = lines.find((line) =>

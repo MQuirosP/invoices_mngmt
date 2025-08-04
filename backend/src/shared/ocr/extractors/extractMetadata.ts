@@ -1,11 +1,11 @@
-import { ExtractedInvoiceMetadata } from "../ocr.types";
+import { ExtractedInvoiceMetadata } from "@/shared/ocr/ocr.types";
 import {
   extractItems,
   extractProvider,
   extractIssueDate,
   extractWarranty,
   extractTitle,
-} from "./index";
+} from '@/shared/ocr/extractors';
 
 
 

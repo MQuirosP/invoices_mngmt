@@ -52,3 +52,5 @@ function fixMultiDotPrice(raw: string): number {
   }
   return parseFloat(raw.replace(",", "."));
 }
+
+export { regexPatterns };

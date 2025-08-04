@@ -1,8 +1,8 @@
 // shared/ocr/ocr.providers/tesseract.ts
 import Tesseract from "tesseract.js";
 import { OCRProvider } from "../ocr.types";
-import { extractMetadataFromText } from "../extractors/extractMetadata";
-import { logOCR } from "../preprocessing";
+import { extractMetadataFromText } from '@/shared/ocr/extractors/extractMetadata';
+import { logOCR } from "@/shared/ocr/preprocessing";
 
 export class TesseractOCRProvider implements OCRProvider {
   async extract(buffer: Buffer) {
