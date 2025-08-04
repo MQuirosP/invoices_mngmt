@@ -2,6 +2,7 @@ import cloudinary from "@/config/cloudinary";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import path from "path";
+import { logger } from "@/shared/utils/logger";
 
 export class CloudinaryService {
   async upload(
@@ -13,6 +14,13 @@ export class CloudinaryService {
     try {
       const ext = mimeExtensionMap[mimetype];
       console.log("Received MIME type:", mimetype);
+      logger.info({
+        action: "CLOUDINARY_UPLOAD_INIT",
+        context: "CLOUDINARY_SERVICE",
+        mimetype,
+        filename,
+        userId,
+      });
       if (!ext) throw new AppError("Unsupported file type", 415);
 
       const base64 = `data:${mimetype};base64,${fileBuffer.toString("base64")}`;
@@ -28,7 +36,7 @@ export class CloudinaryService {
 
       if (!result.secure_url) {
         throw new AppError("Cloudinary upload failed");
-      } 
+      }
 
       return {
         url: result.secure_url,
@@ -45,17 +53,26 @@ export class CloudinaryService {
     filename: string,
     mimetype: string
   ): Promise<void> {
-    const nameWithoutExtension = path.basename(filename, path.extname(filename));
+    const nameWithoutExtension = path.basename(
+      filename,
+      path.extname(filename)
+    );
     const publicId = `${userId}/${nameWithoutExtension}`;
-
+    
     let resource_type: "image" | "video" | "raw" = "raw";
     if (mimetype.startsWith("image/")) {
       resource_type = "image";
     } else if (mimetype.startsWith("video/")) {
       resource_type = "video";
     }
-
+    
     console.log("Deleting from Cloudinary:", publicId, resource_type);
+    logger.info({
+      action: "CLOUDINARY_DELETE_INIT",
+      context: "CLOUDINARY_SERVICE",
+      publicId,
+      resource_type,
+    });
 
     await cloudinary.uploader.destroy(publicId, {
       resource_type,
