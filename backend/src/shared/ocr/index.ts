@@ -10,6 +10,6 @@ export const extractMetadataFromBuffer = async (buffer: Buffer) => {
   const provider = process.env.OCR_PROVIDER || "tesseract";
   const ocr = OCRFactory.create(provider);
   const preprocessed = await preprocessImage(buffer);
-  logOCR("OCR iniciado", { provider });
+  logOCR("OCR started", { provider });
   return ocr.extract(preprocessed);
 };
