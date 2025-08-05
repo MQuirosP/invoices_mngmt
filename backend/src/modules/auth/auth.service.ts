@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { RegisterInput, LoginInput } from "./auth.schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -9,7 +9,11 @@ import { logger } from "@/shared/utils/logger";
 import { getCachedUserByEmail, setCachedUser } from "../../cache/userCache";
 
 export const registerUser = async (data: RegisterInput) => {
-  logger.info({ email: data.email, fullname: data.fullname, action: "REGISTER_ATTEMPT" });
+  logger.info({
+    email: data.email,
+    fullname: data.fullname,
+    action: "REGISTER_ATTEMPT",
+  });
   const { email, password, fullname, role = "USER" } = data;
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
@@ -60,32 +64,38 @@ export const loginUser = async (data: LoginInput) => {
   logger.info({ email: data.email, action: "LOGIN_ATTEMPT" });
   const { email, password } = data;
 
-  // Try get user from Redis
-  let user = await getCachedUserByEmail(email);
+  let cachedUser = await getCachedUserByEmail(email);
 
-  //  If not cached, look into DB
-  if (!user) {
+  let user: User | null;
+
+  if (cachedUser) {
+    logger.info({ email, action: "LOGIN_CACHE_USED", context: "CACHE_LAYER" });
+    // Redis no guarda password, así que buscamos en DB para validar
+    user = await prisma.user.findUnique({ where: { id: cachedUser.id } });
+  } else {
     user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user) {
-      logger.warn({ email, action: "LOGIN_USER_NOT_FOUND" });
-      throw new AppError("User not found.", 404);
-    }
-
-    //  Save in Redis to future access
-    await setCachedUser(user);
   }
 
-  //  Validate password
+  if (!user) {
+    logger.warn({ email, action: "LOGIN_USER_NOT_FOUND" });
+    throw new AppError("User not found.", 404);
+  }
+
+  // Validate password
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     logger.warn({ email, action: "LOGIN_INVALID_PASSWORD" });
     throw new AppError("Invalid password.", 401);
   }
 
-  //  Generate token
+  // Cache user if not already cached
+  if (!cachedUser) {
+    await setCachedUser(user);
+  }
+
+  // Generate token
   const token = jwt.sign(
-    { sub: user.id, email: user.email, role: user.role as Role },
+    { sub: user.id, email: user.email, role: user.role },
     process.env.JWT_SECRET!,
     { expiresIn: "7d" }
   );
