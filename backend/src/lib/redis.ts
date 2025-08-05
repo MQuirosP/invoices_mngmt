@@ -1,47 +1,29 @@
 import Redis from "ioredis";
 import { logger } from "@/shared/utils/logger";
 
-// Detectar si estamos usando URL o host/port
-const isUsingUrl = !!process.env.REDIS_URL;
+// Validación estricta
+if (!process.env.REDIS_URL) {
+  throw new Error("Missing REDIS_URL in environment");
+}
 
-const redis = isUsingUrl
-  ? new Redis(process.env.REDIS_URL!, {
-      retryStrategy: (times) => {
-        const delay = Math.min(times * 100, 3000);
-        logger.warn({
-          action: "REDIS_RETRY",
-          attempt: times,
-          delay,
-          context: "CACHE_LAYER",
-        });
-        return delay;
-      },
-    })
-  : new Redis({
-      host: process.env.REDIS_HOST ?? "127.0.0.1",
-      port: parseInt(process.env.REDIS_PORT ?? "6379", 10),
-      retryStrategy: (times) => {
-        const delay = Math.min(times * 100, 3000);
-        logger.warn({
-          action: "REDIS_RETRY",
-          attempt: times,
-          delay,
-          context: "CACHE_LAYER",
-        });
-        return delay;
-      },
+const redis = new Redis(process.env.REDIS_URL, {
+  retryStrategy: (times) => {
+    const delay = Math.min(times * 100, 3000);
+    logger.warn({
+      action: "REDIS_RETRY",
+      attempt: times,
+      delay,
+      context: "CACHE_LAYER",
     });
+    return delay;
+  },
+});
 
 redis.on("connect", () => {
   logger.info({
     action: "REDIS_CONNECTED",
+    url: process.env.REDIS_URL,
     context: "CACHE_LAYER",
-    ...(isUsingUrl
-      ? { url: process.env.REDIS_URL }
-      : {
-          host: process.env.REDIS_HOST ?? "127.0.0.1",
-          port: process.env.REDIS_PORT ?? "6379",
-        }),
   });
 });
 
