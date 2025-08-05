@@ -13,8 +13,8 @@ services:
         value: 732617677476436
       - key: REDIS_URL
         value: redis:6379
-  - type: private
-    name: redis
-    image: redis:7
-    dockerfilePath: ./Dockerfile.redis
-    autoDeploy: false
+  # - type: private
+  #   name: redis
+  #   image: redis:7
+  #   dockerfilePath: ./Dockerfile.redis
+  #   autoDeploy: false
