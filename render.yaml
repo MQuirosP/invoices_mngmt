@@ -11,3 +11,12 @@ services:
         value: patitos
       - key: CLOUDINARY_API_KEY
         value: 732617677476436
+      - key: REDIS_HOST
+        value: redis
+      - key: REDIS_PORT
+        value: 6379
+  - type: private
+    name: redis
+    image: redis:7
+    dockerfilePath: ./Dockerfile.redis
+    autoDeploy: false
