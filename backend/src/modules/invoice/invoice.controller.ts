@@ -10,11 +10,12 @@ import {
   createInvoiceFromBufferOCR,
   createInvoiceWithFiles,
 } from "./invoice.service";
-import { AuthRequest } from "@/modules/auth/auth.middleware";
+import { AuthRequest } from "@/modules/auth/auth.types";
 import { prisma } from "@/config/prisma";
 import { requireUserId } from "@/shared/utils/requireUserId";
 // import { AttachmentService } from "@/shared/services/attachment.service";
 import { Role } from "@prisma/client";
+import { logger } from "@/shared/utils/logger";
 
 export const create = async (
   req: AuthRequest,
@@ -28,6 +29,14 @@ export const create = async (
 
     // Create invoice record
     const files = req.files as Express.Multer.File[] | undefined;
+
+    logger.info({
+      userId,
+      action: "CREATE_INVOICE_ATTEMPT",
+      metadata: parsed,
+      fileCount: files?.length ?? 0,
+    });
+
     const { invoice, uploadedFiles } = await createInvoiceWithFiles(
       parsed,
       userId,
@@ -40,12 +49,21 @@ export const create = async (
     //   }
     // }
 
+    logger.info({
+      userId,
+      invoiceId: invoice.id,
+      uploadedFiles,
+      action: "CREATE_INVOICE_SUCCESS",
+    });
+
+
     res.status(201).json({
       success: true,
       message: `Invoice created with ${uploadedFiles.length} attachment(s)`,
       data: invoice,
     });
   } catch (error) {
+    logger.error({ error, action: "CREATE_INVOICE_ERROR" });
     next(error);
   }
 };
@@ -58,8 +76,10 @@ export const list = async (
   try {
     const userId = requireUserId(req);
     if (!userId) throw new AppError("User not authenticated", 401);
+    logger.info({ userId, action: "LIST_INVOICES_ATTEMPT" });
 
     const invoices = await getUserInvoices(userId);
+    logger.info({ userId, count: invoices.length, action: "LIST_INVOICES_SUCCESS" });
     res.status(200).json({
       success: true,
       message: invoices.length
@@ -68,6 +88,7 @@ export const list = async (
       data: invoices,
     });
   } catch (error) {
+    logger.error({ error, action: "LIST_INVOICES_ERROR" });
     next(error);
   }
 };
@@ -81,19 +102,26 @@ export const show = async (
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
 
+    logger.info({ userId, invoiceId, action: "SHOW_INVOICE_ATTEMPT" });
+
     if (!userId) throw new AppError("Unauthorized", 401);
     if (!invoiceId) throw new AppError("Invoice ID required", 400);
 
     const invoice = await getInvoiceById(invoiceId, userId);
 
-    if (!invoice) throw new AppError("Invoice not found", 404);
+    if (!invoice) {
+      logger.warn({ userId, invoiceId, action: "SHOW_INVOICE_NOT_FOUND" });
+      throw new AppError("Invoice not found", 404);
+    } 
 
+    logger.info({ userId, invoiceId, action: "SHOW_INVOICE_SUCCESS" });
     res.status(200).json({
       success: true,
       message: "Invoice retrieved successfully",
       data: invoice,
     });
   } catch (error) {
+    logger.error({ error, action: "SHOW_INVOICE_ERROR" });
     next(error);
   }
 };
@@ -107,6 +135,7 @@ export const remove = async (
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
 
+    logger.info({ userId, invoiceId, action: "REMOVE_INVOICE_ATTEMPT" });
     if (!userId) throw new AppError("Unauthorized", 401);
     if (!invoiceId) throw new AppError("Invoice ID required", 400);
 
@@ -116,8 +145,12 @@ export const remove = async (
       req.user?.role as Role
     );
 
-    if (!deleted) throw new AppError("Invoice not found", 404);
+    if (!deleted) {
+      logger.warn({ userId, invoiceId, action: "REMOVE_INVOICE_NOT_FOUND" });
+      throw new AppError("Invoice not found", 404);
+    } 
 
+    logger.info({ userId, invoiceId, action: "REMOVE_INVOICE_SUCCESS" });
     res.status(200).json({
       success: true,
       message: "Invoice deleted successfully",
@@ -164,6 +197,8 @@ export const importFromLocal = async (
   try {
     const userId = requireUserId(req);
     const file = req.file;
+
+    logger.info({ userId, fileName: file?.originalname, mimetype: file?.mimetype, action: "IMPORT_LOCAL_ATTEMPT" });
     if (!file || !userId) {
       res.status(400).json({ message: "Missing file or user ID" });
       return;
@@ -175,12 +210,14 @@ export const importFromLocal = async (
       file.mimetype
     );
 
+    logger.info({ userId, invoiceId: invoice?.id, action: "IMPORT_LOCAL_SUCCESS" });
     res.status(201).json({
       success: true,
       message: "Invoice imported from local file",
       data: invoice,
     });
   } catch (error) {
+    logger.error({ error, action: "IMPORT_LOCAL_ERROR" });
     next(error);
   }
 };
@@ -193,6 +230,8 @@ export const importDataFromAttachment = async (
   try {
     const { invoiceId } = req.params;
     const userId = requireUserId(req);
+
+    logger.info({ userId, invoiceId, action: "IMPORT_FROM_ATTACHMENT_ATTEMPT" });
 
     if (!invoiceId || !userId) {
       res.status(400).json({ message: "Missing invoice ID or user ID" });
@@ -226,15 +265,17 @@ export const importDataFromAttachment = async (
     const updateInvoice = await updateInvoiceFromUrlOcr(
       invoiceId,
       userId,
-      attachment.url
+      attachment.url,
     );
 
+    logger.info({ userId, invoiceId, action: "IMPORT_FROM_ATTACHMENT_SUCCESS" });
     res.status(201).json({
       success: true,
       message: "Invoice imported from Cloudinary URL",
       data: updateInvoice,
     });
   } catch (error) {
+    logger.error({ error, action: "IMPORT_FROM_ATTACHMENT_ERROR" });
     next(error);
   }
 };
@@ -249,6 +290,8 @@ export const importFromUrl = async (
     const { invoiceId } = req.params;
     const userId = requireUserId(req);
 
+    logger.info({ userId, invoiceId, url, action: "IMPORT_FROM_URL_ATTEMPT" });
+
     if (!url || !userId || !invoiceId) {
       res.status(400).json({ message: "Missing URL, invoice ID or user ID" });
       return;
@@ -256,12 +299,14 @@ export const importFromUrl = async (
 
     const updateInvoice = await updateInvoiceFromUrlOcr(invoiceId, userId, url);
 
+    logger.info({ userId, invoiceId, action: "IMPORT_FROM_URL_SUCCESS" });
     res.status(201).json({
       success: true,
       message: "Invoice imported from Cloudinary URL",
       data: updateInvoice,
     });
   } catch (error) {
+    logger.error({ error, action: "IMPORT_FROM_URL_ERROR" });
     next(error);
   }
 };

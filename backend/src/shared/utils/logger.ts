@@ -20,6 +20,20 @@ function formatError(err: unknown): string {
 }
 
 export const logger = pino({
+  level: process.env.LOG_LEVEL ?? "info",
+  base: undefined, // no pid, no hostname
+  timestamp: pino.stdTimeFunctions.isoTime,
+  formatters: {
+    level(label) {
+      return { level: label };
+    },
+    bindings() {
+      return {};
+    },
+    log(obj) {
+      return obj;
+    },
+  },
   transport: {
     target: "pino-pretty",
     options: {
@@ -30,6 +44,7 @@ export const logger = pino({
   },
 });
 
+// To delete
 export const logError = (err: unknown, context: string) => {
   logger.error({ error: formatError(err) }, context);
 };

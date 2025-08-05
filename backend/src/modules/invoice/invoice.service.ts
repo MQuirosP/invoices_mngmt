@@ -2,7 +2,7 @@ import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { CreateInvoiceInput } from "@/modules/invoice";
 import axios from "axios";
-import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
+// import { ExtractedMetadata } from "@/shared/utils/extractMetadata.utils";
 import { getFileExtension } from "@/shared/utils/getFileExtension";
 import { CloudinaryService } from "@/shared/services/cloudinary.service";
 import { ImportService } from "@/shared/services/import.service";
@@ -12,11 +12,19 @@ import { generateRandomFilename } from "@/shared/utils/generateRandomFilename";
 import { Role } from "@prisma/client";
 import { AttachmentService } from "@/shared/services/attachment.service";
 import { logger } from "@/shared/utils/logger";
+import { ExtractedInvoiceMetadata } from "@/shared/ocr/ocr.types";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
   userId: string
 ) => {
+  logger.info({
+    userId,
+    title: data.title,
+    issueDate: data.issueDate,
+    expiration: data.expiration,
+    action: "CREATE_INVOICE_RECORD",
+  });
   const invoice = await prisma.invoice.create({
     data: {
       ...data,
@@ -38,17 +46,26 @@ export const createInvoiceWithFiles = async (
   const uploaded: string[] = [];
   if (files && files.length > 0) {
     for (const file of files) {
-      const result = await AttachmentService.uploadValidated(file, invoice.id, userId);
+      const result = await AttachmentService.uploadValidated(
+        file,
+        invoice.id,
+        userId
+      );
       uploaded.push(result.fileName);
     }
   }
-  logger.info(`🧾 Invoice ${invoice.id} created by ${userId} with files: ${uploaded.join(", ")}`);
+  logger.info({
+  invoiceId: invoice.id,
+  userId,
+  files: uploaded,
+}, "🧾 Invoice created with attachments");
   const invoiceWithRelations = await prisma.invoice.findUnique({
     where: { id: invoice.id },
     include: invoiceIncludeOptions,
   });
 
-  if (!invoiceWithRelations) throw new AppError("Failed to retrieve invoice attarchments", 404)
+  if (!invoiceWithRelations)
+    throw new AppError("Failed to retrieve invoice attarchments", 404);
   return {
     invoice: invoiceWithRelations,
     uploadedFiles: uploaded,
@@ -65,6 +82,7 @@ export const getUserInvoices = async (userId: string) => {
 };
 
 export const getInvoiceById = async (id: string, userId: string) => {
+  logger.info({ userId, action: "GET_USER_INVOICES" });
   const invoice = await prisma.invoice.findFirst({
     where: {
       id,
@@ -75,17 +93,26 @@ export const getInvoiceById = async (id: string, userId: string) => {
   return invoice;
 };
 
-export const deleteInvoiceById = async (invoiceId: string, userId: string, userRole: Role) => {
+export const deleteInvoiceById = async (
+  invoiceId: string,
+  userId: string,
+  userRole: Role
+) => {
+  logger.info({ invoiceId, userId, userRole, action: "DELETE_INVOICE_INIT" });
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId },
     include: { attachments: true },
   });
 
-  if (!invoice) return null;
+  if (!invoice) {
+    logger.warn({ invoiceId, action: "INVOICE_NOT_FOUND" });
+    return null;
+  }
 
   const cloudinaryService = new CloudinaryService();
 
   for (const attachment of invoice.attachments) {
+    logger.info({ invoiceId, fileName: attachment.fileName, action: "DELETE_ATTACHMENT_CLOUDINARY" });
     await cloudinaryService.delete(
       invoice.userId,
       attachment.fileName,
@@ -93,14 +120,14 @@ export const deleteInvoiceById = async (invoiceId: string, userId: string, userR
     );
   }
 
-  await prisma.invoice.delete({ where: { id: invoiceId } });
-
-  return invoice;
+  // await prisma.invoice.delete({ where: { id: invoiceId } });
+  logger.info({ invoiceId, userId, action: "INVOICE_DELETED" });
+  return prisma.invoice.delete({ where: { id: invoiceId } });
 };
 
 export const updateInvoiceFromMetadata = async (
   invoiceId: string,
-  metadata: ExtractedMetadata
+  metadata: ExtractedInvoiceMetadata
 ) => {
   return prisma.invoice.update({
     where: { id: invoiceId },
@@ -110,28 +137,6 @@ export const updateInvoiceFromMetadata = async (
       expiration: metadata.expiration ?? new Date(),
       provider: metadata.provider ?? "Desconocido",
       extracted: true,
-      warranty: metadata.duration
-        ? {
-            upsert: {
-              update: {
-                duration: metadata.duration,
-                validUntil:
-                  metadata.validUntil ??
-                  new Date(
-                    metadata.issueDate.getTime() + metadata.duration * 86400000
-                  ),
-              },
-              create: {
-                duration: metadata.duration,
-                validUntil:
-                  metadata.validUntil ??
-                  new Date(
-                    metadata.issueDate.getTime() + metadata.duration * 86400000
-                  ),
-              },
-            },
-          }
-        : undefined,
     },
     include: invoiceIncludeOptions,
   });
@@ -142,6 +147,7 @@ export const downloadAttachment = async (
   invoiceId: string,
   attachmentId: string
 ) => {
+  logger.info({ userId, invoiceId, attachmentId, action: "DOWNLOAD_ATTACHMENT_INIT" });
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId, userId },
     include: { attachments: true },
@@ -157,6 +163,8 @@ export const downloadAttachment = async (
   const ext = getFileExtension(attachment.url) || "bin";
   const fileName = `${invoice.title.replace(/\s+/g, "_")}.${ext}`;
 
+  logger.info({ invoiceId, fileName, action: "DOWNLOAD_ATTACHMENT_SUCCESS" });
+
   return {
     stream: response.data,
     mimeType: response.headers["content-type"],
@@ -170,6 +178,7 @@ export const createInvoiceFromBufferOCR = async (
   originalName: string,
   mimeType: string
 ) => {
+  logger.info({ userId, fileName: originalName, mimeType, action: "CREATE_FROM_BUFFER_OCR" });
   const importService = new ImportService();
   const metadata = await importService.extractFromBuffer(buffer);
 
@@ -182,20 +191,31 @@ export const createInvoiceFromBufferOCR = async (
       expiration: metadata.expiration,
       provider: metadata.provider,
       extracted: true,
-      warranty: metadata.duration
-        ? {
-            create: {
-              duration: metadata.duration,
-              validUntil: metadata.validUntil!,
-            },
-          }
-        : undefined,
     },
     include: invoiceIncludeOptions,
   });
 
+  if (metadata.items?.length) {
+    await prisma.invoiceItem.createMany({
+      data: metadata.items.map((item) => ({
+        ...item,
+        invoiceId: invoice.id,
+      })),
+    });
+  }
+
+  if (metadata.items?.length) {
+    await prisma.invoiceItem.deleteMany({ where: { invoiceId: invoice.id } });
+    await prisma.invoiceItem.createMany({
+      data: metadata.items.map((item) => ({
+        ...item,
+        invoiceId: invoice.id,
+      })),
+    });
+  }
+
   // Upload file & attach to invoice
-  const attachment = await AttachmentService.uploadValidated(
+  await AttachmentService.uploadValidated(
     {
       buffer,
       mimetype: mimeType,
@@ -205,11 +225,9 @@ export const createInvoiceFromBufferOCR = async (
     userId
   );
 
+  logger.info({ userId, invoiceId: invoice.id, action: "CREATE_FROM_BUFFER_OCR_SUCCESS" });
   // Return invoice with attachment
-  return {
-    ...invoice,
-    attachments: [attachment],
-  };
+  return getInvoiceById(invoice.id, userId);
 };
 
 export const updateInvoiceFromUrlOcr = async (
@@ -217,11 +235,13 @@ export const updateInvoiceFromUrlOcr = async (
   userId: string,
   url: string
 ) => {
+  logger.info({ userId, invoiceId, url, action: "UPDATE_FROM_URL_OCR" });
   const invoice = await getInvoiceById(invoiceId, userId);
   if (!invoice) throw new AppError("Invoice not found", 404);
 
   const importService = new ImportService();
   const metadata = await importService.extractFromUrl(url);
+
   const existingAttachment = await prisma.attachment.findFirst({
     where: { invoiceId, url },
   });
@@ -230,8 +250,7 @@ export const updateInvoiceFromUrlOcr = async (
     const mimeType =
       Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] ||
       "application/octet-stream";
-    const filename = generateRandomFilename(ext);
-
+    const filename = generateRandomFilename(mimeType);
     await prisma.attachment.create({
       data: {
         invoiceId,
@@ -240,12 +259,22 @@ export const updateInvoiceFromUrlOcr = async (
         mimeType,
       },
     });
-
-    // await prisma.invoice.update({
-    //   where: { id: invoiceId },
-    //   data: { updatedAt: new Date() },
-    // });
   }
 
-  return updateInvoiceFromMetadata(invoiceId, metadata);
+  await updateInvoiceFromMetadata(invoiceId, metadata);
+
+  await prisma.invoiceItem.deleteMany({ where: { invoiceId } });
+
+  if (metadata.items?.length) {
+    await prisma.invoiceItem.createMany({
+      data: metadata.items.map((item) => ({
+        ...item,
+        invoiceId: invoice.id,
+      })),
+    });
+  }
+
+  logger.info({ userId, invoiceId, itemCount: metadata.items?.length ?? 0, action: "UPDATE_FROM_URL_OCR_SUCCESS" });
+  // const fullInvoice = await getInvoiceById(invoiceId, userId);
+  return getInvoiceById(invoiceId, userId);
 };

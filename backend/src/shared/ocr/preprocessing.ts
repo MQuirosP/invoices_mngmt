@@ -1,0 +1,22 @@
+import axios from "axios";
+import sharp from "sharp";
+
+export const fetchBuffer = async (url: string): Promise<Buffer> => {
+  const res = await axios.get<ArrayBuffer>(url, {
+    responseType: "arraybuffer",
+  });
+  return Buffer.from(res.data);
+};
+
+export const preprocessImage = async (buffer: Buffer): Promise<Buffer> => {
+  return sharp(buffer)
+    .resize({ width: 1500 })
+    .grayscale()
+    .linear(1.2, -10)
+    .threshold(150)
+    .toBuffer();
+};
+
+export const logOCR = (msg: string, data?: any) => {
+  console.log(`🧠 OCR: ${msg}`, data || "");
+};

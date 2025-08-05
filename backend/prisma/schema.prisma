@@ -12,9 +12,9 @@ model User {
   email     String    @unique
   password  String
   fullname  String
+  role      Role      @default(USER)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  role      Role      @default(USER)
   invoices  Invoice[]
 }
 
@@ -25,23 +25,32 @@ model Invoice {
   issueDate   DateTime
   expiration  DateTime
   provider    String
+  extracted   Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  extracted   Boolean      @default(false)
   attachments Attachment[]
   user        User         @relation(fields: [userId], references: [id])
-  warranty    Warranty?
+  items       InvoiceItem[]
 }
 
-model Warranty {
-  id         String   @id @default(uuid())
-  invoiceId  String   @unique
-  duration   Int
-  notes      String?
-  validUntil DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  invoice    Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+model InvoiceItem {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  description     String
+  quantity        Int
+  unitPrice       Float
+  total           Float
+
+  // Garantía por ítem
+  warrantyDuration Int?
+  warrantyValidUntil  DateTime?
+
+  warrantyNotes   String?  // notas adicionales o condiciones
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model Attachment {
@@ -52,6 +61,7 @@ model Attachment {
   invoiceId String
   createdAt DateTime @default(now())
   invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
   @@unique([invoiceId, fileName])
 }
 
