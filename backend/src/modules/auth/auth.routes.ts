@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { register, login } from "./auth.controller";
 import { authenticate, AuthRequest } from "./auth.middleware";
-import { loginRateLimiter } from "../../shared/middleware/rateLimiter";
+import { loginRateLimiter } from "@/shared/middleware/rateLimiter";
 
 const authRouter = Router();
 
