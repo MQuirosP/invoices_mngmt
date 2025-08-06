@@ -18,13 +18,6 @@ export const createInvoice = async (
   data: CreateInvoiceInput,
   userId: string
 ) => {
-  logger.info({
-    userId,
-    title: data.title,
-    issueDate: data.issueDate,
-    expiration: data.expiration,
-    action: "CREATE_INVOICE_RECORD",
-  });
   const invoice = await prisma.invoice.create({
     data: {
       ...data,
@@ -33,6 +26,15 @@ export const createInvoice = async (
       userId,
     },
   });
+  logger.info({
+    userId,
+    invoiceId: invoice.id,
+    title: data.title,
+    issueDate: data.issueDate,
+    expiration: data.expiration,
+    action: "INVOICE_CREATE_SUCCESS",
+  });
+
   return invoice;
 };
 
@@ -53,12 +55,20 @@ export const createInvoiceWithFiles = async (
       );
       uploaded.push(result.fileName);
     }
+
+    logger.info({
+      invoiceId: invoice.id,
+      userId,
+      files: uploaded,
+      action: "INVOICE_CREATE_WITH_ATTACHMENTS_SUCCESS",
+    });
+  } else {
+    logger.info({
+      invoiceId: invoice.id,
+      userId,
+      action: "INVOICE_CREATE_NO_ATTACHMENTS",
+    });
   }
-  logger.info({
-  invoiceId: invoice.id,
-  userId,
-  files: uploaded,
-}, "🧾 Invoice created with attachments");
   const invoiceWithRelations = await prisma.invoice.findUnique({
     where: { id: invoice.id },
     include: invoiceIncludeOptions,
@@ -73,16 +83,33 @@ export const createInvoiceWithFiles = async (
 };
 
 export const getUserInvoices = async (userId: string) => {
+  logger.info({
+    userId,
+    action: "INVOICE_GET_ALL_ATTEMPT",
+  });
+
   const invoices = await prisma.invoice.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
     include: invoiceIncludeOptions,
   });
+
+  logger.info({
+    userId,
+    invoiceCount: invoices.length,
+    action: "INVOICE_GET_ALL_SUCCESS",
+  });
+
   return invoices;
 };
 
 export const getInvoiceById = async (id: string, userId: string) => {
-  logger.info({ userId, action: "GET_USER_INVOICES" });
+  logger.info({
+    userId,
+    invoiceId: id,
+    action: "INVOICE_GET_BY_ID_ATTEMPT",
+  });
+
   const invoice = await prisma.invoice.findFirst({
     where: {
       id,
@@ -90,6 +117,20 @@ export const getInvoiceById = async (id: string, userId: string) => {
     },
     include: invoiceIncludeOptions,
   });
+
+  if (!invoice) {
+    logger.warn({
+      userId,
+      invoiceId: id,
+      action: "INVOICE_GET_BY_ID_NOT_FOUND",
+    });
+  } else {
+    logger.info({
+      userId,
+      invoiceId: id,
+      action: "INVOICE_GET_BY_ID_SUCCESS",
+    });
+  }
   return invoice;
 };
 
@@ -98,21 +139,37 @@ export const deleteInvoiceById = async (
   userId: string,
   userRole: Role
 ) => {
-  logger.info({ invoiceId, userId, userRole, action: "DELETE_INVOICE_INIT" });
+  logger.info({
+    invoiceId,
+    userId,
+    userRole,
+    action: "INVOICE_DELETE_ATTEMPT",
+  });
+
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId },
     include: { attachments: true },
   });
 
   if (!invoice) {
-    logger.warn({ invoiceId, action: "INVOICE_NOT_FOUND" });
+    logger.warn({
+      invoiceId,
+      userId,
+      action: "INVOICE_DELETE_NOT_FOUND",
+    });
     return null;
   }
 
   const cloudinaryService = new CloudinaryService();
 
   for (const attachment of invoice.attachments) {
-    logger.info({ invoiceId, fileName: attachment.fileName, action: "DELETE_ATTACHMENT_CLOUDINARY" });
+    logger.info({
+      invoiceId,
+      userId,
+      fileName: attachment.fileName,
+      action: "INVOICE_ATTACHMENT_DELETE_ATTEMPT",
+    });
+
     await cloudinaryService.delete(
       invoice.userId,
       attachment.fileName,
@@ -120,16 +177,31 @@ export const deleteInvoiceById = async (
     );
   }
 
-  // await prisma.invoice.delete({ where: { id: invoiceId } });
-  logger.info({ invoiceId, userId, action: "INVOICE_DELETED" });
-  return prisma.invoice.delete({ where: { id: invoiceId } });
+  const deleted = await prisma.invoice.delete({ where: { id: invoiceId } });
+
+  logger.info({
+    invoiceId,
+    userId,
+    action: "INVOICE_DELETE_SUCCESS",
+  });
+
+  return deleted;
 };
 
 export const updateInvoiceFromMetadata = async (
   invoiceId: string,
   metadata: ExtractedInvoiceMetadata
 ) => {
-  return prisma.invoice.update({
+  logger.info({
+    invoiceId,
+    title: metadata.title,
+    issueDate: metadata.issueDate,
+    expiration: metadata.expiration,
+    provider: metadata.provider,
+    action: "INVOICE_UPDATE_METADATA_ATTEMPT",
+  });
+
+  const updated = await prisma.invoice.update({
     where: { id: invoiceId },
     data: {
       title: metadata.title,
@@ -140,6 +212,13 @@ export const updateInvoiceFromMetadata = async (
     },
     include: invoiceIncludeOptions,
   });
+
+  logger.info({
+    invoiceId,
+    action: "INVOICE_UPDATE_METADATA_SUCCESS",
+  });
+
+  return updated;
 };
 
 export const downloadAttachment = async (
@@ -147,23 +226,50 @@ export const downloadAttachment = async (
   invoiceId: string,
   attachmentId: string
 ) => {
-  logger.info({ userId, invoiceId, attachmentId, action: "DOWNLOAD_ATTACHMENT_INIT" });
+  logger.info({
+    userId,
+    invoiceId,
+    attachmentId,
+    action: "INVOICE_DOWNLOAD_ATTEMPT",
+  });
+
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId, userId },
     include: { attachments: true },
   });
 
-  if (!invoice) throw new AppError("Invoice not found", 404);
+  if (!invoice) {
+    logger.warn({
+      userId,
+      invoiceId,
+      action: "INVOICE_DOWNLOAD_INVOICE_NOT_FOUND",
+    });
+    throw new AppError("Invoice not found", 404);
+  }
 
   const attachment = invoice.attachments.find((a) => a.id === attachmentId);
-  if (!attachment) throw new AppError("Attachment not found", 404);
+  if (!attachment) {
+    logger.warn({
+      userId,
+      invoiceId,
+      attachmentId,
+      action: "INVOICE_DOWNLOAD_ATTACHMENT_NOT_FOUND",
+    });
+    throw new AppError("Attachment not found", 404);
+  }
 
   const response = await axios.get(attachment.url, { responseType: "stream" });
 
   const ext = getFileExtension(attachment.url) || "bin";
   const fileName = `${invoice.title.replace(/\s+/g, "_")}.${ext}`;
 
-  logger.info({ invoiceId, fileName, action: "DOWNLOAD_ATTACHMENT_SUCCESS" });
+  logger.info({
+    userId,
+    invoiceId,
+    attachmentId,
+    fileName,
+    action: "INVOICE_DOWNLOAD_SUCCESS",
+  });
 
   return {
     stream: response.data,
@@ -178,11 +284,16 @@ export const createInvoiceFromBufferOCR = async (
   originalName: string,
   mimeType: string
 ) => {
-  logger.info({ userId, fileName: originalName, mimeType, action: "CREATE_FROM_BUFFER_OCR" });
+  logger.info({
+    userId,
+    fileName: originalName,
+    mimeType,
+    action: "INVOICE_OCR_CREATE_ATTEMPT",
+  });
+
   const importService = new ImportService();
   const metadata = await importService.extractFromBuffer(buffer);
 
-  // Create invoice record
   const invoice = await prisma.invoice.create({
     data: {
       userId,
@@ -204,17 +315,6 @@ export const createInvoiceFromBufferOCR = async (
     });
   }
 
-  if (metadata.items?.length) {
-    await prisma.invoiceItem.deleteMany({ where: { invoiceId: invoice.id } });
-    await prisma.invoiceItem.createMany({
-      data: metadata.items.map((item) => ({
-        ...item,
-        invoiceId: invoice.id,
-      })),
-    });
-  }
-
-  // Upload file & attach to invoice
   await AttachmentService.uploadValidated(
     {
       buffer,
@@ -225,8 +325,13 @@ export const createInvoiceFromBufferOCR = async (
     userId
   );
 
-  logger.info({ userId, invoiceId: invoice.id, action: "CREATE_FROM_BUFFER_OCR_SUCCESS" });
-  // Return invoice with attachment
+  logger.info({
+    userId,
+    invoiceId: invoice.id,
+    itemCount: metadata.items?.length ?? 0,
+    action: "INVOICE_OCR_CREATE_SUCCESS",
+  });
+
   return getInvoiceById(invoice.id, userId);
 };
 
@@ -235,46 +340,78 @@ export const updateInvoiceFromUrlOcr = async (
   userId: string,
   url: string
 ) => {
-  logger.info({ userId, invoiceId, url, action: "UPDATE_FROM_URL_OCR" });
-  const invoice = await getInvoiceById(invoiceId, userId);
-  if (!invoice) throw new AppError("Invoice not found", 404);
+  logger.info({
+  userId,
+  invoiceId,
+  url,
+  action: "INVOICE_OCR_UPDATE_ATTEMPT",
+});
 
-  const importService = new ImportService();
-  const metadata = await importService.extractFromUrl(url);
-
-  const existingAttachment = await prisma.attachment.findFirst({
-    where: { invoiceId, url },
+const invoice = await getInvoiceById(invoiceId, userId);
+if (!invoice) {
+  logger.warn({
+    userId,
+    invoiceId,
+    action: "INVOICE_OCR_UPDATE_NOT_FOUND",
   });
-  if (!existingAttachment) {
-    const ext = getFileExtension(url) || "bin";
-    const mimeType =
-      Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] ||
-      "application/octet-stream";
-    const filename = generateRandomFilename(mimeType);
-    await prisma.attachment.create({
-      data: {
-        invoiceId,
-        url,
-        fileName: filename,
-        mimeType,
-      },
-    });
-  }
+  throw new AppError("Invoice not found", 404);
+}
 
-  await updateInvoiceFromMetadata(invoiceId, metadata);
+const importService = new ImportService();
+const metadata = await importService.extractFromUrl(url);
 
-  await prisma.invoiceItem.deleteMany({ where: { invoiceId } });
+const existingAttachment = await prisma.attachment.findFirst({
+  where: { invoiceId, url },
+});
 
-  if (metadata.items?.length) {
-    await prisma.invoiceItem.createMany({
-      data: metadata.items.map((item) => ({
-        ...item,
-        invoiceId: invoice.id,
-      })),
-    });
-  }
+if (!existingAttachment) {
+  const ext = getFileExtension(url) || "bin";
+  const mimeType =
+    Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] ||
+    "application/octet-stream";
+  const filename = generateRandomFilename(mimeType);
 
-  logger.info({ userId, invoiceId, itemCount: metadata.items?.length ?? 0, action: "UPDATE_FROM_URL_OCR_SUCCESS" });
-  // const fullInvoice = await getInvoiceById(invoiceId, userId);
-  return getInvoiceById(invoiceId, userId);
+  await prisma.attachment.create({
+    data: {
+      invoiceId,
+      url,
+      fileName: filename,
+      mimeType,
+    },
+  });
+
+  logger.info({
+    userId,
+    invoiceId,
+    fileName: filename,
+    action: "INVOICE_OCR_ATTACHMENT_CREATED",
+  });
+} else {
+  logger.info({
+    userId,
+    invoiceId,
+    action: "INVOICE_OCR_ATTACHMENT_ALREADY_EXISTS",
+  });
+}
+
+await updateInvoiceFromMetadata(invoiceId, metadata);
+await prisma.invoiceItem.deleteMany({ where: { invoiceId } });
+
+if (metadata.items?.length) {
+  await prisma.invoiceItem.createMany({
+    data: metadata.items.map((item) => ({
+      ...item,
+      invoiceId: invoice.id,
+    })),
+  });
+}
+
+logger.info({
+  userId,
+  invoiceId,
+  itemCount: metadata.items?.length ?? 0,
+  action: "INVOICE_OCR_UPDATE_SUCCESS",
+});
+
+return getInvoiceById(invoiceId, userId);
 };
