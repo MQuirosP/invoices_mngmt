@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Curl to keep service alive
         run: |
-          curl -X GET https://invoices-mngmt.onrender.com \
+          curl --fail --silent https://invoices-mngmt.onrender.com/api/ \
             -H "X-Trigger: GitHubAction" \
             -H "X-Job-ID: keep-alive-$(date +%s)" \
             -H "X-Env: dev"
