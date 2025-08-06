@@ -1,10 +1,17 @@
 import { AppError } from "@/shared/utils/AppError.utils";
-import { AuthRequest } from "../../modules/auth/auth.types";
+import { AuthRequest } from "@/modules/auth/auth.types";
+import { logger } from "./logger";
 
 export const requireUserId = (req: AuthRequest): string => {
-  const userId = req.user?.id; // Assuming req.user is populated by authentication middleware
+  const userId = req.user?.id; 
   if (!userId) {
-    throw new AppError("User not authenticated", 401);
-  }
+  logger.warn({
+    action: "AUTH_USER_ID_MISSING",
+    context: "AUTH_MIDDLEWARE",
+    path: req.path,
+    method: req.method,
+  });
+  throw new AppError("User not authenticated", 401);
+}
   return userId;
 };
