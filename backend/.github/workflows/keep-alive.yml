@@ -1,0 +1,16 @@
+name: Keep Render Alive
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Ejecuta cada 15 minutos
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Curl to keep service alive
+        run: |
+          curl -X GET https://invoices-mngmt.onrender.com \
+            -H "X-Trigger: GitHubAction" \
+            -H "X-Job-ID: keep-alive-$(date +%s)" \
+            -H "X-Env: dev"
