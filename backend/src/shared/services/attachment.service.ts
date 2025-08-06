@@ -6,17 +6,19 @@ import { logger } from "@/shared/utils/logger";
 import { AppError } from "../utils/AppError.utils";
 
 export class AttachmentService {
-  private cloudinary: CloudinaryService;
+  // private cloudinary: CloudinaryService;
 
   constructor() {
-    this.cloudinary = new CloudinaryService();
+    // this.cloudinary = new CloudinaryService();
   }
 
-  async uploadValidated(
+  static async uploadValidated(
     file: { buffer: Buffer; mimetype: string; originalname: string },
     invoiceId: string,
     userId: string
   ) {
+    const cloudinary = new CloudinaryService();
+
     logger.info({
       userId,
       invoiceId,
@@ -50,7 +52,7 @@ export class AttachmentService {
     // Upload to Cloudinary
     let url: string;
     try {
-      const result = await this.cloudinary.upload(buffer, filename, mime, userId);
+      const result = await cloudinary.upload(buffer, filename, mime, userId);
       url = result.url;
     } catch (error: any) {
       logger.error({
