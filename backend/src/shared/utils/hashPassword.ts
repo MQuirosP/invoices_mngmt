@@ -12,6 +12,16 @@ export async function hashPassword(password: string, saltRounds: number): Promis
       error: error instanceof Error ? error.message : String(error),
       context: "AUTH_SERVICE",
     });
-    throw new AppError("Failed to hash password", 500);
+
+    throw new AppError(
+      "Failed to hash password",
+      500,
+      true,
+      error instanceof Error ? error : undefined,
+      {
+        saltRounds,
+        context: "AUTH_SERVICE",
+      }
+    );
   }
 }
