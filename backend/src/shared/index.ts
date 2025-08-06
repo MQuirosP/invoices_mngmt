@@ -6,11 +6,11 @@ export * from './middleware/validateParams';
 
 // ⚙️ utils
 export * from './utils/AppError.utils';
-export * from './utils/getFileExtension';
-export * from './utils/generateRandomFilename';
+export * from './utils/file/getFileExtension';
+export * from './utils/file/generateRandomFilename';
 export * from './utils/logger';
 export * from './utils/requireUserId';
-export * from './utils/validateRealMime';
+export * from './utils/file/validateRealMime';
 
 // 📦 services
 export * from './services/attachment.service';

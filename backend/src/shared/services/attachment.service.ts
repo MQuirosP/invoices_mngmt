@@ -1,11 +1,18 @@
-import { validateRealMime } from "@/shared/utils/validateRealMime";
+import { validateRealMime } from "@/shared/utils/file/validateRealMime";
 import { CloudinaryService } from "./cloudinary.service";
-import { generateRandomFilename } from "@/shared/utils/generateRandomFilename";
+import { generateRandomFilename } from "@/shared/utils/file/generateRandomFilename";
 import { prisma } from "@/config/prisma";
 import { logger } from "@/shared/utils/logger";
+import { AppError } from "../utils/AppError.utils";
 
 export class AttachmentService {
-  static async uploadValidated(
+  private cloudinary: CloudinaryService;
+
+  constructor() {
+    this.cloudinary = new CloudinaryService();
+  }
+
+  async uploadValidated(
     file: { buffer: Buffer; mimetype: string; originalname: string },
     invoiceId: string,
     userId: string
@@ -17,25 +24,57 @@ export class AttachmentService {
       mimetype: file.mimetype,
       action: "ATTACHMENT_UPLOAD_ATTEMPT",
     });
-    const { buffer, mimetype, originalname } = file;
+
+    const { buffer, mimetype } = file;
 
     // Validate real MIME from buffer
     const { mime, ext } = await validateRealMime(buffer, mimetype);
+    logger.info({
+      action: "ATTACHMENT_MIME_VALIDATED",
+      context: "ATTACHMENT_SERVICE",
+      originalMime: mimetype,
+      validatedMime: mime,
+      extension: ext,
+    });
 
-    // Random file name generate
-    logger.info({ invoiceId, userId, originalname }, "File received");
+    // Generate random filename
     const filename = generateRandomFilename(mime, invoiceId);
-    logger.info({ invoiceId, userId, filename, ext }, "Filename generated")
-    // Upload to cloudinary
-    const cloudinary = new CloudinaryService();
-    const { url } = await cloudinary.upload(buffer, filename, mime, userId);
+    logger.info({
+      invoiceId,
+      userId,
+      filename,
+      ext,
+      action: "ATTACHMENT_FILENAME_GENERATED",
+    });
 
-    if (!url) {
-      logger.warn({ invoiceId, fileName: file.originalname, action: "ATTACHMENT_UPLOAD_FAILED" });
-      throw new Error("Attachment upload failed");
+    // Upload to Cloudinary
+    let url: string;
+    try {
+      const result = await this.cloudinary.upload(buffer, filename, mime, userId);
+      url = result.url;
+    } catch (error: any) {
+      logger.error({
+        action: "ATTACHMENT_UPLOAD_ERROR",
+        context: "ATTACHMENT_SERVICE",
+        error,
+        invoiceId,
+        userId,
+        filename,
+        mime,
+      });
+      throw new AppError("Cloudinary upload failed", 500);
     }
 
-    // Record attachment on DB
+    if (!url) {
+      logger.warn({
+        invoiceId,
+        fileName: file.originalname,
+        action: "ATTACHMENT_UPLOAD_FAILED",
+      });
+      throw new AppError("Attachment upload failed", 500);
+    }
+
+    // Record attachment in DB
     const attachment = await prisma.attachment.create({
       data: {
         invoiceId,
@@ -44,7 +83,16 @@ export class AttachmentService {
         fileName: `${filename}.${ext}`,
       },
     });
-    logger.info({ invoiceId, fileName: file.originalname, action: "ATTACHMENT_UPLOAD_SUCCESS" });
+
+    logger.info({
+      action: "ATTACHMENT_UPLOAD_SUCCESS",
+      context: "ATTACHMENT_SERVICE",
+      invoiceId,
+      userId,
+      attachmentId: attachment.id,
+      fileName: attachment.fileName,
+    });
+
     return attachment;
   }
 }
