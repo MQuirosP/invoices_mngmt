@@ -25,10 +25,13 @@ export const create = async (
   try {
     const parsed = createInvoiceSchema.parse(req.body);
     const userId = requireUserId(req);
-    if (!userId) throw new AppError("User not authenticated", 401);
 
     // Create invoice record
     const files = req.files as Express.Multer.File[] | undefined;
+
+    if (!files || files.length === 0) {
+      logger.warn({ userId, action: "CREATE_INVOICE_NO_FILES" });
+    }
 
     logger.info({
       userId,
@@ -56,7 +59,6 @@ export const create = async (
       action: "CREATE_INVOICE_SUCCESS",
     });
 
-
     res.status(201).json({
       success: true,
       message: `Invoice created with ${uploadedFiles.length} attachment(s)`,
@@ -75,11 +77,14 @@ export const list = async (
 ): Promise<void> => {
   try {
     const userId = requireUserId(req);
-    if (!userId) throw new AppError("User not authenticated", 401);
     logger.info({ userId, action: "LIST_INVOICES_ATTEMPT" });
 
     const invoices = await getUserInvoices(userId);
-    logger.info({ userId, count: invoices.length, action: "LIST_INVOICES_SUCCESS" });
+    logger.info({
+      userId,
+      count: invoices.length,
+      action: "LIST_INVOICES_SUCCESS",
+    });
     res.status(200).json({
       success: true,
       message: invoices.length
@@ -104,15 +109,14 @@ export const show = async (
 
     logger.info({ userId, invoiceId, action: "SHOW_INVOICE_ATTEMPT" });
 
-    if (!userId) throw new AppError("Unauthorized", 401);
-    if (!invoiceId) throw new AppError("Invoice ID required", 400);
+    if (!invoiceId)
+      throw new AppError("Missing invoice ID in request params", 400);
 
     const invoice = await getInvoiceById(invoiceId, userId);
-
     if (!invoice) {
       logger.warn({ userId, invoiceId, action: "SHOW_INVOICE_NOT_FOUND" });
-      throw new AppError("Invoice not found", 404);
-    } 
+      throw new AppError("Invoice not found or access denied", 404);
+    }
 
     logger.info({ userId, invoiceId, action: "SHOW_INVOICE_SUCCESS" });
     res.status(200).json({
@@ -136,8 +140,8 @@ export const remove = async (
     const invoiceId = req.params.id;
 
     logger.info({ userId, invoiceId, action: "REMOVE_INVOICE_ATTEMPT" });
-    if (!userId) throw new AppError("Unauthorized", 401);
-    if (!invoiceId) throw new AppError("Invoice ID required", 400);
+    if (!invoiceId)
+      throw new AppError("Missing invoice ID in request params", 400);
 
     const deleted = await deleteInvoiceById(
       invoiceId,
@@ -147,8 +151,8 @@ export const remove = async (
 
     if (!deleted) {
       logger.warn({ userId, invoiceId, action: "REMOVE_INVOICE_NOT_FOUND" });
-      throw new AppError("Invoice not found", 404);
-    } 
+      throw new AppError("Invoice not found or access denied", 404);
+    }
 
     logger.info({ userId, invoiceId, action: "REMOVE_INVOICE_SUCCESS" });
     res.status(200).json({
@@ -157,6 +161,7 @@ export const remove = async (
       data: deleted,
     });
   } catch (error) {
+    logger.error({ error, action: "REMOVE_INVOICE_ERROR" });
     next(error);
   }
 };
@@ -171,8 +176,10 @@ export const download = async (
     const invoiceId = req.params.invoiceId;
     const attachmentId = req.params.attachmentId;
 
-    if (!userId) throw new AppError("Unauthorized", 401);
-    if (!invoiceId || !attachmentId) throw new AppError("Missing IDs", 400);
+    if (!invoiceId)
+      throw new AppError("Missing invoice ID in request params", 400);
+    if (!attachmentId)
+      throw new AppError("Missing attachment ID in request params", 400);
 
     const { stream, mimeType, fileName } = await downloadAttachment(
       userId,
@@ -184,7 +191,11 @@ export const download = async (
     res.setHeader("Content-Type", mimeType);
 
     stream.pipe(res);
+
+    logger.info({ userId, invoiceId, attachmentId, action: "DOWNLOAD_ATTACHMENT_SUCCESS" });
+    
   } catch (error) {
+    logger.error({ error, action: "DOWNLOAD_ATTACHMENT_ERROR" });
     next(error);
   }
 };
@@ -198,11 +209,15 @@ export const importFromLocal = async (
     const userId = requireUserId(req);
     const file = req.file;
 
-    logger.info({ userId, fileName: file?.originalname, mimetype: file?.mimetype, action: "IMPORT_LOCAL_ATTEMPT" });
-    if (!file || !userId) {
-      res.status(400).json({ message: "Missing file or user ID" });
-      return;
-    }
+    logger.info({
+      userId,
+      fileName: file?.originalname,
+      mimetype: file?.mimetype,
+      action: "IMPORT_LOCAL_ATTEMPT",
+    });
+
+    if (!file) return next(new AppError("Missing file in request", 400));
+
     const invoice = await createInvoiceFromBufferOCR(
       file.buffer,
       userId,
@@ -210,7 +225,11 @@ export const importFromLocal = async (
       file.mimetype
     );
 
-    logger.info({ userId, invoiceId: invoice?.id, action: "IMPORT_LOCAL_SUCCESS" });
+    logger.info({
+      userId,
+      invoiceId: invoice?.id,
+      action: "IMPORT_LOCAL_SUCCESS",
+    });
     res.status(201).json({
       success: true,
       message: "Invoice imported from local file",
@@ -231,47 +250,45 @@ export const importDataFromAttachment = async (
     const { invoiceId } = req.params;
     const userId = requireUserId(req);
 
-    logger.info({ userId, invoiceId, action: "IMPORT_FROM_ATTACHMENT_ATTEMPT" });
-
-    if (!invoiceId || !userId) {
-      res.status(400).json({ message: "Missing invoice ID or user ID" });
-      return;
+    if (!invoiceId) {
+      return next(new AppError("Missing invoice ID", 400));
     }
 
-    // Asure invoice belongs to user
+    logger.info({
+      userId,
+      invoiceId,
+      action: "IMPORT_FROM_ATTACHMENT_ATTEMPT",
+    });
+
     const invoice = await prisma.invoice.findFirst({
-      where: {
-        id: invoiceId,
-        userId,
-      },
-      include: {
-        attachments: true,
-      },
+      where: { id: invoiceId, userId },
+      include: { attachments: true },
     });
 
     if (!invoice) {
-      res.status(404).json({ message: "Invoice not found or access denied" });
-      return;
+      throw new AppError("Invoice not found for user or access denied", 404);
     }
 
     const attachment = invoice.attachments[0];
     if (!attachment) {
-      res
-        .status(404)
-        .json({ message: "No attachments found for this invoice" });
-      return;
+      return next(new AppError("No attachments found for this invoice", 404));
     }
 
     const updateInvoice = await updateInvoiceFromUrlOcr(
       invoiceId,
       userId,
-      attachment.url,
+      attachment.url
     );
 
-    logger.info({ userId, invoiceId, action: "IMPORT_FROM_ATTACHMENT_SUCCESS" });
+    logger.info({
+      userId,
+      invoiceId,
+      action: "IMPORT_FROM_ATTACHMENT_SUCCESS",
+    });
+
     res.status(201).json({
       success: true,
-      message: "Invoice imported from Cloudinary URL",
+      message: `Invoice ${invoiceId} imported successfully from Cloudinary`,
       data: updateInvoice,
     });
   } catch (error) {
@@ -290,16 +307,15 @@ export const importFromUrl = async (
     const { invoiceId } = req.params;
     const userId = requireUserId(req);
 
-    logger.info({ userId, invoiceId, url, action: "IMPORT_FROM_URL_ATTEMPT" });
+    if (!invoiceId) return next(new AppError("Missing invoice ID", 400));
+    if (!url) return next(new AppError("Missing URL in request body", 400));
 
-    if (!url || !userId || !invoiceId) {
-      res.status(400).json({ message: "Missing URL, invoice ID or user ID" });
-      return;
-    }
+    logger.info({ userId, invoiceId, url, action: "IMPORT_FROM_URL_ATTEMPT" });
 
     const updateInvoice = await updateInvoiceFromUrlOcr(invoiceId, userId, url);
 
-    logger.info({ userId, invoiceId, action: "IMPORT_FROM_URL_SUCCESS" });
+    logger.info({ userId, invoiceId, url, action: "IMPORT_FROM_URL_SUCCESS" });
+
     res.status(201).json({
       success: true,
       message: "Invoice imported from Cloudinary URL",
