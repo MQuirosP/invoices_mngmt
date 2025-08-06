@@ -13,7 +13,7 @@ export class CloudinaryService {
   ): Promise<{ url: string; type: string }> {
     try {
       const ext = mimeExtensionMap[mimetype];
-      console.log("Received MIME type:", mimetype);
+      // console.log("Received MIME type:", mimetype);
       logger.info({
         action: "CLOUDINARY_UPLOAD_INIT",
         context: "CLOUDINARY_SERVICE",
@@ -38,12 +38,29 @@ export class CloudinaryService {
         throw new AppError("Cloudinary upload failed");
       }
 
+      logger.info({
+        action: "CLOUDINARY_UPLOAD_SUCCESS",
+        context: "CLOUDINARY_SERVICE",
+        url: result.secure_url,
+        userId,
+        filename,
+        mimetype,
+      });
       return {
         url: result.secure_url,
         type: mimetype,
       };
     } catch (error: any) {
-      console.error("Error uploading file:", error.message);
+      // console.error("Error uploading file:", error.message);
+      logger.error({
+        action: "CLOUDINARY_UPLOAD_ERROR",
+        context: "CLOUDINARY_SERVICE",
+        error,
+        userId,
+        filename,
+        mimetype,
+      });
+
       throw new AppError(error.message || "Cloudinary upload failed");
     }
   }
@@ -53,30 +70,49 @@ export class CloudinaryService {
     filename: string,
     mimetype: string
   ): Promise<void> {
-    const nameWithoutExtension = path.basename(
-      filename,
-      path.extname(filename)
-    );
-    const publicId = `${userId}/${nameWithoutExtension}`;
-    
-    let resource_type: "image" | "video" | "raw" = "raw";
-    if (mimetype.startsWith("image/")) {
-      resource_type = "image";
-    } else if (mimetype.startsWith("video/")) {
-      resource_type = "video";
-    }
-    
-    console.log("Deleting from Cloudinary:", publicId, resource_type);
-    logger.info({
-      action: "CLOUDINARY_DELETE_INIT",
-      context: "CLOUDINARY_SERVICE",
-      publicId,
-      resource_type,
-    });
+    try {
+      const nameWithoutExtension = path.basename(
+        filename,
+        path.extname(filename)
+      );
+      const publicId = `${userId}/${nameWithoutExtension}`;
 
-    await cloudinary.uploader.destroy(publicId, {
-      resource_type,
-      invalidate: true,
-    });
+      let resource_type: "image" | "video" | "raw" = "raw";
+      if (mimetype.startsWith("image/")) {
+        resource_type = "image";
+      } else if (mimetype.startsWith("video/")) {
+        resource_type = "video";
+      }
+
+      logger.info({
+        action: "CLOUDINARY_DELETE_INIT",
+        context: "CLOUDINARY_SERVICE",
+        publicId,
+        resource_type,
+      });
+
+      await cloudinary.uploader.destroy(publicId, {
+        resource_type,
+        invalidate: true,
+      });
+
+      logger.info({
+        action: "CLOUDINARY_DELETE_SUCCESS",
+        context: "CLOUDINARY_SERVICE",
+        publicId,
+        resource_type,
+      });
+    } catch (error: any) {
+      logger.error({
+        action: "CLOUDINARY_DELETE_ERROR",
+        context: "CLOUDINARY_SERVICE",
+        error,
+        userId,
+        filename,
+        mimetype,
+      });
+
+      throw new AppError("Cloudinary deletion failed", 500);
+    }
   }
 }
