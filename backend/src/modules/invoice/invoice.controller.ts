@@ -30,12 +30,12 @@ export const create = async (
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (!files || files.length === 0) {
-      logger.warn({ userId, action: "CREATE_INVOICE_NO_FILES" });
+      logger.warn({ userId, action: "INVOICE_CREATE_NO_FILES" });
     }
 
     logger.info({
       userId,
-      action: "CREATE_INVOICE_ATTEMPT",
+      action: "INVOICE_CREATE_ATTEMPT",
       metadata: parsed,
       fileCount: files?.length ?? 0,
     });
@@ -56,7 +56,7 @@ export const create = async (
       userId,
       invoiceId: invoice.id,
       uploadedFiles,
-      action: "CREATE_INVOICE_SUCCESS",
+      action: "INVOICE_CREATE_SUCCESS",
     });
 
     res.status(201).json({
@@ -65,7 +65,7 @@ export const create = async (
       data: invoice,
     });
   } catch (error) {
-    logger.error({ error, action: "CREATE_INVOICE_ERROR" });
+    logger.error({ error, action: "INVOICE_CREATE_ERROR" });
     next(error);
   }
 };
@@ -77,13 +77,13 @@ export const list = async (
 ): Promise<void> => {
   try {
     const userId = requireUserId(req);
-    logger.info({ userId, action: "LIST_INVOICES_ATTEMPT" });
+    logger.info({ userId, action: "INVOICE_LIST_ATTEMPT" });
 
     const invoices = await getUserInvoices(userId);
     logger.info({
       userId,
       count: invoices.length,
-      action: "LIST_INVOICES_SUCCESS",
+      action: "INVOICE_LIST_SUCCESS",
     });
     res.status(200).json({
       success: true,
@@ -93,7 +93,7 @@ export const list = async (
       data: invoices,
     });
   } catch (error) {
-    logger.error({ error, action: "LIST_INVOICES_ERROR" });
+    logger.error({ error, action: "INVOICE_LIST_ERROR" });
     next(error);
   }
 };
@@ -107,25 +107,25 @@ export const show = async (
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
 
-    logger.info({ userId, invoiceId, action: "SHOW_INVOICE_ATTEMPT" });
+    logger.info({ userId, invoiceId, action: "INVOICE_SHOW_ATTEMPT" });
 
     if (!invoiceId)
       throw new AppError("Missing invoice ID in request params", 400);
 
     const invoice = await getInvoiceById(invoiceId, userId);
     if (!invoice) {
-      logger.warn({ userId, invoiceId, action: "SHOW_INVOICE_NOT_FOUND" });
+      logger.warn({ userId, invoiceId, action: "INVOICE_SHOW_NOT_FOUND" });
       throw new AppError("Invoice not found or access denied", 404);
     }
 
-    logger.info({ userId, invoiceId, action: "SHOW_INVOICE_SUCCESS" });
+    logger.info({ userId, invoiceId, action: "INVOICE_SHOW_SUCCESS" });
     res.status(200).json({
       success: true,
       message: "Invoice retrieved successfully",
       data: invoice,
     });
   } catch (error) {
-    logger.error({ error, action: "SHOW_INVOICE_ERROR" });
+    logger.error({ error, action: "INVOICE_SHOW_ERROR" });
     next(error);
   }
 };
@@ -139,7 +139,7 @@ export const remove = async (
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
 
-    logger.info({ userId, invoiceId, action: "REMOVE_INVOICE_ATTEMPT" });
+    logger.info({ userId, invoiceId, action: "INVOICE_REMOVE_ATTEMPT" });
     if (!invoiceId)
       throw new AppError("Missing invoice ID in request params", 400);
 
@@ -150,18 +150,18 @@ export const remove = async (
     );
 
     if (!deleted) {
-      logger.warn({ userId, invoiceId, action: "REMOVE_INVOICE_NOT_FOUND" });
+      logger.warn({ userId, invoiceId, action: "INVOICE_REMOVE_NOT_FOUND" });
       throw new AppError("Invoice not found or access denied", 404);
     }
 
-    logger.info({ userId, invoiceId, action: "REMOVE_INVOICE_SUCCESS" });
+    logger.info({ userId, invoiceId, action: "INVOICE_REMOVE_SUCCESS" });
     res.status(200).json({
       success: true,
       message: "Invoice deleted successfully",
       data: deleted,
     });
   } catch (error) {
-    logger.error({ error, action: "REMOVE_INVOICE_ERROR" });
+    logger.error({ error, action: "INVOICE_REMOVE_ERROR" });
     next(error);
   }
 };
@@ -192,10 +192,10 @@ export const download = async (
 
     stream.pipe(res);
 
-    logger.info({ userId, invoiceId, attachmentId, action: "DOWNLOAD_ATTACHMENT_SUCCESS" });
+    logger.info({ userId, invoiceId, attachmentId, action: "INVOICE_DOWNLOAD_SUCCESS" });
     
   } catch (error) {
-    logger.error({ error, action: "DOWNLOAD_ATTACHMENT_ERROR" });
+    logger.error({ error, action: "INVOICE_DOWNLOAD_ERROR" });
     next(error);
   }
 };
