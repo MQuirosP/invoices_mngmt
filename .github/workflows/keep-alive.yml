@@ -2,7 +2,7 @@ name: Keep Render Alive
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -11,7 +11,6 @@ jobs:
     steps:
       - name: Curl to keep service alive
         run: |
-          curl --fail --silent https://invoices-mngmt.onrender.com/api/ \
-            -H "X-Trigger: GitHubAction" \
-            -H "X-Job-ID: keep-alive-$(date +%s)" \
-            -H "X-Env: dev"
+          curl --fail --silent https://invoices-mngmt.onrender.com/api/ping \
+          -H "X-Job-ID: keep-alive-$(date +%s)" \
+          -H "X-Env: dev"
