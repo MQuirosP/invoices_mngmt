@@ -52,4 +52,34 @@ router.get("/ping", async (req, res) => {
   }
 });
 
+// Health check for DB
+router.get("/health/db", async (req, res) => {
+  const jobId = req.headers["x-job-id"] || "unknown";
+
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+
+    logger.info({
+      action: "DB_HEALTH_OK",
+      context: "HEALTH_CHECK",
+      jobId,
+      timestamp: new Date().toISOString(),
+    });
+
+    res.json({ status: "ok", jobId });
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+
+    logger.error({
+      action: "DB_HEALTH_ERROR",
+      context: "HEALTH_CHECK",
+      jobId,
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    });
+
+    res.status(500).json({ error: error.message, jobId });
+  }
+});
+
 export default router;

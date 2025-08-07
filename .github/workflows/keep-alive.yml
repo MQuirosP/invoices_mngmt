@@ -1,16 +1,26 @@
-name: Keep Render Alive
+name: Keep Render and DB Alive
 
 on:
   schedule:
     - cron: "*/5 * * * *"
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate Job ID
+        run: echo "JOB_ID=keep-alive-$(date +%s)" >> $GITHUB_ENV
+
       - name: Curl to keep service alive
         run: |
+          echo "Pinging Render with Job ID: $JOB_ID"
           curl --fail --silent https://invoices-mngmt.onrender.com/api/ping \
-          -H "X-Job-ID: keep-alive-$(date +%s)" \
-          -H "X-Env: dev"
+            -H "X-Job-ID: $JOB_ID" \
+            -H "X-Env: dev"
+
+      - name: Curl to wake up DB
+        run: |
+          echo "Pinging DB health check with Job ID: $JOB_ID"
+          curl --fail --silent https://invoices-mngmt.onrender.com/api/health/db \
+            -H "X-Job-ID: $JOB_ID"
