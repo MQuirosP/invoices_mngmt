@@ -9,10 +9,12 @@ import { ImportService } from "@/shared/services/import.service";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import { invoiceIncludeOptions } from "./invoice.query";
 import { generateRandomFilename } from "@/shared/utils/file/generateRandomFilename";
-import { Role } from "@prisma/client";
+import { Invoice, Role } from "@prisma/client";
 import { AttachmentService } from "@/shared/services/attachment.service";
 import { logger } from "@/shared/utils/logger";
 import { ExtractedInvoiceMetadata } from "@/shared/ocr/ocr.types";
+import { PrismaClientInitializationError } from '@prisma/client/runtime/library'
+
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -88,11 +90,42 @@ export const getUserInvoices = async (userId: string) => {
     action: "INVOICE_GET_ALL_ATTEMPT",
   });
 
-  const invoices = await prisma.invoice.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    include: invoiceIncludeOptions,
-  });
+  const maxRetries = 3
+  let invoices: Invoice[] = []
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      invoices = await prisma.invoice.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        include: invoiceIncludeOptions,
+      });
+      break
+    } catch (err: unknown) {
+      const error = err as Error
+
+      const isInitError =
+        error instanceof PrismaClientInitializationError ||
+        error.message?.includes("Can't reach database server")
+
+      if (isInitError && attempt < maxRetries) {
+        logger.warn({
+          userId,
+          attempt,
+          action: "INVOICE_DB_RETRY",
+          message: "Retrying DB connection due to cold start",
+        });
+        await new Promise(res => setTimeout(res, 1000 * attempt));
+      } else {
+        logger.error({
+          userId,
+          action: "INVOICE_GET_ALL_ERROR",
+          error: error.message,
+        });
+        throw error
+      }
+    }
+  }
 
   logger.info({
     userId,
@@ -101,7 +134,7 @@ export const getUserInvoices = async (userId: string) => {
   });
 
   return invoices;
-};
+}
 
 export const getInvoiceById = async (id: string, userId: string) => {
   logger.info({
