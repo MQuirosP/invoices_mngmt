@@ -60,6 +60,31 @@ export const registerUser = async (data: RegisterInput) => {
   };
 };
 
+export const getUsers = async () => {
+  logger.info({ action: "USERS_GET_ATTEMPT", context: "USER_SERVICE" });
+
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        fullname: true,
+        role: true,
+      },
+    });
+
+    logger.info({ action: "USERS_GET_SUCCESS", count: users.length });
+    return users;
+  } catch (error) {
+    logger.error({
+      action: "USERS_GET_ERROR",
+      context: "USER_SERVICE",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw new AppError("Failed to fetch users", 500);
+  }
+};
+
 export const loginUser = async (data: LoginInput) => {
   logger.info({ email: data.email, action: "LOGIN_ATTEMPT" });
   const { email, password } = data;

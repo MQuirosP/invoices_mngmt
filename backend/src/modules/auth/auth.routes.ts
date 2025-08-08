@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login } from "./auth.controller";
+import { register, login, listUsers } from "./auth.controller";
 import { authenticate, AuthRequest } from "./auth.middleware";
 import { loginRateLimiter } from "@/shared/middleware/rateLimiter";
 
@@ -9,6 +9,8 @@ const authRouter = Router();
 authRouter.post("/register", register);
 // POST /api/auth/login
 authRouter.post("/login", loginRateLimiter, login);
+// GET /api/users
+authRouter.get("/list", authenticate, listUsers);
 
 // Protecting the routes with authentication middleware
 authRouter.get("/me", authenticate, (req: AuthRequest, res) => {
