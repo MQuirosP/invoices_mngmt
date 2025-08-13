@@ -22,7 +22,6 @@ export class TesseractOCRProvider implements OCRProvider {
       context: "TESSERACT_OCR_PROVIDER",
       length: text.length,
     });
-    console.log(text)
     return extractMetadataFromText(text);
   }
 }
