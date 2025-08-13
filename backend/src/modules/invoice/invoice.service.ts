@@ -101,16 +101,16 @@ export const getUserInvoices = async (userId: string): Promise<Invoice[]> => {
       action: "INVOICE_GET_ALL_SUCCESS",
     });
 
-    return invoices
+    return invoices;
   } catch (error) {
     logger.error({
       userId,
       action: "UNHANDLED_ERROR",
       message: (error as Error).message,
     });
-    throw error
+    throw error;
   }
-}
+};
 export const getInvoiceById = async (id: string, userId: string) => {
   logger.info({
     userId,
@@ -185,7 +185,10 @@ export const deleteInvoiceById = async (
     );
   }
 
-  const deleted = await prisma.invoice.delete({ where: { id: invoiceId } });
+  const deleted = await prisma.invoice.delete({
+    where: { id: invoiceId },
+    include: invoiceIncludeOptions,
+  });
 
   logger.info({
     invoiceId,
@@ -349,77 +352,77 @@ export const updateInvoiceFromUrlOcr = async (
   url: string
 ) => {
   logger.info({
-  userId,
-  invoiceId,
-  url,
-  action: "INVOICE_OCR_UPDATE_ATTEMPT",
-});
-
-const invoice = await getInvoiceById(invoiceId, userId);
-if (!invoice) {
-  logger.warn({
     userId,
     invoiceId,
-    action: "INVOICE_OCR_UPDATE_NOT_FOUND",
+    url,
+    action: "INVOICE_OCR_UPDATE_ATTEMPT",
   });
-  throw new AppError("Invoice not found", 404);
-}
 
-const importService = new ImportService();
-const metadata = await importService.extractFromUrl(url);
-
-const existingAttachment = await prisma.attachment.findFirst({
-  where: { invoiceId, url },
-});
-
-if (!existingAttachment) {
-  const ext = getFileExtension(url) || "bin";
-  const mimeType =
-    Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] ||
-    "application/octet-stream";
-  const filename = generateRandomFilename(mimeType);
-
-  await prisma.attachment.create({
-    data: {
+  const invoice = await getInvoiceById(invoiceId, userId);
+  if (!invoice) {
+    logger.warn({
+      userId,
       invoiceId,
-      url,
+      action: "INVOICE_OCR_UPDATE_NOT_FOUND",
+    });
+    throw new AppError("Invoice not found", 404);
+  }
+
+  const importService = new ImportService();
+  const metadata = await importService.extractFromUrl(url);
+
+  const existingAttachment = await prisma.attachment.findFirst({
+    where: { invoiceId, url },
+  });
+
+  if (!existingAttachment) {
+    const ext = getFileExtension(url) || "bin";
+    const mimeType =
+      Object.entries(mimeExtensionMap).find(([, v]) => v === ext)?.[0] ||
+      "application/octet-stream";
+    const filename = generateRandomFilename(mimeType);
+
+    await prisma.attachment.create({
+      data: {
+        invoiceId,
+        url,
+        fileName: filename,
+        mimeType,
+      },
+    });
+
+    logger.info({
+      userId,
+      invoiceId,
       fileName: filename,
-      mimeType,
-    },
-  });
+      action: "INVOICE_OCR_ATTACHMENT_CREATED",
+    });
+  } else {
+    logger.info({
+      userId,
+      invoiceId,
+      action: "INVOICE_OCR_ATTACHMENT_ALREADY_EXISTS",
+    });
+  }
+
+  await updateInvoiceFromMetadata(invoiceId, metadata);
+  await prisma.invoiceItem.deleteMany({ where: { invoiceId } });
+
+  if (metadata.items?.length) {
+    await prisma.invoiceItem.createMany({
+      data: metadata.items.map((item) => ({
+        ...item,
+        invoiceId: invoice.id,
+      })),
+    });
+  }
 
   logger.info({
     userId,
     invoiceId,
-    fileName: filename,
-    action: "INVOICE_OCR_ATTACHMENT_CREATED",
+    itemCount: metadata.items?.length ?? 0,
+    action: "INVOICE_OCR_UPDATE_SUCCESS",
   });
-} else {
-  logger.info({
-    userId,
-    invoiceId,
-    action: "INVOICE_OCR_ATTACHMENT_ALREADY_EXISTS",
-  });
-}
 
-await updateInvoiceFromMetadata(invoiceId, metadata);
-await prisma.invoiceItem.deleteMany({ where: { invoiceId } });
-
-if (metadata.items?.length) {
-  await prisma.invoiceItem.createMany({
-    data: metadata.items.map((item) => ({
-      ...item,
-      invoiceId: invoice.id,
-    })),
-  });
-}
-
-logger.info({
-  userId,
-  invoiceId,
-  itemCount: metadata.items?.length ?? 0,
-  action: "INVOICE_OCR_UPDATE_SUCCESS",
-});
-
-return getInvoiceById(invoiceId, userId);
+  return getInvoiceById(invoiceId, userId);
 };
