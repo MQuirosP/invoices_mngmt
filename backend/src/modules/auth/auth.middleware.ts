@@ -70,6 +70,7 @@ export const authenticate = (
       id: decoded.sub,
       email: decoded.email,
       role: decoded.role,
+      jti: decoded.jti || "",
     };
 
     logger.info({

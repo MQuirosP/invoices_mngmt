@@ -4,6 +4,7 @@ import { registerUser, loginUser, getUsers } from "./auth.service";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { logger } from "@/shared/utils/logger";
 import { AuthRequest } from "./auth.types";
+import { revokeToken } from "../../shared/utils/token/revokeToken";
 
 // Create user
 export const register = async (
@@ -140,3 +141,82 @@ export const listUsers = async (
     );
   }
 };
+
+export const logoutUser = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const jti = req.user?.jti;
+  const userId = req.user?.id;
+
+  logger.info({
+    action: "USER_LOGOUT_ATTEMPT",
+    context: "AUTH_CONTROLLER",
+    userId,
+    method: req.method,
+    path: req.originalUrl,
+    jti,
+  });
+
+  if (!jti) {
+    logger.warn({
+      action: "LOGOUT_JTI_MISSING",
+      context: "AUTH_CONTROLLER",
+      userId,
+      method: req.method,
+      path: req.originalUrl,
+    });
+
+    res.status(400).json({
+      success: false,
+      message: "Missing token identifier (jti)",
+    });
+    return;
+  }
+
+  try {
+    await revokeToken(jti);
+
+    logger.info({
+      action: "USER_LOGOUT_SUCCESS",
+      context: "AUTH_CONTROLLER",
+      userId,
+      method: req.method,
+      path: req.originalUrl,
+      jti,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    logger.error({
+      action: "USER_LOGOUT_ERROR",
+      context: "AUTH_CONTROLLER",
+      userId,
+      method: req.method,
+      path: req.originalUrl,
+      jti,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+
+    next(
+      new AppError(
+        "Logout failed",
+        500,
+        true,
+        error instanceof Error ? error : undefined,
+        {
+          context: "AUTH_CONTROLLER",
+          route: req.originalUrl,
+          method: req.method,
+          userId,
+          jti,
+        }
+      )
+    );
+  }
+};
+
