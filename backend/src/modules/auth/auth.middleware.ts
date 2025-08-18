@@ -4,8 +4,9 @@ import { AppError } from "@/shared/utils/AppError.utils";
 import { Role } from "@prisma/client";
 import { logger } from "@/shared";
 import { AuthRequest } from "./auth.types";
+import { redis } from "../../lib/redis";
 
-export const authenticate = (
+export const authenticate = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -65,6 +66,31 @@ export const authenticate = (
       role: Role;
       jti?: string;
     };
+
+    // Verificación de revocación
+    if (decoded.jti) {
+      const isRevoked = await redis.get(`revoked:${decoded.jti}`);
+
+      if (isRevoked !== null) {
+        logger.warn({
+          action: "JWT_REJECTED_REVOKED",
+          jti: decoded.jti,
+          userId: decoded.sub,
+          context: "AUTH_MIDDLEWARE",
+          path: req.originalUrl,
+          method: req.method,
+        });
+
+        return next(
+          new AppError("Token has been revoked", 401, true, undefined, {
+            context: "AUTH_MIDDLEWARE",
+            path: req.originalUrl,
+            method: req.method,
+            jti: decoded.jti,
+          })
+        );
+      }
+    }
 
     req.user = {
       id: decoded.sub,
