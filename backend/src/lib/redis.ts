@@ -42,7 +42,7 @@ redis.on("end", () => {
   });
 });
 
-export async function verifyRedisConnection() {
+export async function verifyRedisConnection(): Promise<void> {
   try {
     const pong = await redis.ping();
     logger.info({

@@ -14,7 +14,7 @@ import { AttachmentService } from "@/shared/services/attachment.service";
 import { logger } from "@/shared/utils/logger";
 import { ExtractedInvoiceMetadata } from "@/shared/ocr/ocr.types";
 import cloudinary from "../../config/cloudinary";
-import { retry } from "../../shared/utils/retry";
+import { retry } from "../../shared/utils/retries/retryMethods";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
