@@ -22,12 +22,18 @@ export const authenticate = (
     });
 
     return next(
-      new AppError("Authentication token is missing or invalid", 401, true, undefined, {
-        context: "AUTH_MIDDLEWARE",
-        path: req.originalUrl,
-        method: req.method,
-        authHeader,
-      })
+      new AppError(
+        "Authentication token is missing or invalid",
+        401,
+        true,
+        undefined,
+        {
+          context: "AUTH_MIDDLEWARE",
+          path: req.originalUrl,
+          method: req.method,
+          authHeader,
+        }
+      )
     );
   }
 
@@ -53,10 +59,11 @@ export const authenticate = (
   }
 
   try {
-    const decoded = jwt.verify(token, secret) as {
+    const decoded = jwt.verify(token, secret, { clockTolerance: 5 }) as {
       sub: string;
       email: string;
       role: Role;
+      jti?: string;
     };
 
     req.user = {
@@ -88,12 +95,18 @@ export const authenticate = (
     });
 
     return next(
-      new AppError("Invalid or expired token", 401, true, error instanceof Error ? error : undefined, {
-        context: "AUTH_MIDDLEWARE",
-        path: req.originalUrl,
-        method: req.method,
-        token,
-      })
+      new AppError(
+        "Invalid or expired token",
+        401,
+        true,
+        error instanceof Error ? error : undefined,
+        {
+          context: "AUTH_MIDDLEWARE",
+          path: req.originalUrl,
+          method: req.method,
+          token,
+        }
+      )
     );
   }
 };

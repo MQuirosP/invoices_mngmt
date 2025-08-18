@@ -5,7 +5,7 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
-      - key: DATAVBASE_URL
+      - key: DATABASE_URL
         value: postgresql://op3nbv:xau_1yK7b5yd0gzUB5BZIbT1GOjqv1JogSGO0@us-east-1.sql.xata.sh/invoice-db:main?sslmode=require
       - key: JWT_SECRET
         value: patitos

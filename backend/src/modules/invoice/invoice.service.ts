@@ -13,6 +13,8 @@ import { Invoice, Role } from "@prisma/client";
 import { AttachmentService } from "@/shared/services/attachment.service";
 import { logger } from "@/shared/utils/logger";
 import { ExtractedInvoiceMetadata } from "@/shared/ocr/ocr.types";
+import cloudinary from "../../config/cloudinary";
+import { retry } from "../../shared/utils/retry";
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -43,42 +45,100 @@ export const createInvoiceWithFiles = async (
   userId: string,
   files?: Express.Multer.File[]
 ) => {
-  const invoice = await createInvoice(parsed, userId);
+  const uploads: {
+    secure_url: string;
+    original_filename: string;
+    format: string;
+  }[] = [];
 
-  const uploaded: string[] = [];
+  // 1. Subida de archivos a Cloudinary
   if (files && files.length > 0) {
     for (const file of files) {
-      const result = await AttachmentService.uploadValidated(
-        file,
-        invoice.id,
-        userId
-      );
-      uploaded.push(result.fileName);
+      try {
+        const result = await retry(() =>
+          cloudinary.uploader.upload(file.path, {
+            folder: `invoices/${userId}`,
+            resource_type: "auto",
+          })
+        );
+        uploads.push({
+          secure_url: result.secure_url,
+          original_filename: result.original_filename,
+          format: result.format,
+        });
+      } catch (error) {
+        logger.error({
+          action: "CLOUDINARY_UPLOAD_FAILED",
+          userId,
+          fileName: file.originalname,
+          error: error instanceof Error ? error.message : String(error),
+          context: "INVOICE_CREATE",
+        });
+        throw new AppError("Failed to upload file to Cloudinary", 500);
+      }
     }
-
-    logger.info({
-      invoiceId: invoice.id,
-      userId,
-      files: uploaded,
-      action: "INVOICE_CREATE_WITH_ATTACHMENTS_SUCCESS",
-    });
-  } else {
-    logger.info({
-      invoiceId: invoice.id,
-      userId,
-      action: "INVOICE_CREATE_NO_ATTACHMENTS",
-    });
   }
+
+  // 2. Creación de factura + adjuntos en transacción
+  let invoice;
+  try {
+    invoice = await prisma.$transaction(async (tx) => {
+      const createdInvoice = await tx.invoice.create({
+        data: { ...parsed, userId },
+      });
+
+      for (const upload of uploads) {
+        await tx.attachment.create({
+          data: {
+            invoiceId: createdInvoice.id,
+            url: upload.secure_url,
+            fileName: upload.original_filename,
+            mimeType: upload.format,
+          },
+        });
+      }
+
+      return createdInvoice;
+    });
+  } catch (error) {
+    logger.error({
+      action: "INVOICE_DB_TRANSACTION_FAILED",
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+      context: "INVOICE_CREATE",
+    });
+    throw new AppError("Failed to persist invoice and attachments", 500);
+  }
+
+  // 3. Obtener factura con relaciones
   const invoiceWithRelations = await prisma.invoice.findUnique({
     where: { id: invoice.id },
     include: invoiceIncludeOptions,
   });
 
-  if (!invoiceWithRelations)
-    throw new AppError("Failed to retrieve invoice attarchments", 404);
+  if (!invoiceWithRelations) {
+    logger.error({
+      action: "INVOICE_RETRIEVE_FAILED",
+      invoiceId: invoice.id,
+      userId,
+      context: "INVOICE_CREATE",
+    });
+    throw new AppError("Failed to retrieve invoice with attachments", 404);
+  }
+
+  // 4. Log de éxito
+  logger.info({
+    action: files?.length
+      ? "INVOICE_CREATE_WITH_ATTACHMENTS_SUCCESS"
+      : "INVOICE_CREATE_NO_ATTACHMENTS",
+    invoiceId: invoice.id,
+    userId,
+    files: uploads.map((f) => f.original_filename),
+  });
+
   return {
     invoice: invoiceWithRelations,
-    uploadedFiles: uploaded,
+    uploadedFiles: uploads.map((f) => f.original_filename),
   };
 };
 

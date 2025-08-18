@@ -8,7 +8,7 @@ if (!process.env.REDIS_URL) {
 
 const redis = new Redis(process.env.REDIS_URL, {
   retryStrategy: (times) => {
-    const delay = Math.min(times * 100, 3000);
+    const delay = Math.min(50 * Math.pow(2, times), 5000); // Exponential backoff with a max delay of 5 seconds
     logger.warn({
       action: "REDIS_RETRY",
       attempt: times,

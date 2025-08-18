@@ -3,9 +3,13 @@ import { AppError } from "@/shared/utils/AppError.utils";
 import { logger } from "../shared";
 
 const REQUIRED_ENV_VARS = [
+  "DATABASE_URL",
   "JWT_SECRET",
+  "CLOUDINARY_CLOUD_NAME",
   "CLOUDINARY_API_KEY",
   "CLOUDINARY_API_SECRET",
+  "REDIS_URL",
+  "SALT_ROUNDS"
 ] as const;
 
 type RequiredEnvVar = typeof REQUIRED_ENV_VARS[number];
