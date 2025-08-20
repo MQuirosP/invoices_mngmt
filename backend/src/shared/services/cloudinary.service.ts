@@ -1,5 +1,5 @@
 import cloudinary from "@/config/cloudinary";
-import { AppError } from "@/shared/utils/AppError.utils";
+import { AppError } from "@/shared/utils/AppError";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import path from "path";
 import { logger } from "@/shared/utils/logger";

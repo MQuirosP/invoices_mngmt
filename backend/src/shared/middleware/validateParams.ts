@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { AppError } from "@/shared/utils/AppError.utils";
+import { AppError } from "@/shared/utils/AppError";
 import { logger } from "@/shared/utils/logger";
 
 /**

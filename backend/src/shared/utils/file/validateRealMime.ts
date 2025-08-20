@@ -1,4 +1,4 @@
-import { AppError } from "@/shared/utils/AppError.utils";
+import { AppError } from "@/shared/utils/AppError";
 import { mimeMetadataMap } from "@/shared/constants/mimeExtensionMap";
 import { logger } from "@/shared";
 

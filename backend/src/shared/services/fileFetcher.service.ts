@@ -1,6 +1,6 @@
 import axios from "axios";
 import { logger } from "@/shared/utils/logger";
-import { AppError } from "@/shared/utils/AppError.utils";
+import { AppError } from "@/shared/utils/AppError";
 
 export class FileFetcherService {
   async fetchBuffer(

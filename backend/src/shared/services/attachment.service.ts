@@ -3,7 +3,7 @@ import { CloudinaryService } from "./cloudinary.service";
 import { generateRandomFilename } from "@/shared/utils/file/generateRandomFilename";
 import { prisma } from "@/config/prisma";
 import { logger } from "@/shared/utils/logger";
-import { AppError } from "../utils/AppError.utils";
+import { AppError } from "../utils/AppError";
 
 export class AttachmentService {
   // private cloudinary: CloudinaryService;

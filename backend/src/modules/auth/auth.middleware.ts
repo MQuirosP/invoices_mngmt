@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { AppError } from "@/shared/utils/AppError.utils";
+import { AppError } from "@/shared/utils/AppError";
 import { Role } from "@prisma/client";
 import { logger } from "@/shared";
 import { AuthRequest } from "./auth.types";

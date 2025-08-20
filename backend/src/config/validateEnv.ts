@@ -1,5 +1,5 @@
 // src/config/validateEnv.ts
-import { AppError } from "@/shared/utils/AppError.utils";
+import { AppError } from "@/shared/utils/AppError";
 import { logger } from "../shared";
 
 const REQUIRED_ENV_VARS = [

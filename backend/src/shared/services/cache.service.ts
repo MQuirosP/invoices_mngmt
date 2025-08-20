@@ -1,6 +1,6 @@
 import { logger } from "@/shared/utils/logger";
 import { redis } from "@/lib/redis";
-import { AppError } from "@/shared/utils/AppError.utils";
+import { AppError } from "@/shared/utils/AppError";
 
 export const cacheService = {
   async get<T>(key: string): Promise<T | null> {

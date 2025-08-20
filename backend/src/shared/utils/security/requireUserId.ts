@@ -1,4 +1,4 @@
-import { AppError } from "@/shared/utils/AppError.utils";
+import { AppError } from "@/shared/utils/AppError";
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { logger } from "./logger";
 
