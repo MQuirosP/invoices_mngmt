@@ -1,12 +1,4 @@
-import axios from "axios";
 import sharp from "sharp";
-
-export const fetchBuffer = async (url: string): Promise<Buffer> => {
-  const res = await axios.get<ArrayBuffer>(url, {
-    responseType: "arraybuffer",
-  });
-  return Buffer.from(res.data);
-};
 
 export const preprocessImage = async (buffer: Buffer): Promise<Buffer> => {
   return sharp(buffer)
