@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"; // solo si querés extraer jti
 
 export const loginRateLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // max 5 
+  max: 5, // max 5 requests per windowMs
 
   handler: (req, res) => {
     const ip = req.ip;
