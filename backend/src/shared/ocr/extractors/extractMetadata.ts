@@ -9,8 +9,6 @@ import {
 import { logger } from "@/shared/utils/logger";
 import { calculateExpirationFromItems } from "./extractExpirationFromItems";
 
-
-
 export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata {
   const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
 
