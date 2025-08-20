@@ -1,7 +1,7 @@
 // shared/ocr/ocr.factory.ts
 import { OCRProvider } from "./ocr.types";
-import { GcpOCRProvider } from "./ocr.providers/gcp";
-import { TesseractOCRProvider } from "./ocr.providers/tesseract";
+import { GcpOCRProvider } from "./providers/gcp";
+import { TesseractOCRProvider } from "./providers/tesseract";
 import { logger } from "@/shared/utils/logger";
 import { AppError } from "@/shared/utils/AppError.utils";
 

@@ -1,7 +1,7 @@
 import { logger } from "@/shared/utils/logger";
-import { OCRFactory } from "./ocr.factory";
-import { preprocessImage } from "./preprocessing";
-import { FileFetcherService } from "../services/fileFetcher.service";
+import { OCRFactory } from "../ocr.factory";
+import { preprocessImage } from "../preprocessing";
+import { FileFetcherService } from "../../services/fileFetcher.service";
 
 export const extractMetadataFromUrl = async (url: string) => {
   const fileFetcher = new FileFetcherService();

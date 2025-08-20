@@ -19,7 +19,7 @@ export * from './services/fileFetcher.service';
 export * from './services/import.service';
 
 // 🧠 OCR
-export * from './ocr/index';
+export * from './ocr/extractors/metadataExtractor';
 export * from './ocr/ocr.types';
 
 // 🔒 constantes
