@@ -30,6 +30,8 @@ export class CloudinaryService {
         public_id: baseName,
         folder: userId,
         resource_type: "auto",
+        type: "upload",
+        overwrite: true,
       });
 
       if (!result.secure_url) {
@@ -62,7 +64,6 @@ export class CloudinaryService {
       throw new AppError(error.message || "Cloudinary upload failed");
     }
   }
-
 
   async delete(
     userId: string,

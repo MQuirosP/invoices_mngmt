@@ -6,12 +6,16 @@ interface UploadOptions {
   public_id: string;
   folder?: string;
   resource_type?: "image" | "video" | "raw" | "auto";
+  type?: "upload";
+  overwrite?: boolean;
 }
 
 function uploadStream(file: Buffer, options: UploadOptions): Promise<any> {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      options,
+      {
+        ...options,
+      },
       (err, result) => {
         if (err) return reject(err);
         resolve(result);
@@ -35,6 +39,7 @@ export async function uploadWithRetry(
     logger.info({
       action: "CLOUDINARY_UPLOAD_SUCCESS",
       public_id: options.public_id,
+      folder: options.folder,
       attempt,
       context: "FILE_UPLOAD",
     });
@@ -44,6 +49,7 @@ export async function uploadWithRetry(
     logger.warn({
       action: "CLOUDINARY_UPLOAD_RETRY",
       public_id: options.public_id,
+      folder: options.folder,
       attempt,
       context: "FILE_UPLOAD",
       error: err instanceof Error ? err.message : String(err),
@@ -53,6 +59,7 @@ export async function uploadWithRetry(
       logger.error({
         action: "CLOUDINARY_UPLOAD_FAILED",
         public_id: options.public_id,
+        folder: options.folder,
         context: "FILE_UPLOAD",
         error: err instanceof Error ? err.message : String(err),
       });
