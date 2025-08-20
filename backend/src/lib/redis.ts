@@ -42,21 +42,4 @@ redis.on("end", () => {
   });
 });
 
-export async function verifyRedisConnection(): Promise<void> {
-  try {
-    const pong = await redis.ping();
-    logger.info({
-      action: "REDIS_PING_SUCCESS",
-      response: pong,
-      context: "CACHE_LAYER",
-    });
-  } catch (err) {
-    logger.error({
-      action: "REDIS_PING_FAILED",
-      error: (err as Error).message,
-      context: "CACHE_LAYER",
-    });
-  }
-}
-
 export { redis };
