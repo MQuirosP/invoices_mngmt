@@ -12,7 +12,7 @@ import {
 } from "./invoice.service";
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { prisma } from "@/config/prisma";
-import { requireUserId } from "@/shared/utils/requireUserId";
+import { requireUserId } from "@/shared/utils/security/requireUserId";
 // import { AttachmentService } from "@/shared/services/attachment.service";
 import { Role } from "@prisma/client";
 import { logger } from "@/shared/utils/logger";
