@@ -1,9 +1,9 @@
+import cloudinary from "@/config/cloudinary";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import path from "path";
 import { logger } from "@/shared/utils/logger";
-import cloudinary from "@/config/cloudinary";
-import { uploadWithRetry } from "@/shared/utils/retries/uploadWithRetry";
+import { uploadWithRetry } from "../utils/retries/uploadWithRetry";
 
 export class CloudinaryService {
   async upload(
@@ -14,7 +14,6 @@ export class CloudinaryService {
   ): Promise<{ url: string; type: string }> {
     try {
       const ext = mimeExtensionMap[mimetype];
-
       logger.info({
         action: "CLOUDINARY_UPLOAD_INIT",
         context: "CLOUDINARY_SERVICE",
@@ -26,10 +25,10 @@ export class CloudinaryService {
       if (!ext) throw new AppError("Unsupported file type", 415);
 
       const baseName = path.basename(filename, path.extname(filename));
-      const public_id = `${userId}/${baseName}`;
 
       const result = await uploadWithRetry(fileBuffer, {
-        public_id,
+        public_id: baseName,
+        folder: userId,
         resource_type: "auto",
       });
 
@@ -44,7 +43,6 @@ export class CloudinaryService {
         userId,
         filename,
         mimetype,
-        public_id,
       });
 
       return {
@@ -64,6 +62,7 @@ export class CloudinaryService {
       throw new AppError(error.message || "Cloudinary upload failed");
     }
   }
+
 
   async delete(
     userId: string,
