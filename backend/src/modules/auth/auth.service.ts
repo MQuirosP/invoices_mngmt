@@ -5,7 +5,7 @@ import { prisma } from "@/config/prisma";
 import { AppError } from "@/shared/utils/AppError.utils";
 import { hashPassword } from "@/shared/utils/hashPassword";
 import { logger } from "@/shared/utils/logger";
-import { getCachedUserByEmail, setCachedUser } from "../../cache/userCache";
+import { getCachedUserByEmail, setCachedUser } from "@/shared/services/userCache.service";
 import { signTokenWithJti } from "@/shared/utils/token/signTokenWithJti";
 
 export const registerUser = async (data: RegisterInput) => {
