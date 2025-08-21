@@ -7,20 +7,53 @@ type CachedUser = Pick<User, "id" | "email" | "fullname" | "role">;
 
 export async function getCachedUserByEmail(email: string): Promise<CachedUser | null> {
   const key = `user:email:${email}`;
-  const cached = await redis.get(key);
+  const timestamp = new Date().toISOString();
 
-  if (cached) {
-    logger.info({ email, action: "USER_CACHE_HIT", context: "CACHE_LAYER" });
-    return JSON.parse(cached);
+  try {
+    const cached = await redis.get(key);
+
+    if (cached) {
+      logger.info({
+        layer: "service",
+        module: "user-cache",
+        action: "USER_CACHE_HIT",
+        key,
+        email,
+        timestamp,
+      });
+
+      return JSON.parse(cached);
+    }
+
+    logger.info({
+      layer: "service",
+      module: "user-cache",
+      action: "USER_CACHE_MISS",
+      key,
+      email,
+      timestamp,
+    });
+
+    return null;
+  } catch (error) {
+    logger.error({
+      layer: "service",
+      module: "user-cache",
+      action: "USER_CACHE_GET_FAILED",
+      key,
+      email,
+      error: error instanceof Error ? error.message : String(error),
+      timestamp,
+    });
+
+    return null;
   }
-
-  logger.info({ email, action: "USER_CACHE_MISS", context: "CACHE_LAYER" });
-  return null;
 }
 
 export async function setCachedUser(user: User): Promise<void> {
   const keyById = `user:${user.id}`;
   const keyByEmail = `user:email:${user.email}`;
+  const timestamp = new Date().toISOString();
 
   const safeUser: CachedUser = {
     id: user.id,
@@ -31,8 +64,28 @@ export async function setCachedUser(user: User): Promise<void> {
 
   const serialized = JSON.stringify(safeUser);
 
-  await redis.set(keyById, serialized, "EX", TTL_SECONDS);
-  await redis.set(keyByEmail, serialized, "EX", TTL_SECONDS);
+  try {
+    await redis.set(keyById, serialized, "EX", TTL_SECONDS);
+    await redis.set(keyByEmail, serialized, "EX", TTL_SECONDS);
 
-  logger.info({ userId: user.id, email: user.email, action: "USER_CACHE_SET", context: "CACHE_LAYER" });
+    logger.info({
+      layer: "service",
+      module: "user-cache",
+      action: "USER_CACHE_SET",
+      userId: user.id,
+      email: user.email,
+      ttlSeconds: TTL_SECONDS,
+      timestamp,
+    });
+  } catch (error) {
+    logger.error({
+      layer: "service",
+      module: "user-cache",
+      action: "USER_CACHE_SET_FAILED",
+      userId: user.id,
+      email: user.email,
+      error: error instanceof Error ? error.message : String(error),
+      timestamp,
+    });
+  }
 }
