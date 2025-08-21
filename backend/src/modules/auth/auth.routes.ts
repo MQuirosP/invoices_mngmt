@@ -1,20 +1,16 @@
 import { Router } from "express";
-import { register, login, listUsers, logoutUser } from "./auth.controller";
 import { authenticate, AuthRequest } from "./auth.middleware";
 import { loginRateLimiter } from "@/shared/middleware/rateLimiter";
+import { AuthController } from "./auth.controller";
 
 const authRouter = Router();
+const controller = new AuthController();
 
-// POST /api/auth/register
-authRouter.post("/register", register);
-// POST /api/auth/login
-authRouter.post("/login", loginRateLimiter, login);
-// POST /api/auth/logout
-authRouter.post("/logout", authenticate, logoutUser);
-// GET /api/users
-authRouter.get("/list", authenticate, listUsers);
+authRouter.post("/register", controller.register.bind(controller));
+authRouter.post("/login", loginRateLimiter, controller.login.bind(controller));
+authRouter.post("/logout", authenticate, controller.logoutUser.bind(controller));
+authRouter.get("/list", authenticate, controller.listUsers.bind(controller));
 
-// Protecting the routes with authentication middleware
 authRouter.get("/me", authenticate, (req: AuthRequest, res) => {
   res.json({
     success: true,

@@ -8,113 +8,115 @@ import { logger } from "@/shared/utils/logger";
 import { getCachedUserByEmail, setCachedUser } from "@/shared/services/userCache.service";
 import { signTokenWithJti } from "@/shared/utils/token/signTokenWithJti";
 
-export const registerUser = async (data: RegisterInput) => {
-  logger.info({
-    email: data.email,
-    fullname: data.fullname,
-    action: "REGISTER_ATTEMPT",
-  });
-
-  const { email, password, fullname, role = "USER" } = data;
-
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) {
-    logger.warn({ email, action: "REGISTER_USER_EXISTS" });
-    throw new AppError("Email already registered", 409);
-  }
-
-  const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
-  const hashedPassword = await hashPassword(password, saltRounds);
-
-  const user = await prisma.user.create({
-    data: { email, password: hashedPassword, fullname, role },
-  });
-
-  const { token } = await signTokenWithJti({
-    sub: user.id,
-    email: user.email,
-    role: user.role as Role,
-  });
-
-  logger.info({ email, action: "REGISTER_SUCCESS" });
-
-  return {
-    id: user.id,
-    email: user.email,
-    fullname: user.fullname,
-    role,
-    token,
-  };
-};
-
-export const getUsers = async () => {
-  logger.info({ action: "USERS_GET_ATTEMPT", context: "USER_SERVICE" });
-
-  try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        fullname: true,
-        role: true,
-      },
+export class AuthService {
+  async registerUser(data: RegisterInput) {
+    logger.info({
+      email: data.email,
+      fullname: data.fullname,
+      action: "REGISTER_ATTEMPT",
     });
 
-    logger.info({ action: "USERS_GET_SUCCESS", count: users.length });
-    return users;
-  } catch (error) {
-    logger.error({
-      action: "USERS_GET_ERROR",
-      context: "USER_SERVICE",
-      error: error instanceof Error ? error.message : String(error),
+    const { email, password, fullname, role = "USER" } = data;
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      logger.warn({ email, action: "REGISTER_USER_EXISTS" });
+      throw new AppError("Email already registered", 409);
+    }
+
+    const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
+    const hashedPassword = await hashPassword(password, saltRounds);
+
+    const user = await prisma.user.create({
+      data: { email, password: hashedPassword, fullname, role },
     });
-    throw new AppError("Failed to fetch users", 500);
-  }
-};
 
-export const loginUser = async (data: LoginInput) => {
-  logger.info({ email: data.email, action: "LOGIN_ATTEMPT" });
+    const { token } = await signTokenWithJti({
+      sub: user.id,
+      email: user.email,
+      role: user.role as Role,
+    });
 
-  const { email, password } = data;
+    logger.info({ email, action: "REGISTER_SUCCESS" });
 
-  let cachedUser = await getCachedUserByEmail(email);
-  let user: User | null;
-
-  if (cachedUser) {
-    logger.info({ email, action: "LOGIN_CACHE_USED", context: "CACHE_LAYER" });
-    user = await prisma.user.findUnique({ where: { id: cachedUser.id } });
-  } else {
-    user = await prisma.user.findUnique({ where: { email } });
-  }
-
-  if (!user) {
-    logger.warn({ email, action: "LOGIN_USER_NOT_FOUND" });
-    throw new AppError("User not found.", 404);
+    return {
+      id: user.id,
+      email: user.email,
+      fullname: user.fullname,
+      role,
+      token,
+    };
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    logger.warn({ email, action: "LOGIN_INVALID_PASSWORD" });
-    throw new AppError("Invalid password.", 401);
+  async loginUser(data: LoginInput) {
+    logger.info({ email: data.email, action: "LOGIN_ATTEMPT" });
+
+    const { email, password } = data;
+
+    let cachedUser = await getCachedUserByEmail(email);
+    let user: User | null;
+
+    if (cachedUser) {
+      logger.info({ email, action: "LOGIN_CACHE_USED", context: "CACHE_LAYER" });
+      user = await prisma.user.findUnique({ where: { id: cachedUser.id } });
+    } else {
+      user = await prisma.user.findUnique({ where: { email } });
+    }
+
+    if (!user) {
+      logger.warn({ email, action: "LOGIN_USER_NOT_FOUND" });
+      throw new AppError("User not found.", 404);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      logger.warn({ email, action: "LOGIN_INVALID_PASSWORD" });
+      throw new AppError("Invalid password.", 401);
+    }
+
+    if (!cachedUser) {
+      await setCachedUser(user);
+    }
+
+    const { token } = await signTokenWithJti({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    logger.info({ userId: user.id, email: user.email, action: "LOGIN_SUCCESS" });
+
+    return {
+      id: user.id,
+      email: user.email,
+      fullname: user.fullname,
+      role: user.role,
+      token,
+    };
   }
 
-  if (!cachedUser) {
-    await setCachedUser(user);
+  async getUsers() {
+    logger.info({ action: "USERS_GET_ATTEMPT", context: "USER_SERVICE" });
+
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          fullname: true,
+          role: true,
+        },
+      });
+
+      logger.info({ action: "USERS_GET_SUCCESS", count: users.length });
+      return users;
+    } catch (error) {
+      logger.error({
+        action: "USERS_GET_ERROR",
+        context: "USER_SERVICE",
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new AppError("Failed to fetch users", 500);
+    }
   }
-
-  const { token } = await signTokenWithJti({
-    sub: user.id,
-    email: user.email,
-    role: user.role,
-  });
-
-  logger.info({ userId: user.id, email: user.email, action: "LOGIN_SUCCESS" });
-
-  return {
-    id: user.id,
-    email: user.email,
-    fullname: user.fullname,
-    role: user.role,
-    token,
-  };
-};
+}
