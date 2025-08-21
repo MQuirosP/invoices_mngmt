@@ -1,7 +1,7 @@
 import { prisma } from "@/config/prisma";
 import { Invoice, Role } from "@prisma/client";
 import { CreateInvoiceInput } from "@/modules/invoice";
-import { invoiceIncludeOptions } from "./invoice.query";
+import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logger";
 
 export const createInvoice = async (

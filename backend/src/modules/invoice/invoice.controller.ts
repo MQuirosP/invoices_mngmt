@@ -9,11 +9,11 @@ import {
   getUserInvoices,
   getInvoiceById,
   deleteInvoiceById,
-} from "@/modules/invoice/core.service";
+} from "@/modules/invoice/services/core.service";
 import { Role } from "@prisma/client";
-import { FileService } from "./file.service";
-import { OCRService } from "./ocr.service";
-import { prisma } from "../../config/prisma";
+import { FileService } from "@/modules/invoice";
+import { OCRService } from "@/modules/invoice";
+import { prisma } from "@/config/prisma";
 import { createInvoiceSchema } from "./schemas/invoice.schema";
 
 const fileService = new FileService();
