@@ -1,328 +1,171 @@
+import { Response, NextFunction } from "express";
+import { requireUserId } from "@/shared/utils/security/requireUserId";
 import { AppError } from "@/shared/utils/AppError";
-import { /*Request,*/ Response, NextFunction } from "express";
-import { createInvoiceSchema } from "@/modules/invoice";
+import { AuthRequest } from "@/modules/auth/auth.types";
+import { logger } from "@/shared/utils/logger";
+
 import {
+  createInvoice,
   getUserInvoices,
   getInvoiceById,
   deleteInvoiceById,
-  downloadAttachment,
-  updateInvoiceFromUrlOcr,
-  createInvoiceFromBufferOCR,
-  createInvoiceWithFiles,
-} from "./invoice.service";
-import { AuthRequest } from "@/modules/auth/auth.types";
-import { prisma } from "@/config/prisma";
-import { requireUserId } from "@/shared/utils/security/requireUserId";
-// import { AttachmentService } from "@/shared/services/attachment.service";
+} from "@/modules/invoice/core.service";
+
+// import {
+//   uploadFiles,
+//   downloadAttachment,
+//   FileService,
+// } from "@/modules/invoice/file.service";
+
+// import {
+//   createInvoiceFromBuffer,
+//   updateInvoiceFromUrl,
+// } from "@/modules/invoice/ocr.service";
 import { Role } from "@prisma/client";
-import { logger } from "@/shared/utils/logger";
+import { FileService } from "./file.service";
+import { OCRService } from "./ocr.service";
+import { prisma } from "../../config/prisma";
+import { createInvoiceSchema } from "./schemas/invoice.schema";
 
-export const create = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+const fileService = new FileService();
+const ocrService = new OCRService();
+
+
+export const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const parsed = createInvoiceSchema.parse(req.body);
     const userId = requireUserId(req);
-
-    // Create invoice record
+    const parsed = createInvoiceSchema.parse(req.body);
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (!files || files.length === 0) {
       logger.warn({ userId, action: "INVOICE_CREATE_NO_FILES" });
     }
 
-    logger.info({
-      userId,
-      action: "INVOICE_CREATE_ATTEMPT",
-      metadata: parsed,
-      fileCount: files?.length ?? 0,
-    });
 
-    const { invoice, uploadedFiles } = await createInvoiceWithFiles(
-      parsed,
-      userId,
-      files
-    );
+    const invoice = await createInvoice(parsed, userId);
+    const uploads = files?.length ? await fileService.uploadFiles(userId, invoice.id, files) : [];
 
-    // if (files && files.length > 0) {
-    //   for (const file of files) {
-    //     await AttachmentService.uploadValidated(file, invoice.id, userId);
-    //   }
-    // }
-
-    logger.info({
-      userId,
-      invoiceId: invoice.id,
-      uploadedFiles,
-      action: "INVOICE_CREATE_SUCCESS",
-    });
+    logger.info({ msg: "Invoice created", invoiceId: invoice.id, userId });
 
     res.status(201).json({
       success: true,
-      message: `Invoice created with ${uploadedFiles.length} attachment(s)`,
-      data: invoice,
+      message: `Invoice created with ${uploads.length} attachment(s)`,
+      data: await getInvoiceById(invoice.id, userId),
     });
   } catch (error) {
-    logger.error({ error, action: "INVOICE_CREATE_ERROR" });
     next(error);
   }
 };
 
-export const list = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const list = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = requireUserId(req);
-    logger.info({ userId, action: "INVOICE_LIST_ATTEMPT" });
-
     const invoices = await getUserInvoices(userId);
-    logger.info({
-      userId,
-      count: invoices.length,
-      action: "INVOICE_LIST_SUCCESS",
-    });
-    res.status(200).json({
-      success: true,
-      message: invoices.length
-        ? "Invoices retrieved successfully"
-        : "No invoices found",
-      data: invoices,
-    });
+    res.status(200).json({ success: true, data: invoices });
   } catch (error) {
-    logger.error({ error, action: "INVOICE_LIST_ERROR" });
     next(error);
   }
 };
 
-export const show = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const userId = requireUserId(req);
-    const invoiceId = req.params.id;
-
-    logger.info({ userId, invoiceId, action: "INVOICE_SHOW_ATTEMPT" });
-
-    if (!invoiceId)
-      throw new AppError("Missing invoice ID in request params", 400);
-
-    const invoice = await getInvoiceById(invoiceId, userId);
-    if (!invoice) {
-      logger.warn({ userId, invoiceId, action: "INVOICE_SHOW_NOT_FOUND" });
-      throw new AppError("Invoice not found or access denied", 404);
-    }
-
-    logger.info({ userId, invoiceId, action: "INVOICE_SHOW_SUCCESS" });
-    res.status(200).json({
-      success: true,
-      message: "Invoice retrieved successfully",
-      data: invoice,
-    });
-  } catch (error) {
-    logger.error({ error, action: "INVOICE_SHOW_ERROR" });
-    next(error);
-  }
-};
-
-export const remove = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const userId = requireUserId(req);
-    const invoiceId = req.params.id;
-
-    logger.info({ userId, invoiceId, action: "INVOICE_REMOVE_ATTEMPT" });
-    if (!invoiceId)
-      throw new AppError("Missing invoice ID in request params", 400);
-
-    const deleted = await deleteInvoiceById(
-      invoiceId,
-      userId,
-      req.user?.role as Role
-    );
-
-    if (!deleted) {
-      logger.warn({ userId, invoiceId, action: "INVOICE_REMOVE_NOT_FOUND" });
-      throw new AppError("Invoice not found or access denied", 404);
-    }
-
-    logger.info({ userId, invoiceId, action: "INVOICE_REMOVE_SUCCESS" });
-    res.status(200).json({
-      success: true,
-      message: "Invoice deleted successfully",
-      data: deleted,
-    });
-  } catch (error) {
-    logger.error({ error, action: "INVOICE_REMOVE_ERROR" });
-    next(error);
-  }
-};
-
-export const download = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const get = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = requireUserId(req);
     const invoiceId = req.params.invoiceId;
-    const attachmentId = req.params.attachmentId;
-
-    if (!invoiceId)
-      throw new AppError("Missing invoice ID in request params", 400);
-    if (!attachmentId)
-      throw new AppError("Missing attachment ID in request params", 400);
-
-    const { stream, mimeType, fileName } = await downloadAttachment(
-      userId,
-      invoiceId,
-      attachmentId
-    );
-
-    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
-    res.setHeader("Content-Type", mimeType);
-
-    stream.pipe(res);
-
-    logger.info({ userId, invoiceId, attachmentId, action: "INVOICE_DOWNLOAD_SUCCESS" });
-    
+    const invoice = await getInvoiceById(invoiceId, userId);
+    res.status(200).json({ success: true, data: invoice });
   } catch (error) {
-    logger.error({ error, action: "INVOICE_DOWNLOAD_ERROR" });
     next(error);
   }
 };
 
-export const importFromLocal = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const remove = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = requireUserId(req);
-    const file = req.file;
+    const invoiceId = req.params.id;
+    const userRole = req.user?.role as Role;
 
-    logger.info({
-      userId,
-      fileName: file?.originalname,
-      mimetype: file?.mimetype,
-      action: "IMPORT_LOCAL_ATTEMPT",
-    });
-
-    if (!file) return next(new AppError("Missing file in request", 400));
-
-    const invoice = await createInvoiceFromBufferOCR(
-      file.buffer,
-      userId,
-      file.originalname,
-      file.mimetype
-    );
-
-    logger.info({
-      userId,
-      invoiceId: invoice?.id,
-      action: "IMPORT_LOCAL_SUCCESS",
-    });
-    res.status(201).json({
-      success: true,
-      message: "Invoice imported from local file",
-      data: invoice,
-    });
-  } catch (error) {
-    logger.error({ error, action: "IMPORT_LOCAL_ERROR" });
-    next(error);
-  }
-};
-
-export const importDataFromAttachment = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { invoiceId } = req.params;
-    const userId = requireUserId(req);
-
-    if (!invoiceId) {
-      return next(new AppError("Missing invoice ID", 400));
-    }
-
-    logger.info({
-      userId,
-      invoiceId,
-      action: "IMPORT_FROM_ATTACHMENT_ATTEMPT",
-    });
-
+    // Obtener la factura antes de eliminarla
     const invoice = await prisma.invoice.findFirst({
       where: { id: invoiceId, userId },
       include: { attachments: true },
     });
 
-    if (!invoice) {
-      throw new AppError("Invoice not found for user or access denied", 404);
-    }
+    if (!invoice) throw new AppError("Invoice not found", 404);
 
-    const attachment = invoice.attachments[0];
-    if (!attachment) {
-      return next(new AppError("No attachments found for this invoice", 404));
-    }
+    // Eliminar archivos de Cloudinary
+    await fileService.deleteAttachments(userId, invoiceId);
 
-    const updateInvoice = await updateInvoiceFromUrlOcr(
-      invoiceId,
-      userId,
-      attachment.url
-    );
+    // Eliminar la factura
+    const deletedInvoice = await deleteInvoiceById(invoiceId, userId, userRole);
 
-    logger.info({
-      userId,
-      invoiceId,
-      action: "IMPORT_FROM_ATTACHMENT_SUCCESS",
-    });
+    logger.info({ msg: "Invoice deleted", invoiceId, userId });
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: `Invoice ${invoiceId} imported successfully from Cloudinary`,
-      data: updateInvoice,
+      message: "Invoice deleted",
+      data: deletedInvoice,
     });
   } catch (error) {
-    logger.error({ error, action: "IMPORT_FROM_ATTACHMENT_ERROR" });
+    next(error);
+  }
+};
+export const download = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = requireUserId(req);
+    const { invoiceId, attachmentId } = req.params;
+    const { stream, mimeType, fileName } = await fileService.downloadAttachment(userId, invoiceId, attachmentId);
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.setHeader("Content-Type", mimeType);
+    stream.pipe(res);
+  } catch (error) {
     next(error);
   }
 };
 
-export const importFromUrl = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const importFromLocal = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { url } = req.body;
-    const { invoiceId } = req.params;
     const userId = requireUserId(req);
+    const file = req.file;
+    if (!file) throw new AppError("No file uploaded", 400);
 
-    if (!invoiceId) return next(new AppError("Missing invoice ID", 400));
-    if (!url) return next(new AppError("Missing URL in request body", 400));
+    const invoice = await ocrService.createInvoiceFromBuffer(file.buffer, userId, file.originalname, file.mimetype);
+    res.status(201).json({ success: true, message: "Invoice imported from local file", data: invoice });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    logger.info({ userId, invoiceId, url, action: "IMPORT_FROM_URL_ATTEMPT" });
+export const importFromUrl = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = requireUserId(req);
+    const invoiceId = req.params.invoiceId;
+    const { url } = req.body;
+    if (!url) throw new AppError("Missing URL", 400);
 
-    const updateInvoice = await updateInvoiceFromUrlOcr(invoiceId, userId, url);
+    const invoice = await ocrService.updateInvoiceFromUrl(invoiceId, userId, url);
+    res.status(200).json({ success: true, message: "Invoice updated from OCR", data: invoice });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    logger.info({ userId, invoiceId, url, action: "IMPORT_FROM_URL_SUCCESS" });
+export const importDataFromAttachment = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = requireUserId(req);
+    const invoiceId = req.params.invoiceId;
+    const invoice  = await getInvoiceById(invoiceId, userId);
+    const url = invoice?.attachments[0]?.url;
 
-    res.status(201).json({
+    if (!url) throw new AppError("Missing URL", 400);
+
+    const result = await ocrService.updateInvoiceFromUrl(invoiceId, userId, url);
+
+    res.status(200).json({
       success: true,
-      message: "Invoice imported from Cloudinary URL",
-      data: updateInvoice,
+      message: "Invoice metadata updated from attachment",
+      data: result,
     });
   } catch (error) {
-    logger.error({ error, action: "IMPORT_FROM_URL_ERROR" });
     next(error);
   }
 };

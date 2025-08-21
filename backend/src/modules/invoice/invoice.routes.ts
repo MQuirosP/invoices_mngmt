@@ -4,10 +4,12 @@ import {
   download,
   list,
   remove,
-  show,
+  // show,
   importFromLocal,
   importFromUrl,
+  get,
   importDataFromAttachment,
+  // importDataFromAttachment,
 } from "@/modules/invoice";
 import { authenticate } from "@/modules/auth/auth.middleware";
 import { upload } from "@/shared/middleware/upload";
@@ -18,7 +20,7 @@ const router = Router();
 // ====================
 // Public invoice access
 // ====================
-router.get("/:id", authenticate, validateParams(["id"]) , show); // Get single invoice
+router.get("/:id", authenticate, validateParams(["id"]) , get); // Get single invoice
 router.get("/", authenticate, list); // List invoices
 router.delete(
   "/:id",
@@ -43,13 +45,13 @@ router.get(
 // Import / OCR
 // ====================
 router.post("/ocrscan", authenticate, upload.single("file"), importFromLocal); // From local file
-router.post(
+router.patch(
   "/import/:invoiceId",
   authenticate,
   validateParams(["invoiceId"]),
   importFromUrl
 ); // From URL
-router.post(
+router.patch(
   "/extract/:invoiceId",
   authenticate,
   validateParams(["invoiceId"]),

@@ -7,12 +7,10 @@ import { logger } from "@/shared/utils/logger";
 export const createInvoice = async (
   data: CreateInvoiceInput,
   userId: string
-): Promise<Invoice> => {
+) => {
   const invoice = await prisma.invoice.create({
     data: {
       ...data,
-      issueDate: new Date(data.issueDate),
-      expiration: new Date(data.expiration),
       userId,
     },
   });
@@ -28,7 +26,6 @@ export const createInvoice = async (
 
   return invoice;
 };
-
 export const getUserInvoices = async (userId: string): Promise<Invoice[]> => {
   logger.info({ userId, action: "INVOICE_GET_ALL_ATTEMPT" });
 
@@ -58,7 +55,7 @@ export const getInvoiceById = async (id: string, userId: string) => {
   if (!invoice) {
     logger.warn({ userId, invoiceId: id, action: "INVOICE_GET_BY_ID_NOT_FOUND" });
   } else {
-    logger.info({ userId, invoiceId: id, action: "INVOICE_GET_BY_ID_SUCCESS" });
+    logger.info({msg: "Invoice retrieved", userId, invoiceId: id, action: "INVOICE_GET_BY_ID_SUCCESS" });
   }
 
   return invoice;
@@ -79,7 +76,8 @@ export const deleteInvoiceById = async (
   if (!invoice) return null;
 
   await prisma.invoice.delete({ where: { id: invoiceId } });
-
+  
   logger.info({ invoiceId, userId, action: "INVOICE_DELETE_SUCCESS" });
   return invoice;
 };
+
