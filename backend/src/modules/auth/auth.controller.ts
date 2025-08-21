@@ -30,20 +30,24 @@ export const register = async (
       message: "User registered successfully",
     });
   } catch (error) {
-    next(
-      new AppError(
-        "Registration failed",
-        400,
-        true,
-        error instanceof Error ? error : undefined,
-        {
-          context: "AUTH_CONTROLLER",
-          route: req.originalUrl,
-          method: req.method,
-          payload: req.body,
-        }
-      )
-    );
+    if (error instanceof AppError) {
+      next(error);
+    } else {
+      next(
+        new AppError(
+          "Registration failed",
+          500,
+          true,
+          error instanceof Error ? error : undefined,
+          {
+            context: "AUTH_CONTROLLER",
+            route: req.originalUrl,
+            method: req.method,
+            payload: req.body,
+          }
+        )
+      );
+    }
   }
 };
 
@@ -71,20 +75,24 @@ export const login = async (
       message: "User logged in successfully",
     });
   } catch (error) {
-    next(
-      new AppError(
-        "Login failed",
-        401,
-        true,
-        error instanceof Error ? error : undefined,
-        {
-          context: "AUTH_CONTROLLER",
-          route: req.originalUrl,
-          method: req.method,
-          payload: req.body,
-        }
-      )
-    );
+    if (error instanceof AppError) {
+      next(error);
+    } else {
+      next(
+        new AppError(
+          "Login failed",
+          500,
+          true,
+          error instanceof Error ? error : undefined,
+          {
+            context: "AUTH_CONTROLLER",
+            route: req.originalUrl,
+            method: req.method,
+            payload: req.body,
+          }
+        )
+      );
+    }
   }
 };
 
@@ -219,4 +227,3 @@ export const logoutUser = async (
     );
   }
 };
-
