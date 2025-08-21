@@ -10,17 +10,6 @@ import {
   getInvoiceById,
   deleteInvoiceById,
 } from "@/modules/invoice/core.service";
-
-// import {
-//   uploadFiles,
-//   downloadAttachment,
-//   FileService,
-// } from "@/modules/invoice/file.service";
-
-// import {
-//   createInvoiceFromBuffer,
-//   updateInvoiceFromUrl,
-// } from "@/modules/invoice/ocr.service";
 import { Role } from "@prisma/client";
 import { FileService } from "./file.service";
 import { OCRService } from "./ocr.service";
