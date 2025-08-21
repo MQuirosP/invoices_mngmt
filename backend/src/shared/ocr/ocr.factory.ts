@@ -8,9 +8,11 @@ import { AppError } from "@/shared/utils/AppError";
 export class OCRFactory {
   static create(provider: string): OCRProvider {
     logger.info({
+      layer: "middleware",
+      module: "ocr",
       action: "OCR_PROVIDER_SELECTED",
-      context: "OCR_FACTORY",
       selected: provider,
+      timestamp: new Date().toISOString(),
     });
     if (!provider || typeof provider !== "string") {
       throw new AppError(
@@ -19,8 +21,10 @@ export class OCRFactory {
         true,
         undefined,
         {
-          context: "OCR_FACTORY",
+          layer: "middleware",
+          module: "ocr",
           provider,
+          reason: "EMPTY_OR_INVALID_PROVIDER",
         }
       );
     }
@@ -36,8 +40,10 @@ export class OCRFactory {
           true,
           undefined,
           {
-            context: "OCR_FACTORY",
+            layer: "middleware",
+            module: "ocr",
             provider,
+            reason: "UNSUPPORTED_PROVIDER",
           }
         );
     }
