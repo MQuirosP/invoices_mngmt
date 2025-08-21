@@ -284,7 +284,4 @@ npm run dev
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/MQuirosP/invoices_mngmt)
 
-```bash
-
-[![Repositorio en GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-black?logo=github)](https://github.com/MQuirosP/invoices_mngmt)
-
+[![Repositorio en GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-3f3f3f?logo=github&logoColor=white)](https://github.com/MQuirosP/invoices_mngmt)
