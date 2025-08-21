@@ -1,6 +1,6 @@
 import rateLimit from "express-rate-limit";
 import { logger } from "@/shared/utils/logger";
-import jwt from "jsonwebtoken"; // solo si querés extraer jti
+import jwt from "jsonwebtoken";
 
 export const loginRateLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
@@ -8,27 +8,27 @@ export const loginRateLimiter = rateLimit({
 
   handler: (req, res) => {
     const ip = req.ip;
-    const email = req.body?.email;
+    const email = req.body?.email ?? "unknown";
     const path = req.originalUrl;
     const method = req.method;
     const userAgent = req.headers["user-agent"];
 
-    // Extraer jti si hay JWT en el header
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(" ")[1];
     const decoded = token ? jwt.decode(token) : null;
     const jti = typeof decoded === "object" ? decoded?.jti : undefined;
 
     logger.warn({
+      layer: "middleware",
       action: "RATE_LIMIT_BLOCK",
-      context: "AUTH_LOGIN",
       ip,
-      email: email ?? "unknown",
+      email,
       jti,
       path,
       method,
       userAgent,
       reason: "Too many login attempts",
+      timestamp: new Date().toISOString(),
     });
 
     res.status(429).json({
