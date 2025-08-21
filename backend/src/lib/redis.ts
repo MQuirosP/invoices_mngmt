@@ -1,19 +1,25 @@
 import Redis from "ioredis";
 import { logger } from "@/shared/utils/logger";
 
-// Validación estricta
 if (!process.env.REDIS_URL) {
+  logger.error({
+    layer: "infrastructure",
+    action: "REDIS_CONFIG_MISSING",
+    message: "Missing REDIS_URL in environment",
+    timestamp: new Date().toISOString(),
+  });
   throw new Error("Missing REDIS_URL in environment");
 }
 
 const redis = new Redis(process.env.REDIS_URL, {
   retryStrategy: (times) => {
-    const delay = Math.min(50 * Math.pow(2, times), 5000); // Exponential backoff with a max delay of 5 seconds
+    const delay = Math.min(50 * Math.pow(2, times), 5000);
     logger.warn({
+      layer: "infrastructure",
       action: "REDIS_RETRY",
       attempt: times,
       delay,
-      context: "CACHE_LAYER",
+      timestamp: new Date().toISOString(),
     });
     return delay;
   },
@@ -21,24 +27,27 @@ const redis = new Redis(process.env.REDIS_URL, {
 
 redis.on("connect", () => {
   logger.info({
-    action: "REDIS_CONNECTED",
+    layer: "infrastructure",
+    action: "REDIS_CONNECT_SUCCESS",
     url: process.env.REDIS_URL,
-    context: "CACHE_LAYER",
+    timestamp: new Date().toISOString(),
   });
 });
 
 redis.on("error", (err) => {
   logger.error({
-    action: "REDIS_CONNECTION_ERROR",
+    layer: "infrastructure",
+    action: "REDIS_CONNECT_ERROR",
     error: err.message,
-    context: "CACHE_LAYER",
+    timestamp: new Date().toISOString(),
   });
 });
 
 redis.on("end", () => {
   logger.warn({
+    layer: "infrastructure",
     action: "REDIS_DISCONNECTED",
-    context: "CACHE_LAYER",
+    timestamp: new Date().toISOString(),
   });
 });
 
