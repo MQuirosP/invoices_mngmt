@@ -6,13 +6,17 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 
 ## Tecnologías
 
-- Node.js + Express  
-- TypeScript  
-- Prisma ORM + PostgreSQL  
-- JWT + Bcrypt  
-- Zod para validaciones  
-- Multer + Cloudinary para manejo de archivos  
-- Google Cloud Vision API para OCR
+[![Node.js](https://img.shields.io/badge/Node.js-%3E=18.0.0-3f3f3f?logo=node.js)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-Routing--Layer-3f3f3f)](https://expressjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict--Types-3f3f3f?logo=typescript)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM--Auditable-3f3f3f?logo=prisma)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Relational--DB-3f3f3f?logo=postgresql)](https://www.postgresql.org/)
+[![JWT](https://img.shields.io/badge/JWT-Token--Based--Auth-3f3f3f)](https://jwt.io/)
+[![Bcrypt](https://img.shields.io/badge/Bcrypt-Password--Hashing-3f3f3f)](https://github.com/kelektiv/node.bcrypt.js)
+[![Zod](https://img.shields.io/badge/Zod-Strict--Validation-3f3f3f)](https://zod.dev/)
+[![Multer](https://img.shields.io/badge/Multer-File--Upload--Middleware-3f3f3f)](https://github.com/expressjs/multer)
+[![Cloudinary](https://img.shields.io/badge/Cloudinary-Asset--Storage-3f3f3f?logo=cloudinary)](https://cloudinary.com/)
+[![Google Cloud Vision](https://img.shields.io/badge/Google--Vision-OCR--API-3f3f3f?logo=googlecloud)](https://cloud.google.com/vision)
 
 ---
 
