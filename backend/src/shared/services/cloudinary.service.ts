@@ -12,20 +12,34 @@ export class CloudinaryService {
     mimetype: string,
     userId: string
   ): Promise<{ url: string; type: string }> {
-    try {
-      const ext = mimeExtensionMap[mimetype];
-      logger.info({
-        action: "CLOUDINARY_UPLOAD_INIT",
-        context: "CLOUDINARY_SERVICE",
+    const timestamp = new Date().toISOString();
+    const ext = mimeExtensionMap[mimetype];
+
+    logger.info({
+      layer: "service",
+      module: "cloudinary",
+      action: "CLOUDINARY_UPLOAD_INIT",
+      mimetype,
+      filename,
+      userId,
+      timestamp,
+    });
+
+    if (!ext) {
+      throw new AppError("Unsupported file type", 415, true, undefined, {
+        layer: "service",
+        module: "cloudinary",
+        reason: "UNSUPPORTED_MIME_TYPE",
         mimetype,
         filename,
         userId,
+        timestamp,
       });
+    }
 
-      if (!ext) throw new AppError("Unsupported file type", 415);
+    const baseName = path.basename(filename, path.extname(filename));
 
-      const baseName = path.basename(filename, path.extname(filename));
-
+    try {
       const result = await uploadWithRetry(fileBuffer, {
         public_id: baseName,
         folder: userId,
@@ -35,16 +49,26 @@ export class CloudinaryService {
       });
 
       if (!result.secure_url) {
-        throw new AppError("Cloudinary upload failed");
+        throw new AppError("Cloudinary upload failed", 500, true, undefined, {
+          layer: "service",
+          module: "cloudinary",
+          reason: "NO_URL_RETURNED",
+          filename,
+          userId,
+          mimetype,
+          timestamp,
+        });
       }
 
       logger.info({
+        layer: "service",
+        module: "cloudinary",
         action: "CLOUDINARY_UPLOAD_SUCCESS",
-        context: "CLOUDINARY_SERVICE",
         url: result.secure_url,
         userId,
         filename,
         mimetype,
+        timestamp,
       });
 
       return {
@@ -53,19 +77,24 @@ export class CloudinaryService {
       };
     } catch (error: any) {
       logger.error({
+        layer: "service",
+        module: "cloudinary",
         action: "CLOUDINARY_UPLOAD_ERROR",
-        context: "CLOUDINARY_SERVICE",
-        error,
+        error: error instanceof Error ? error.message : String(error),
         userId,
         filename,
         mimetype,
+        timestamp,
       });
 
       throw new AppError("Cloudinary upload failed", 500, true, error, {
-        context: "CLOUDINARY_SERVICE",
+        layer: "service",
+        module: "cloudinary",
+        reason: "UPLOAD_EXCEPTION",
         userId,
         filename,
         mimetype,
+        timestamp,
       });
     }
   }
@@ -75,53 +104,60 @@ export class CloudinaryService {
     filename: string,
     mimetype: string
   ): Promise<void> {
+    const timestamp = new Date().toISOString();
+    const nameWithoutExtension = path.basename(filename, path.extname(filename));
+    const publicId = `${userId}/${nameWithoutExtension}`;
+
+    let resource_type: "image" | "video" | "raw" = "raw";
+    if (mimetype.startsWith("image/")) {
+      resource_type = "image";
+    } else if (mimetype.startsWith("video/")) {
+      resource_type = "video";
+    }
+
+    logger.info({
+      layer: "service",
+      module: "cloudinary",
+      action: "CLOUDINARY_DELETE_INIT",
+      publicId,
+      resource_type,
+      timestamp,
+    });
+
     try {
-      const nameWithoutExtension = path.basename(
-        filename,
-        path.extname(filename)
-      );
-      const publicId = `${userId}/${nameWithoutExtension}`;
-
-      let resource_type: "image" | "video" | "raw" = "raw";
-      if (mimetype.startsWith("image/")) {
-        resource_type = "image";
-      } else if (mimetype.startsWith("video/")) {
-        resource_type = "video";
-      }
-
-      logger.info({
-        action: "CLOUDINARY_DELETE_INIT",
-        context: "CLOUDINARY_SERVICE",
-        publicId,
-        resource_type,
-      });
-
       await cloudinary.uploader.destroy(publicId, {
         resource_type,
         invalidate: true,
       });
 
       logger.info({
+        layer: "service",
+        module: "cloudinary",
         action: "CLOUDINARY_DELETE_SUCCESS",
-        context: "CLOUDINARY_SERVICE",
         publicId,
         resource_type,
+        timestamp,
       });
     } catch (error: any) {
       logger.error({
+        layer: "service",
+        module: "cloudinary",
         action: "CLOUDINARY_DELETE_ERROR",
-        context: "CLOUDINARY_SERVICE",
-        error,
+        error: error instanceof Error ? error.message : String(error),
         userId,
         filename,
         mimetype,
+        timestamp,
       });
 
       throw new AppError("Cloudinary deletion failed", 500, true, error, {
-        context: "CLOUDINARY_SERVICE",
+        layer: "service",
+        module: "cloudinary",
+        reason: "DELETE_EXCEPTION",
         userId,
         filename,
         mimetype,
+        timestamp,
       });
     }
   }
