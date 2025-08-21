@@ -14,6 +14,7 @@ router.get("/", (req, res) => {
 
 // Auth module
 router.use("/auth", authRouter);
+
 // Invoice module
 router.use("/invoices", invoiceRouter);
 
@@ -22,17 +23,21 @@ router.get("/ping", async (req, res) => {
   const jobId = req.headers["x-job-id"] || "unknown";
   const env = req.headers["x-env"] || "unknown";
 
-  try {
-    // Redis touch
-    await redis.set(`ping:${jobId}`, Date.now().toString(), "EX", 60);
+  logger.info({
+    layer: "router",
+    action: "PING_ATTEMPT",
+    jobId,
+    env,
+    timestamp: new Date().toISOString(),
+  });
 
-    // Optional DB touch
+  try {
+    await redis.set(`ping:${jobId}`, Date.now().toString(), "EX", 60);
     const invoiceCount = await prisma.invoice.count();
 
-    // Logging estructurado
     logger.info({
-      action: "PING_RECEIVED",
-      context: "KEEP_ALIVE",
+      layer: "router",
+      action: "PING_SUCCESS",
       jobId,
       env,
       invoiceCount,
@@ -42,12 +47,14 @@ router.get("/ping", async (req, res) => {
     res.json({ status: "ok", invoiceCount });
   } catch (err) {
     logger.error({
+      layer: "router",
       action: "PING_ERROR",
-      context: "KEEP_ALIVE",
-      error: err,
       jobId,
       env,
+      error: err instanceof Error ? err.message : String(err),
+      timestamp: new Date().toISOString(),
     });
+
     res.status(500).json({ status: "error" });
   }
 });
@@ -56,12 +63,19 @@ router.get("/ping", async (req, res) => {
 router.get("/health/db", async (req, res) => {
   const jobId = req.headers["x-job-id"] || "unknown";
 
+  logger.info({
+    layer: "router",
+    action: "DB_HEALTH_ATTEMPT",
+    jobId,
+    timestamp: new Date().toISOString(),
+  });
+
   try {
     await prisma.$queryRaw`SELECT 1`;
 
     logger.info({
-      action: "DB_HEALTH_OK",
-      context: "HEALTH_CHECK",
+      layer: "router",
+      action: "DB_HEALTH_SUCCESS",
       jobId,
       timestamp: new Date().toISOString(),
     });
@@ -71,8 +85,8 @@ router.get("/health/db", async (req, res) => {
     const error = err instanceof Error ? err : new Error(String(err));
 
     logger.error({
+      layer: "router",
       action: "DB_HEALTH_ERROR",
-      context: "HEALTH_CHECK",
       jobId,
       error: error.message,
       timestamp: new Date().toISOString(),
