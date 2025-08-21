@@ -13,13 +13,14 @@ export const requireRole = (allowedRoles: readonly string[]) => {
 
     if (!user?.role || !allowedRoles.includes(user.role)) {
       logger.warn({
+        layer: "middleware",
         action: "ROLE_UNAUTHORIZED",
-        context: "AUTH_MIDDLEWARE",
         userId: user?.id,
         actualRole: user?.role,
         requiredRoles: allowedRoles,
         path: req.originalUrl,
         method: req.method,
+        timestamp: new Date().toISOString(),
       });
 
       throw new AppError(
