@@ -5,12 +5,17 @@ import {
   extractIssueDate,
   extractWarranty,
   extractTitle,
-} from '@/shared/ocr/extractors';
+} from "@/shared/ocr/extractors";
 import { logger } from "@/shared/utils/logger";
 import { calculateExpirationFromItems } from "./extractExpirationFromItems";
 
-export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata {
-  const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
+export function extractMetadataFromText(
+  text: string
+): ExtractedInvoiceMetadata {
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   const title = extractTitle(lines);
   const provider = extractProvider(lines);
@@ -21,12 +26,14 @@ export function extractMetadataFromText(text: string): ExtractedInvoiceMetadata 
   const expiration = calculateExpirationFromItems(issueDate, items);
 
   logger.info({
+    layer: "extractor",
+    action: "OCR_METADATA_EXTRACTED",
     provider,
     title,
     issueDate,
     expiration,
     itemCount: items.length,
-    step: "OCR_METADATA_EXTRACTED",
+    timestamp: new Date().toISOString(),
   });
 
   return {
