@@ -5,38 +5,46 @@ import { connectWithRetry } from "@/shared/utils/retries/connectWithRetry";
 import { verifyRedisConnection } from "./lib/verifyRedisConnection";
 
 async function bootstrap() {
-  validateEnvVars();
+  logger.info({
+    layer: "bootstrap",
+    action: "BOOT_ATTEMPT",
+    timestamp: new Date().toISOString(),
+  });
 
-  await connectWithRetry(); // Checks DB connection before starting server
+  validateEnvVars();
+  await connectWithRetry();
 
   const redisAvailable = await verifyRedisConnection();
 
   if (!redisAvailable) {
     logger.warn({
+      layer: "bootstrap",
       action: "REDIS_UNAVAILABLE_AT_BOOT",
-      context: "BOOTSTRAP",
       message: "Revocation and caching will be disabled",
+      timestamp: new Date().toISOString(),
     });
   }
 
   const PORT = process.env.PORT || 3000;
 
   app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
     logger.info({
+      layer: "bootstrap",
       action: "SERVER_STARTED",
       port: PORT,
       redisAvailable,
-      context: "BOOTSTRAP",
+      timestamp: new Date().toISOString(),
     });
+    console.log(`Server is running on port ${PORT}`);
   });
 }
 
 bootstrap().catch((err) => {
   logger.fatal({
-    action: "SERVER_BOOTSTRAP_FAILED",
+    layer: "bootstrap",
+    action: "BOOT_ERROR",
     error: err instanceof Error ? err.message : String(err),
-    context: "BOOTSTRAP",
+    timestamp: new Date().toISOString(),
   });
   process.exit(1);
 });
