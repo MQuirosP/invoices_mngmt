@@ -23,7 +23,8 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 ## mquirosp-invoices_mngmt
 
 ```bash
-└──
+
+└── mquirosp-invoices_mngmt/
     ├── README.md
     ├── CHANGELOG.md
     ├── LICENSE
@@ -62,15 +63,14 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     │   └── src/
     │       ├── app.ts
     │       ├── server.ts
-    │       ├── cache/
-    │       │   └── userCache.ts
     │       ├── config/
     │       │   ├── cloudinary.ts
     │       │   ├── index.ts
     │       │   ├── prisma.ts
     │       │   └── validateEnv.ts
     │       ├── lib/
-    │       │   └── redis.ts
+    │       │   ├── redis.ts
+    │       │   └── verifyRedisConnection.ts
     │       ├── modules/
     │       │   ├── auth/
     │       │   │   ├── auth.controller.ts
@@ -80,14 +80,19 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     │       │   │   ├── auth.service.ts
     │       │   │   ├── auth.types.ts
     │       │   │   └── index.ts
-    │       │   └── invoice/
-    │       │       ├── index.ts
-    │       │       ├── invoice.controller.ts
-    │       │       ├── invoice.query.ts
-    │       │       ├── invoice.routes.ts
-    │       │       ├── invoice.schema.ts
-    │       │       ├── invoice.service.ts
-    │       │       └── invoiceItems.schema.ts
+    │       │   ├── invoice/
+    │       │   │   ├── index.ts
+    │       │   │   ├── invoice.controller.ts
+    │       │   │   ├── invoice.query.ts
+    │       │   │   ├── invoice.routes.ts
+    │       │   │   ├── invoice.service.ts
+    │       │   │   └── schemas/
+    │       │   │       ├── invoice.schema.ts
+    │       │   │       └── invoiceItems.schema.ts
+    │       │   └── monitoring/
+    │       │       ├── dbHealth.controller.ts
+    │       │       ├── dbHealth.routes.ts
+    │       │       └── dbHealth.service.ts
     │       ├── routes/
     │       │   └── index.ts
     │       └── shared/
@@ -102,44 +107,54 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     │           │   ├── upload.ts
     │           │   └── validateParams.ts
     │           ├── ocr/
-    │           │   ├── index.ts
     │           │   ├── ocr.factory.ts
     │           │   ├── ocr.types.ts
     │           │   ├── preprocessing.ts
     │           │   ├── extractors/
+    │           │   │   ├── extractExpirationFromItems.ts
     │           │   │   ├── extractIssueDate.ts
     │           │   │   ├── extractItems.ts
     │           │   │   ├── extractMetadata.ts
     │           │   │   ├── extractProvider.ts
     │           │   │   ├── extractTitle.ts
     │           │   │   ├── extractWarranty.ts
-    │           │   │   └── index.ts
-    │           │   ├── ocr.providers/
-    │           │   │   ├── aws.ts
-    │           │   │   ├── gcp.ts
-    │           │   │   └── tesseract.ts
-    │           │   └── patterns/
-    │           │       ├── index.ts
-    │           │       ├── matchers.ts
-    │           │       └── regex.ts
+    │           │   │   ├── index.ts
+    │           │   │   └── metadataExtractor.ts
+    │           │   ├── patterns/
+    │           │   │   ├── index.ts
+    │           │   │   ├── matchers.ts
+    │           │   │   └── regex.ts
+    │           │   └── providers/
+    │           │       ├── aws.ts
+    │           │       ├── gcp.ts
+    │           │       └── tesseract.ts
     │           ├── services/
     │           │   ├── attachment.service.ts
     │           │   ├── cache.service.ts
     │           │   ├── cloudinary.service.ts
     │           │   ├── fileFetcher.service.ts
-    │           │   └── import.service.ts
+    │           │   ├── import.service.ts
+    │           │   └── userCache.service.ts
     │           └── utils/
-    │               ├── AppError.utils.ts
-    │               ├── hashPassword.ts
+    │               ├── AppError.ts
     │               ├── logger.ts
-    │               ├── requireUserId.ts
-    │               └── file/
-    │                   ├── generateRandomFilename.ts
-    │                   ├── getFileExtension.ts
-    │                   └── validateRealMime.ts
-└── .github/
-    └── workflows/
-        └── keep-alive.yml
+    │               ├── file/
+    │               │   ├── generateRandomFilename.ts
+    │               │   ├── getFileExtension.ts
+    │               │   └── validateRealMime.ts
+    │               ├── retries/
+    │               │   ├── connectWithRetry.ts
+    │               │   ├── retryMethods.ts
+    │               │   └── uploadWithRetry.ts
+    │               ├── security/
+    │               │   ├── hashPassword.ts
+    │               │   └── requireUserId.ts
+    │               └── token/
+    │                   ├── revokeToken.ts
+    │                   └── signTokenWithJti.ts
+    └── .github/
+        └── workflows/
+            └── keep-alive.yml
 
 ```
 
