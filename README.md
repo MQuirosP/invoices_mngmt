@@ -286,5 +286,5 @@ npm run dev
 
 ```bash
 
-[Repositorio en GitHub](https://github.com/MQuirosP)
+[![Repositorio en GitHub](https://github.com/MQuirosP)]
 
