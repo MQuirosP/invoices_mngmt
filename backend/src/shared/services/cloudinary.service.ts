@@ -61,7 +61,12 @@ export class CloudinaryService {
         mimetype,
       });
 
-      throw new AppError(error.message || "Cloudinary upload failed");
+      throw new AppError("Cloudinary upload failed", 500, true, error, {
+        context: "CLOUDINARY_SERVICE",
+        userId,
+        filename,
+        mimetype,
+      });
     }
   }
 
@@ -112,7 +117,12 @@ export class CloudinaryService {
         mimetype,
       });
 
-      throw new AppError("Cloudinary deletion failed", 500);
+      throw new AppError("Cloudinary deletion failed", 500, true, error, {
+        context: "CLOUDINARY_SERVICE",
+        userId,
+        filename,
+        mimetype,
+      });
     }
   }
 }
