@@ -14,11 +14,14 @@ export class AttachmentService {
     const cloudinary = new CloudinaryService();
 
     logger.info({
+      layer: "service",
+      module: "attachment",
+      action: "ATTACHMENT_UPLOAD_ATTEMPT",
       userId,
       invoiceId,
       fileName: file.originalname,
       mimetype: file.mimetype,
-      action: "ATTACHMENT_UPLOAD_ATTEMPT",
+      timestamp: new Date().toISOString(),
     });
 
     const { buffer, mimetype } = file;
@@ -26,21 +29,26 @@ export class AttachmentService {
     // Validate real MIME from buffer
     const { mime, ext } = await validateRealMime(buffer, mimetype);
     logger.info({
+      layer: "service",
+      module: "attachment",
       action: "ATTACHMENT_MIME_VALIDATED",
-      context: "ATTACHMENT_SERVICE",
       originalMime: mimetype,
       validatedMime: mime,
       extension: ext,
+      timestamp: new Date().toISOString(),
     });
 
     // Generate random filename
     const filename = generateRandomFilename(mime, invoiceId);
     logger.info({
+      layer: "service",
+      module: "attachment",
+      action: "ATTACHMENT_FILENAME_GENERATED",
       invoiceId,
       userId,
       filename,
       ext,
-      action: "ATTACHMENT_FILENAME_GENERATED",
+      timestamp: new Date().toISOString(),
     });
 
     // Upload to Cloudinary
@@ -50,22 +58,29 @@ export class AttachmentService {
       url = result.url;
     } catch (error: any) {
       logger.error({
+        layer: "service",
+        module: "attachment",
         action: "ATTACHMENT_UPLOAD_ERROR",
-        context: "ATTACHMENT_SERVICE",
-        error,
+        reason: "CLOUDINARY_UPLOAD_FAILED",
+        error: error instanceof Error ? error.message : String(error),
         invoiceId,
         userId,
         filename,
         mime,
+        timestamp: new Date().toISOString(),
       });
       throw new AppError("Cloudinary upload failed", 500);
     }
 
     if (!url) {
       logger.warn({
+        layer: "service",
+        module: "attachment",
+        action: "ATTACHMENT_UPLOAD_FAILED",
+        reason: "NO_URL_RETURNED",
         invoiceId,
         fileName: file.originalname,
-        action: "ATTACHMENT_UPLOAD_FAILED",
+        timestamp: new Date().toISOString(),
       });
       throw new AppError("Attachment upload failed", 500);
     }
@@ -81,12 +96,14 @@ export class AttachmentService {
     });
 
     logger.info({
+      layer: "service",
+      module: "attachment",
       action: "ATTACHMENT_UPLOAD_SUCCESS",
-      context: "ATTACHMENT_SERVICE",
       invoiceId,
       userId,
       attachmentId: attachment.id,
       fileName: attachment.fileName,
+      timestamp: new Date().toISOString(),
     });
 
     return attachment;
