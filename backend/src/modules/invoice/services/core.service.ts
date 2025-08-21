@@ -8,6 +8,17 @@ export const createInvoice = async (
   data: CreateInvoiceInput,
   userId: string
 ) => {
+  logger.info({
+    layer: "service",
+    action: "INVOICE_CREATE_ATTEMPT",
+    userId,
+    payload: {
+      title: data.title,
+      issueDate: data.issueDate,
+      expiration: data.expiration,
+    },
+  });
+
   const invoice = await prisma.invoice.create({
     data: {
       ...data,
@@ -16,18 +27,24 @@ export const createInvoice = async (
   });
 
   logger.info({
+    layer: "service",
+    action: "INVOICE_CREATE_SUCCESS",
     userId,
     invoiceId: invoice.id,
     title: data.title,
     issueDate: data.issueDate,
     expiration: data.expiration,
-    action: "INVOICE_CREATE_SUCCESS",
   });
 
   return invoice;
 };
+
 export const getUserInvoices = async (userId: string): Promise<Invoice[]> => {
-  logger.info({ userId, action: "INVOICE_GET_ALL_ATTEMPT" });
+  logger.info({
+    layer: "service",
+    action: "INVOICE_GET_ALL_ATTEMPT",
+    userId,
+  });
 
   const invoices = await prisma.invoice.findMany({
     where: { userId },
@@ -36,16 +53,22 @@ export const getUserInvoices = async (userId: string): Promise<Invoice[]> => {
   });
 
   logger.info({
+    layer: "service",
+    action: "INVOICE_GET_ALL_SUCCESS",
     userId,
     invoiceCount: invoices.length,
-    action: "INVOICE_GET_ALL_SUCCESS",
   });
 
   return invoices;
 };
 
 export const getInvoiceById = async (id: string, userId: string) => {
-  logger.info({ userId, invoiceId: id, action: "INVOICE_GET_BY_ID_ATTEMPT" });
+  logger.info({
+    layer: "service",
+    action: "INVOICE_GET_BY_ID_ATTEMPT",
+    userId,
+    invoiceId: id,
+  });
 
   const invoice = await prisma.invoice.findFirst({
     where: { id, userId },
@@ -53,9 +76,19 @@ export const getInvoiceById = async (id: string, userId: string) => {
   });
 
   if (!invoice) {
-    logger.warn({ userId, invoiceId: id, action: "INVOICE_GET_BY_ID_NOT_FOUND" });
+    logger.warn({
+      layer: "service",
+      action: "INVOICE_GET_BY_ID_NOT_FOUND",
+      userId,
+      invoiceId: id,
+    });
   } else {
-    logger.info({msg: "Invoice retrieved", userId, invoiceId: id, action: "INVOICE_GET_BY_ID_SUCCESS" });
+    logger.info({
+      layer: "service",
+      action: "INVOICE_GET_BY_ID_SUCCESS",
+      userId,
+      invoiceId: id,
+    });
   }
 
   return invoice;
@@ -66,18 +99,37 @@ export const deleteInvoiceById = async (
   userId: string,
   userRole: Role
 ) => {
-  logger.info({ invoiceId, userId, userRole, action: "INVOICE_DELETE_ATTEMPT" });
+  logger.info({
+    layer: "service",
+    action: "INVOICE_DELETE_ATTEMPT",
+    invoiceId,
+    userId,
+    userRole,
+  });
 
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId },
     include: { attachments: true },
   });
 
-  if (!invoice) return null;
+  if (!invoice) {
+    logger.warn({
+      layer: "service",
+      action: "INVOICE_DELETE_NOT_FOUND",
+      invoiceId,
+      userId,
+    });
+    return null;
+  }
 
   await prisma.invoice.delete({ where: { id: invoiceId } });
-  
-  logger.info({ invoiceId, userId, action: "INVOICE_DELETE_SUCCESS" });
+
+  logger.info({
+    layer: "service",
+    action: "INVOICE_DELETE_SUCCESS",
+    invoiceId,
+    userId,
+  });
+
   return invoice;
 };
-

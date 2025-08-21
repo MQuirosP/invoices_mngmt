@@ -13,13 +13,21 @@ export const authenticate = async (
 ) => {
   const authHeader = req.headers.authorization;
 
+  logger.info({
+    layer: "middleware",
+    action: "AUTH_CHECK_INIT",
+    method: req.method,
+    path: req.originalUrl,
+    hasAuthHeader: !!authHeader,
+  });
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     logger.warn({
-      action: "AUTH_HEADER_MISSING",
-      message: "Missing or malformed Authorization header",
-      context: "AUTH_MIDDLEWARE",
-      path: req.originalUrl,
+      layer: "middleware",
+      action: "AUTH_HEADER_INVALID",
       method: req.method,
+      path: req.originalUrl,
+      authHeader,
     });
 
     return next(
@@ -43,11 +51,10 @@ export const authenticate = async (
 
   if (!secret) {
     logger.error({
+      layer: "middleware",
       action: "JWT_SECRET_MISSING",
-      message: "JWT_SECRET is not defined",
-      context: "AUTH_MIDDLEWARE",
-      path: req.originalUrl,
       method: req.method,
+      path: req.originalUrl,
     });
 
     return next(
@@ -67,18 +74,28 @@ export const authenticate = async (
       jti?: string;
     };
 
-    // Verificación de revocación
+    logger.info({
+      layer: "middleware",
+      action: "JWT_VERIFIED",
+      method: req.method,
+      path: req.originalUrl,
+      userId: decoded.sub,
+      email: decoded.email,
+      role: decoded.role,
+      jti: decoded.jti,
+    });
+
     if (decoded.jti) {
       const isRevoked = await redis.get(`revoked:${decoded.jti}`);
 
       if (isRevoked !== null) {
         logger.warn({
-          action: "JWT_REJECTED_REVOKED",
-          jti: decoded.jti,
-          userId: decoded.sub,
-          context: "AUTH_MIDDLEWARE",
-          path: req.originalUrl,
+          layer: "middleware",
+          action: "JWT_REVOKED",
           method: req.method,
+          path: req.originalUrl,
+          userId: decoded.sub,
+          jti: decoded.jti,
         });
 
         return next(
@@ -100,25 +117,24 @@ export const authenticate = async (
     };
 
     logger.info({
+      layer: "middleware",
       action: "AUTH_SUCCESS",
-      context: "AUTH_MIDDLEWARE",
+      method: req.method,
+      path: req.originalUrl,
       userId: decoded.sub,
       email: decoded.email,
       role: decoded.role,
-      path: req.originalUrl,
-      method: req.method,
     });
 
     next();
   } catch (error) {
-    logger.warn({
-      action: "JWT_VERIFICATION_FAILED",
-      message: "JWT verification failed",
+    logger.error({
+      layer: "middleware",
+      action: "JWT_VERIFICATION_ERROR",
+      method: req.method,
+      path: req.originalUrl,
       token,
       error: error instanceof Error ? error.message : String(error),
-      context: "AUTH_MIDDLEWARE",
-      path: req.originalUrl,
-      method: req.method,
     });
 
     return next(

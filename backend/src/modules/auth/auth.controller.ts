@@ -10,17 +10,25 @@ export class AuthController {
   private readonly service: AuthService;
 
   constructor(service?: AuthService) {
-    this.service = new AuthService();
+    this.service = service ?? new AuthService();
   }
 
   async register(req: Request, res: Response, next: NextFunction): Promise<void> {
+    logger.info({
+      layer: "controller",
+      action: "USER_REGISTER_ATTEMPT",
+      method: req.method,
+      path: req.originalUrl,
+      payload: req.body,
+    });
+
     try {
       const parsed = registerSchema.parse(req.body);
       const result = await this.service.registerUser(parsed);
 
       logger.info({
-        action: "USER_REGISTERED",
-        context: "AUTH_CONTROLLER",
+        layer: "controller",
+        action: "USER_REGISTER_SUCCESS",
         userId: result.id,
         method: req.method,
         path: req.originalUrl,
@@ -32,6 +40,14 @@ export class AuthController {
         message: "User registered successfully",
       });
     } catch (error) {
+      logger.error({
+        layer: "controller",
+        action: "USER_REGISTER_ERROR",
+        method: req.method,
+        path: req.originalUrl,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+
       next(
         error instanceof AppError
           ? error
@@ -46,13 +62,21 @@ export class AuthController {
   }
 
   async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+    logger.info({
+      layer: "controller",
+      action: "USER_LOGIN_ATTEMPT",
+      method: req.method,
+      path: req.originalUrl,
+      payload: req.body,
+    });
+
     try {
       const parsed = loginSchema.parse(req.body);
       const result = await this.service.loginUser(parsed);
 
       logger.info({
-        action: "USER_LOGGED_IN",
-        context: "AUTH_CONTROLLER",
+        layer: "controller",
+        action: "USER_LOGIN_SUCCESS",
         userId: result.id,
         method: req.method,
         path: req.originalUrl,
@@ -64,6 +88,14 @@ export class AuthController {
         message: "User logged in successfully",
       });
     } catch (error) {
+      logger.error({
+        layer: "controller",
+        action: "USER_LOGIN_ERROR",
+        method: req.method,
+        path: req.originalUrl,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+
       next(
         error instanceof AppError
           ? error
@@ -78,21 +110,25 @@ export class AuthController {
   }
 
   async listUsers(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    const userId = req.user?.id;
+
     logger.info({
-      action: "USERS_LIST_REQUEST",
-      context: "AUTH_CONTROLLER",
-      userId: req.user?.id,
+      layer: "controller",
+      action: "USER_LIST_ATTEMPT",
+      userId,
       method: req.method,
+      path: req.originalUrl,
     });
 
     try {
       const users = await this.service.getUsers();
+
       logger.info({
-        action: "USERS_LIST_SUCCESS",
-        context: "AUTH_CONTROLLER",
+        layer: "controller",
+        action: "USER_LIST_SUCCESS",
+        userId,
         method: req.method,
         path: req.originalUrl,
-        userId: req.user?.id,
         count: users.length,
       });
 
@@ -103,11 +139,11 @@ export class AuthController {
       });
     } catch (error) {
       logger.error({
-        action: "USERS_LIST_ERROR",
-        context: "AUTH_CONTROLLER",
+        layer: "controller",
+        action: "USER_LIST_ERROR",
+        userId,
         method: req.method,
         path: req.originalUrl,
-        userId: req.user?.id,
         error: error instanceof Error ? error.message : "Unknown error",
       });
 
@@ -116,7 +152,7 @@ export class AuthController {
           context: "AUTH_CONTROLLER",
           route: req.originalUrl,
           method: req.method,
-          userId: req.user?.id,
+          userId,
         })
       );
     }
@@ -127,8 +163,8 @@ export class AuthController {
     const userId = req.user?.id;
 
     logger.info({
+      layer: "controller",
       action: "USER_LOGOUT_ATTEMPT",
-      context: "AUTH_CONTROLLER",
       userId,
       method: req.method,
       path: req.originalUrl,
@@ -137,8 +173,8 @@ export class AuthController {
 
     if (!jti) {
       logger.warn({
-        action: "LOGOUT_JTI_MISSING",
-        context: "AUTH_CONTROLLER",
+        layer: "controller",
+        action: "USER_LOGOUT_JTI_MISSING",
         userId,
         method: req.method,
         path: req.originalUrl,
@@ -155,8 +191,8 @@ export class AuthController {
       await revokeToken(jti);
 
       logger.info({
+        layer: "controller",
         action: "USER_LOGOUT_SUCCESS",
-        context: "AUTH_CONTROLLER",
         userId,
         method: req.method,
         path: req.originalUrl,
@@ -169,8 +205,8 @@ export class AuthController {
       });
     } catch (error) {
       logger.error({
+        layer: "controller",
         action: "USER_LOGOUT_ERROR",
-        context: "AUTH_CONTROLLER",
         userId,
         method: req.method,
         path: req.originalUrl,

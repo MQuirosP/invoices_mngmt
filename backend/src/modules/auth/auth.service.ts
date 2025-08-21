@@ -11,16 +11,22 @@ import { signTokenWithJti } from "@/shared/utils/token/signTokenWithJti";
 export class AuthService {
   async registerUser(data: RegisterInput) {
     logger.info({
+      layer: "service",
+      action: "USER_REGISTER_ATTEMPT",
       email: data.email,
       fullname: data.fullname,
-      action: "REGISTER_ATTEMPT",
+      role: data.role ?? "USER",
     });
 
     const { email, password, fullname, role = "USER" } = data;
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      logger.warn({ email, action: "REGISTER_USER_EXISTS" });
+      logger.warn({
+        layer: "service",
+        action: "USER_REGISTER_EXISTS",
+        email,
+      });
       throw new AppError("Email already registered", 409);
     }
 
@@ -37,7 +43,13 @@ export class AuthService {
       role: user.role as Role,
     });
 
-    logger.info({ email, action: "REGISTER_SUCCESS" });
+    logger.info({
+      layer: "service",
+      action: "USER_REGISTER_SUCCESS",
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     return {
       id: user.id,
@@ -49,7 +61,11 @@ export class AuthService {
   }
 
   async loginUser(data: LoginInput) {
-    logger.info({ email: data.email, action: "LOGIN_ATTEMPT" });
+    logger.info({
+      layer: "service",
+      action: "USER_LOGIN_ATTEMPT",
+      email: data.email,
+    });
 
     const { email, password } = data;
 
@@ -57,25 +73,45 @@ export class AuthService {
     let user: User | null;
 
     if (cachedUser) {
-      logger.info({ email, action: "LOGIN_CACHE_USED", context: "CACHE_LAYER" });
+      logger.info({
+        layer: "service",
+        action: "USER_LOGIN_CACHE_USED",
+        email,
+        cachedUserId: cachedUser.id,
+      });
       user = await prisma.user.findUnique({ where: { id: cachedUser.id } });
     } else {
       user = await prisma.user.findUnique({ where: { email } });
     }
 
     if (!user) {
-      logger.warn({ email, action: "LOGIN_USER_NOT_FOUND" });
+      logger.warn({
+        layer: "service",
+        action: "USER_LOGIN_NOT_FOUND",
+        email,
+      });
       throw new AppError("User not found.", 404);
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      logger.warn({ email, action: "LOGIN_INVALID_PASSWORD" });
+      logger.warn({
+        layer: "service",
+        action: "USER_LOGIN_INVALID_PASSWORD",
+        email,
+        userId: user.id,
+      });
       throw new AppError("Invalid password.", 401);
     }
 
     if (!cachedUser) {
       await setCachedUser(user);
+      logger.info({
+        layer: "service",
+        action: "USER_LOGIN_CACHE_SET",
+        userId: user.id,
+        email,
+      });
     }
 
     const { token } = await signTokenWithJti({
@@ -84,7 +120,13 @@ export class AuthService {
       role: user.role,
     });
 
-    logger.info({ userId: user.id, email: user.email, action: "LOGIN_SUCCESS" });
+    logger.info({
+      layer: "service",
+      action: "USER_LOGIN_SUCCESS",
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     return {
       id: user.id,
@@ -96,7 +138,10 @@ export class AuthService {
   }
 
   async getUsers() {
-    logger.info({ action: "USERS_GET_ATTEMPT", context: "USER_SERVICE" });
+    logger.info({
+      layer: "service",
+      action: "USER_LIST_ATTEMPT",
+    });
 
     try {
       const users = await prisma.user.findMany({
@@ -108,12 +153,17 @@ export class AuthService {
         },
       });
 
-      logger.info({ action: "USERS_GET_SUCCESS", count: users.length });
+      logger.info({
+        layer: "service",
+        action: "USER_LIST_SUCCESS",
+        count: users.length,
+      });
+
       return users;
     } catch (error) {
       logger.error({
-        action: "USERS_GET_ERROR",
-        context: "USER_SERVICE",
+        layer: "service",
+        action: "USER_LIST_ERROR",
         error: error instanceof Error ? error.message : String(error),
       });
       throw new AppError("Failed to fetch users", 500);
