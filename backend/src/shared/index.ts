@@ -9,7 +9,7 @@ export * from './utils/AppError';
 export * from './utils/file/getFileExtension';
 export * from './utils/file/generateRandomFilename';
 export * from './utils/logger';
-export * from './utils/requireUserId';
+export * from './utils/security/requireUserId';
 export * from './utils/file/validateRealMime';
 
 // 📦 services
