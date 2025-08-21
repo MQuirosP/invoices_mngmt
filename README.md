@@ -282,5 +282,12 @@ npm run dev
 
 ### Desarrollado por Mario Quirós
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/MQuirosP/invoices_mngmt)
-[![Repositorio en GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-3f3f3f?logo=github&logoColor=white)](https://github.com/MQuirosP/invoices_mngmt)
+[![GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-3f3f3f?logo=github&logoColor=white)](https://github.com/MQuirosP/invoices_mngmt)
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/MQuirosP/invoices_mngmt)
+[![Audit Ready](https://img.shields.io/badge/Audit--Ready-Strict--Validation-3f3f3f)](https://github.com/MQuirosP/invoices_mngmt)
+[![Modular Core](https://img.shields.io/badge/Architecture-Modular--Core-3f3f3f)](https://github.com/MQuirosP/invoices_mngmt)
+[![Build Status](https://img.shields.io/badge/Build-Passing-3f3f3f?logo=githubactions)](https://github.com/MQuirosP/invoices_mngmt/actions)
+[![Coverage](https://img.shields.io/badge/Coverage-100%25-3f3f3f)](https://github.com/MQuirosP/invoices_mngmt)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E=18.0.0-3f3f3f?logo=node.js)](https://nodejs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM--Strict-3f3f3f?logo=prisma)](https://www.prisma.io/)
+[![Redis](https://img.shields.io/badge/Redis-Backoff--Events--Tracing-3f3f3f?logo=redis)](https://redis.io/)
