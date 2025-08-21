@@ -1,33 +1,23 @@
 import { Router } from "express";
-import {
-  create,
-  download,
-  list,
-  remove,
-  // show,
-  importFromLocal,
-  importFromUrl,
-  get,
-  importDataFromAttachment,
-  // importDataFromAttachment,
-} from "@/modules/invoice";
+import { InvoiceController } from "modules/invoice/invoice.controller";
 import { authenticate } from "@/modules/auth/auth.middleware";
 import { upload } from "@/shared/middleware/upload";
 import { validateParams } from "@/shared/middleware/validateParams";
 import { requireRole } from "@/shared/middleware/requireRole";
 
 const router = Router();
+const controller = new InvoiceController();
 // ====================
 // Public invoice access
 // ====================
-router.get("/:id", authenticate, validateParams(["id"]) , get); // Get single invoice
-router.get("/", authenticate, list); // List invoices
+router.get("/:id", authenticate, validateParams(["id"]) ,controller.get); // Get single invoice
+router.get("/", authenticate, controller.list); // List invoices
 router.delete(
   "/:id",
   authenticate,
   requireRole(["ADMIN"]),
   validateParams(["id"]),
-  remove
+  controller.remove
 );
 ; // Delete invoice
 
@@ -38,29 +28,29 @@ router.get(
   "/:invoiceId/attachments/:attachmentId/download",
   authenticate,
   validateParams(["invoiceId", "attachmentId"]),
-  download
+  controller.download
 );
 
 // ====================
 // Import / OCR
 // ====================
-router.post("/ocrscan", authenticate, upload.single("file"), importFromLocal); // From local file
+router.post("/ocrscan", authenticate, upload.single("file"), controller.importFromLocal); // From local file
 router.patch(
   "/import/:invoiceId",
   authenticate,
   validateParams(["invoiceId"]),
-  importFromUrl
+  controller.importFromUrl
 ); // From URL
 router.patch(
   "/extract/:invoiceId",
   authenticate,
   validateParams(["invoiceId"]),
-  importDataFromAttachment
+  controller.importDataFromAttachment
 ); // From own attachment
 
 // ====================
 // Invoice creation
 // ====================
-router.post("/", authenticate, upload.array("files", 5), create); // Create with optional files
+router.post("/", authenticate, upload.array("files", 5), controller.create); // Create with optional files
 
 export default router;

@@ -3,7 +3,7 @@ import { CloudinaryService } from "@/shared/services/cloudinary.service";
 import { AppError } from "@/shared/utils/AppError";
 import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
-import { logger } from "../../shared/utils/logger";
+import { logger } from "@/shared/utils/logger";
 
 const cloudinaryService = new CloudinaryService();
 

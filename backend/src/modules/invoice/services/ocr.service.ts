@@ -1,7 +1,6 @@
 import { prisma } from "@/config/prisma";
-import { AppError } from "@/shared/utils/AppError";
-import { ImportService } from "@/shared/services/import.service";
-import { AttachmentService } from "../../shared";
+import {  } from "@/shared/utils/AppError";
+import { AppError, ImportService, AttachmentService } from "@/shared";
 
 const importService = new ImportService();
 
