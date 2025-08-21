@@ -29,13 +29,14 @@ async function bootstrap() {
 
   app.listen(PORT, () => {
     logger.info({
+      msg: `Server is running on port ${PORT}`,
       layer: "bootstrap",
       action: "SERVER_STARTED",
       port: PORT,
       redisAvailable,
       timestamp: new Date().toISOString(),
     });
-    console.log(`Server is running on port ${PORT}`);
+    // console.log(`Server is running on port ${PORT}`);
   });
 }
 
