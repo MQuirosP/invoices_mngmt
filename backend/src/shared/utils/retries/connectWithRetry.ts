@@ -1,27 +1,43 @@
-// connectWithRetry.ts
 import { logger } from "@/shared";
 import { prisma } from "@/config/prisma";
 
 export async function connectWithRetry(attempt = 1): Promise<void> {
+  const timestamp = new Date().toISOString();
+
   try {
     await prisma.$connect();
-    logger.info({ action: "PRISMA_CONNECTED", attempt, context: "DB_LAYER" });
+
+    logger.info({
+      layer: "shared",
+      module: "db-retry",
+      action: "PRISMA_CONNECTED",
+      attempt,
+      timestamp,
+    });
   } catch (err) {
     const delay = Math.min(1000 * Math.pow(2, attempt), 10000);
+
     logger.warn({
+      layer: "shared",
+      module: "db-retry",
       action: "PRISMA_CONNECT_RETRY",
       attempt,
       delay,
-      error: (err as Error).message,
-      context: "DB_LAYER",
+      error: err instanceof Error ? err.message : String(err),
+      timestamp,
     });
 
     if (attempt >= 5) {
       logger.error({
+        layer: "shared",
+        module: "db-retry",
         action: "PRISMA_CONNECT_FAILED",
-        error: (err as Error).message,
-        context: "DB_LAYER",
+        attempt,
+        error: err instanceof Error ? err.message : String(err),
+        reason: "MAX_RETRIES_EXCEEDED",
+        timestamp,
       });
+
       throw err;
     }
 
