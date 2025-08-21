@@ -23,8 +23,7 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
 ## mquirosp-invoices_mngmt
 
 ```bash
-
-└── mquirosp-invoices_mngmt/
+└──
     ├── README.md
     ├── CHANGELOG.md
     ├── LICENSE
@@ -63,14 +62,15 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     │   └── src/
     │       ├── app.ts
     │       ├── server.ts
+    │       ├── cache/
+    │       │   └── userCache.ts
     │       ├── config/
     │       │   ├── cloudinary.ts
     │       │   ├── index.ts
     │       │   ├── prisma.ts
     │       │   └── validateEnv.ts
     │       ├── lib/
-    │       │   ├── redis.ts
-    │       │   └── verifyRedisConnection.ts
+    │       │   └── redis.ts
     │       ├── modules/
     │       │   ├── auth/
     │       │   │   ├── auth.controller.ts
@@ -80,19 +80,14 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     │       │   │   ├── auth.service.ts
     │       │   │   ├── auth.types.ts
     │       │   │   └── index.ts
-    │       │   ├── invoice/
-    │       │   │   ├── index.ts
-    │       │   │   ├── invoice.controller.ts
-    │       │   │   ├── invoice.query.ts
-    │       │   │   ├── invoice.routes.ts
-    │       │   │   ├── invoice.service.ts
-    │       │   │   └── schemas/
-    │       │   │       ├── invoice.schema.ts
-    │       │   │       └── invoiceItems.schema.ts
-    │       │   └── monitoring/
-    │       │       ├── dbHealth.controller.ts
-    │       │       ├── dbHealth.routes.ts
-    │       │       └── dbHealth.service.ts
+    │       │   └── invoice/
+    │       │       ├── index.ts
+    │       │       ├── invoice.controller.ts
+    │       │       ├── invoice.query.ts
+    │       │       ├── invoice.routes.ts
+    │       │       ├── invoice.schema.ts
+    │       │       ├── invoice.service.ts
+    │       │       └── invoiceItems.schema.ts
     │       ├── routes/
     │       │   └── index.ts
     │       └── shared/
@@ -107,54 +102,44 @@ Sistema de gestión de facturas y garantías con autenticación segura, validaci
     │           │   ├── upload.ts
     │           │   └── validateParams.ts
     │           ├── ocr/
+    │           │   ├── index.ts
     │           │   ├── ocr.factory.ts
     │           │   ├── ocr.types.ts
     │           │   ├── preprocessing.ts
     │           │   ├── extractors/
-    │           │   │   ├── extractExpirationFromItems.ts
     │           │   │   ├── extractIssueDate.ts
     │           │   │   ├── extractItems.ts
     │           │   │   ├── extractMetadata.ts
     │           │   │   ├── extractProvider.ts
     │           │   │   ├── extractTitle.ts
     │           │   │   ├── extractWarranty.ts
-    │           │   │   ├── index.ts
-    │           │   │   └── metadataExtractor.ts
-    │           │   ├── patterns/
-    │           │   │   ├── index.ts
-    │           │   │   ├── matchers.ts
-    │           │   │   └── regex.ts
-    │           │   └── providers/
-    │           │       ├── aws.ts
-    │           │       ├── gcp.ts
-    │           │       └── tesseract.ts
+    │           │   │   └── index.ts
+    │           │   ├── ocr.providers/
+    │           │   │   ├── aws.ts
+    │           │   │   ├── gcp.ts
+    │           │   │   └── tesseract.ts
+    │           │   └── patterns/
+    │           │       ├── index.ts
+    │           │       ├── matchers.ts
+    │           │       └── regex.ts
     │           ├── services/
     │           │   ├── attachment.service.ts
     │           │   ├── cache.service.ts
     │           │   ├── cloudinary.service.ts
     │           │   ├── fileFetcher.service.ts
-    │           │   ├── import.service.ts
-    │           │   └── userCache.service.ts
+    │           │   └── import.service.ts
     │           └── utils/
-    │               ├── AppError.ts
+    │               ├── AppError.utils.ts
+    │               ├── hashPassword.ts
     │               ├── logger.ts
-    │               ├── file/
-    │               │   ├── generateRandomFilename.ts
-    │               │   ├── getFileExtension.ts
-    │               │   └── validateRealMime.ts
-    │               ├── retries/
-    │               │   ├── connectWithRetry.ts
-    │               │   ├── retryMethods.ts
-    │               │   └── uploadWithRetry.ts
-    │               ├── security/
-    │               │   ├── hashPassword.ts
-    │               │   └── requireUserId.ts
-    │               └── token/
-    │                   ├── revokeToken.ts
-    │                   └── signTokenWithJti.ts
-    └── .github/
-        └── workflows/
-            └── keep-alive.yml
+    │               ├── requireUserId.ts
+    │               └── file/
+    │                   ├── generateRandomFilename.ts
+    │                   ├── getFileExtension.ts
+    │                   └── validateRealMime.ts
+└── .github/
+    └── workflows/
+        └── keep-alive.yml
 
 ```
 
@@ -180,8 +165,8 @@ Características:
 - `GET /:id` → Obtener detalle
 - `DELETE /:id` → Borrar factura y sus archivos
 
-✅ Incluye adjuntos (`attachments`) y garantía (`warranty`) en las respuestas  
-✅ Validación MIME declarada + real (buffer)
+- ✅ Incluye adjuntos (`attachments`) y garantía (`warranty`) en las respuestas  
+- ✅ Validación MIME declarada + real (buffer)
 
 ---
 
@@ -200,9 +185,9 @@ Características:
 - `GET /api/invoices/:id/download` → Descarga principal
 - `GET /api/invoices/:invoiceId/attachments/:attachmentId/download` → Descarga por archivo
 
-🔐 Verifica propiedad del usuario  
-📎 Descarga como `stream` con `Content-Disposition` seguro  
-🌐 No se expone la URL pública de Cloudinary
+- 🔐 Verifica propiedad del usuario  
+- 📎 Descarga como `stream` con `Content-Disposition` seguro  
+- 🌐 No se expone la URL pública de Cloudinary
 
 ---
 
@@ -218,11 +203,6 @@ Características:
 
 ## ⏳ Gestión de garantías (`/api/warranties`)
 
-- `POST`, `PUT`, `GET`, `DELETE`
-- Relación 1:1 con factura
-- Campos: `duration`, `validUntil`, `notes`
-- Eliminación en cascada con factura
-
 ---
 
 ## 🧪 Testing y calidad
@@ -235,18 +215,8 @@ Características:
 
 ## 📖 Documentación
 
-- README interactivo
-- Swagger/OpenAPI en desarrollo (`swagger-jsdoc`)
-- Postman Collection planeada
-
----
-
-## 🧭 Próximas mejoras (roadmap)
-
-- ✅ Validación MIME binaria implementada
 - ✅ OCR modular con fallback y configuración vía `.env`
 - ✅ Refactor para servicios de attachments centralizados
-
 -- ZIP de múltiples archivos  
 -- Paginación y filtros en listado  
 -- Endpoint PATCH parcial  
@@ -268,19 +238,10 @@ npx prisma ...    # Comandos Prisma
 
 ---
 
-## 💻 Instalación y uso local
+``` bash
 
-### Clona el repositorio
-
-```bash
-git clone https://github.com/tu-usuario/invoices_mngmt.git
-cd invoices_mngmt/backend
-```
-
-### Instala dependencias
-
-```bash
 npm install
+
 ```
 
 ### Configura variables de entorno
@@ -309,24 +270,6 @@ npm run dev
 
 ---
 
-## 📖 Documentación de la API
-
-- Pronto estará disponible una colección de Postman o documentación Swagger con todos los endpoints.
-
----
-
-## ✅ Próximos pasos sugeridos
-
-- Implementar soporte OCR para PDF con Google Cloud Storage (GCS)  
-- Añadir pruebas unitarias/integración para importación y descarga  
-- Mejorar manejo de errores  
-- Extender funcionalidad de actualización parcial (PATCH)  
-- Implementar paginación y filtros avanzados  
-- Añadir documentación Swagger/OpenAPI  
-- Crear interfaz web básica de prueba  
-- Mejorar seguridad en límites de archivos  
-- Soporte para más formatos de archivo  
-
 ---
 
 ## 📝 Licencia
@@ -342,4 +285,5 @@ npm run dev
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/MQuirosP/invoices_mngmt)
 
 ```bash
+
 <https://github.com/MQuirosP>
