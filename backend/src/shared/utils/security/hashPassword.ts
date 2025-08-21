@@ -3,25 +3,37 @@ import { AppError } from "@/shared/utils/AppError";
 import { logger } from "@/shared";
 
 export async function hashPassword(password: string, saltRounds: number): Promise<string> {
+  const timestamp = new Date().toISOString();
+
   try {
-    return await bcrypt.hash(password, saltRounds);
-  } catch (error) {
-    logger.error({
-      message: "Password hashing failed",
+    const hashed = await bcrypt.hash(password, saltRounds);
+
+    logger.info({
+      layer: "shared",
+      module: "security",
+      action: "PASSWORD_HASH_SUCCESS",
       saltRounds,
-      error: error instanceof Error ? error.message : String(error),
-      context: "AUTH_SERVICE",
+      timestamp,
     });
 
-    throw new AppError(
-      "Failed to hash password",
-      500,
-      true,
-      error instanceof Error ? error : undefined,
-      {
-        saltRounds,
-        context: "AUTH_SERVICE",
-      }
-    );
+    return hashed;
+  } catch (error) {
+    logger.error({
+      layer: "shared",
+      module: "security",
+      action: "PASSWORD_HASH_FAILED",
+      saltRounds,
+      error: error instanceof Error ? error.message : String(error),
+      reason: "BCRYPT_ERROR",
+      timestamp,
+    });
+
+    throw new AppError("Failed to hash password", 500, true, error instanceof Error ? error : undefined, {
+      layer: "shared",
+      module: "security",
+      reason: "BCRYPT_ERROR",
+      saltRounds,
+      timestamp,
+    });
   }
 }
