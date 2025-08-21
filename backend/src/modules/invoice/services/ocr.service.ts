@@ -2,9 +2,9 @@ import { prisma } from "@/config/prisma";
 import {  } from "@/shared/utils/AppError";
 import { AppError, ImportService, AttachmentService } from "@/shared";
 
-const importService = new ImportService();
-
 export class OCRService {
+  constructor(private importService: ImportService) {}
+
   async createInvoiceFromBuffer(
     buffer: Buffer,
     userId: string,
@@ -12,7 +12,7 @@ export class OCRService {
     mimeType: string
   ) {
     // Extraer metadata usando OCR
-    const metadata = await importService.extractFromBuffer(buffer);
+    const metadata = await this.importService.extractFromBuffer(buffer);
 
     // 1️⃣ Crear la factura sin items
     const invoice = await prisma.invoice.create({
@@ -57,7 +57,7 @@ export class OCRService {
     if (!invoice) throw new AppError("Invoice not found", 404);
 
     // Extraer metadata desde la URL
-    const metadata = await importService.extractFromUrl(url);
+    const metadata = await this.importService.extractFromUrl(url);
 
     // Crear attachment si no existe
     const existingAttachment = invoice.attachments.find((a) => a.url === url);

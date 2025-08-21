@@ -14,15 +14,20 @@ import { Role } from "@prisma/client";
 import { FileService, OCRService } from "@/modules/invoice";
 import { prisma } from "@/config/prisma";
 import { createInvoiceSchema } from "./schemas/invoice.schema";
+import { CloudinaryService, ImportService } from "@/shared";
 
 export class InvoiceController {
   private fileService: FileService;
   private ocrService: OCRService;
 
   constructor() {
-    this.fileService = new FileService();
-    this.ocrService = new OCRService();
+    const cloudinaryService = new CloudinaryService();
+    const importService = new ImportService();
+
+    this.fileService = new FileService(cloudinaryService);
+    this.ocrService = new OCRService(importService);
   }
+
 
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {

@@ -10,14 +10,14 @@ const controller = new InvoiceController();
 // ====================
 // Public invoice access
 // ====================
-router.get("/:id", authenticate, validateParams(["id"]) ,controller.get); // Get single invoice
+router.get("/:id", authenticate, validateParams(["id"]) ,controller.get.bind(controller)); // Get single invoice
 router.get("/", authenticate, controller.list); // List invoices
 router.delete(
   "/:id",
   authenticate,
   requireRole(["ADMIN"]),
   validateParams(["id"]),
-  controller.remove
+  controller.remove.bind(controller)
 );
 ; // Delete invoice
 
@@ -28,29 +28,29 @@ router.get(
   "/:invoiceId/attachments/:attachmentId/download",
   authenticate,
   validateParams(["invoiceId", "attachmentId"]),
-  controller.download
+  controller.download.bind(controller)
 );
 
 // ====================
 // Import / OCR
 // ====================
-router.post("/ocrscan", authenticate, upload.single("file"), controller.importFromLocal); // From local file
+router.post("/ocrscan", authenticate, upload.single("file"), controller.importFromLocal.bind(controller)); // From local file
 router.patch(
   "/import/:invoiceId",
   authenticate,
   validateParams(["invoiceId"]),
-  controller.importFromUrl
+  controller.importFromUrl.bind(controller)
 ); // From URL
 router.patch(
   "/extract/:invoiceId",
   authenticate,
   validateParams(["invoiceId"]),
-  controller.importDataFromAttachment
+  controller.importDataFromAttachment.bind(controller)
 ); // From own attachment
 
 // ====================
 // Invoice creation
 // ====================
-router.post("/", authenticate, upload.array("files", 5), controller.create); // Create with optional files
+router.post("/", authenticate, upload.array("files", 5), controller.create.bind(controller)); // Create with optional files
 
 export default router;

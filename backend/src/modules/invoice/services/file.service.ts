@@ -5,9 +5,10 @@ import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
 import { logger } from "@/shared/utils/logger";
 
-const cloudinaryService = new CloudinaryService();
 
 export class FileService {
+constructor(private cloudinaryService: CloudinaryService) {}
+
   async uploadFiles(
     userId: string,
     invoiceId: string,
@@ -21,7 +22,7 @@ export class FileService {
 
     if (files && files.length > 0) {
       for (const file of files) {
-        const result = await cloudinaryService.upload(
+        const result = await this.cloudinaryService.upload(
           file.buffer,
           file.originalname,
           file.mimetype,
@@ -90,7 +91,7 @@ export class FileService {
         action: "INVOICE_ATTACHMENT_DELETE_ATTEMPT",
       });
 
-      await cloudinaryService.delete(
+      await this.cloudinaryService.delete(
         userId,
         attachment.fileName,
         attachment.mimeType
