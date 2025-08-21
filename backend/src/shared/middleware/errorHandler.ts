@@ -28,19 +28,6 @@ export const errorHandler = (
     statusCode = error.statusCode;
     message = error.message;
     action = "APP_ERROR";
-
-    logger.error({
-      name: error.name,
-      message,
-      statusCode,
-      stack: error.stack,
-      path: req.originalUrl,
-      method: req.method,
-      userId: req.user?.id,
-      action,
-      ...(error.meta && { meta: error.meta }),
-      ...(error.cause && { cause: error.cause.message }),
-    });
   }
 
   // Wrong JSON format
@@ -62,19 +49,19 @@ export const errorHandler = (
     message = error.message;
   }
 
-  // Log unexpected errors
-  if (!(error instanceof AppError)) {
-    logger.error({
-      name: error.name,
-      message,
-      statusCode,
-      stack: error.stack,
-      path: req.originalUrl,
-      method: req.method,
-      userId: req.user?.id,
-      action,
-    });
-  }
+  // Unified error logging
+  logger.error({
+    name: error.name || "UnknownError",
+    message: error.message || message,
+    statusCode,
+    stack: error.stack,
+    path: req.originalUrl,
+    method: req.method,
+    userId: req.user?.id,
+    action,
+    ...(error instanceof AppError && error.meta && { meta: error.meta }),
+    ...(error instanceof AppError && error.cause && { cause: error.cause.message }),
+  });
 
   const metaErrors =
     error instanceof AppError && Array.isArray(error.meta?.errors)
