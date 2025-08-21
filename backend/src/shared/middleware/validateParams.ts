@@ -12,11 +12,12 @@ export const validateParams = (params: string[]) => {
 
     if (missing.length > 0) {
       logger.warn({
+        layer: "middleware",
         action: "PARAMS_VALIDATION_FAILED",
-        context: "PARAMS_MIDDLEWARE",
         path: req.originalUrl,
         method: req.method,
         missingParams: missing,
+        timestamp: new Date().toISOString(),
       });
 
       throw new AppError(
