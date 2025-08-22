@@ -1,5 +1,11 @@
 export const invoiceIncludeOptions = {
-  attachments: true,
+  attachments: {
+    select: {
+      url: true,
+      mimeType: true,
+      fileName: true,
+    }
+  },
   // warranty: true,
   items: {
     select: {
