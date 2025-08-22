@@ -1,3 +1,4 @@
+import { invoiceIncludeOptions } from './../invoice.query';
 import { prisma } from "@/config/prisma";
 import { AppError, ImportService, AttachmentService } from "@/shared";
 import { logger } from "@/shared/utils/logger";
@@ -64,7 +65,7 @@ export class OCRService {
 
     return prisma.invoice.findUnique({
       where: { id: invoice.id },
-      include: { attachments: true, items: true },
+      include: invoiceIncludeOptions,
     });
   }
 
@@ -152,7 +153,7 @@ export class OCRService {
 
     return prisma.invoice.findUnique({
       where: { id: invoiceId },
-      include: { attachments: true, items: true },
+      include: invoiceIncludeOptions,
     });
   }
 }
