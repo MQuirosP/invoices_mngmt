@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/appError.utils";
 import { logger } from "@/shared";
 
 export async function hashPassword(password: string, saltRounds: number): Promise<string> {

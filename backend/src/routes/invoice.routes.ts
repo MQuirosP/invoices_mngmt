@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { InvoiceController } from "modules/invoice/invoice.controller";
 import { authenticate } from "@/modules/auth/auth.middleware";
-import { upload } from "@/shared/middleware/upload";
-import { validateParams } from "@/shared/middleware/validateParams";
-import { requireRole } from "@/shared/middleware/requireRole";
+import { validateParams } from "@/shared/middleware/core/validateParams";
+import { requireRole } from "../shared/middleware/features/requireRole";
+import { upload } from "../shared/middleware/features/upload";
 
 const router = Router();
 const controller = new InvoiceController();

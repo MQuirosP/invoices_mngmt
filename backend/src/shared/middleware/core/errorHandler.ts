@@ -1,8 +1,8 @@
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { Response, NextFunction } from "express";
 import { ZodError } from "zod";
-import { AppError } from "@/shared/utils/AppError";
-import { logger } from "@/shared/utils/logger";
+import { AppError } from "@/shared/utils/appError.utils";
+import { logger } from "@/shared/utils/logging/logger";
 
 export const errorHandler = (
   error: any,

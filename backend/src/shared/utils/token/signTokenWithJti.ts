@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { randomUUID } from "crypto";
 import { Role } from "@prisma/client";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 import { redis } from "../../../lib/redis";
 
 interface TokenPayload {

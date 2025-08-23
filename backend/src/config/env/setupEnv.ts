@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
+import { logger } from '@/shared/utils/logging/logger';
 import { validateEnvVars } from "./validateEnv";
-import { logger } from '@/shared/utils/logger';
 
 export function setupEnv() {
   dotenv.config();

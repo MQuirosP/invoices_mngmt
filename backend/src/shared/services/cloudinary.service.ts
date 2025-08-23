@@ -1,8 +1,8 @@
 import cloudinary from "@/config/cloudinary";
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/appError.utils";
 import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import path from "path";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 import { uploadWithRetry } from "../utils/retries/uploadWithRetry";
 
 export class CloudinaryService {

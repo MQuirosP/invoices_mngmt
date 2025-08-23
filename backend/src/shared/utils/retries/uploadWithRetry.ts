@@ -1,4 +1,4 @@
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier";
 

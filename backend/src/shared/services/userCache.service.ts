@@ -1,6 +1,6 @@
 import { redis } from "@/lib/redis";
 import { User } from "@prisma/client";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 
 const TTL_SECONDS = 3600;
 type CachedUser = Pick<User, "id" | "email" | "fullname" | "role">;

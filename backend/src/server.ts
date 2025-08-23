@@ -1,8 +1,8 @@
-import { setupEnv } from "@/config/setupEnv";
 import app from "@/app";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 import { connectWithRetry } from "@/shared/utils/retries/connectWithRetry";
-import { verifyRedisConnection } from "./lib/verifyRedisConnection";
+import { verifyRedisConnection } from "./lib/redis";
+import { setupEnv } from "@/config";
 
 async function bootstrap() {
   logger.info({ layer: "bootstrap", action: "BOOT_ATTEMPT", timestamp: new Date().toISOString() });

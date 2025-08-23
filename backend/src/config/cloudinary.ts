@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 
 dotenv.config();
 

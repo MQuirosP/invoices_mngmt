@@ -1,9 +1,9 @@
 // shared/ocr/ocr.factory.ts
+import { logger } from "@/shared/utils/logging/logger";
+import { AppError } from "@/shared/utils/appError.utils";
 import { OCRProvider } from "./ocr.types";
-import { GcpOCRProvider } from "./providers/gcp";
-import { TesseractOCRProvider } from "./providers/tesseract";
-import { logger } from "@/shared/utils/logger";
-import { AppError } from "@/shared/utils/AppError";
+import { GcpOCRProvider } from "../providers/gcp";
+import { TesseractOCRProvider } from "../providers/tesseract";
 
 export class OCRFactory {
   static create(provider: string): OCRProvider {

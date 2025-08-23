@@ -1,5 +1,5 @@
 import rateLimit from "express-rate-limit";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 import jwt from "jsonwebtoken";
 
 export const loginRateLimiter = rateLimit({

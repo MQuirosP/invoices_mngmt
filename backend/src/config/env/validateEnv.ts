@@ -1,4 +1,4 @@
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/appError.utils";
 import { logger } from "@/shared";
 
 const REQUIRED_ENV_VARS = [

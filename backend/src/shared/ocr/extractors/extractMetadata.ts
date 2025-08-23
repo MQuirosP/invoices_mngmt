@@ -1,4 +1,4 @@
-import { ExtractedInvoiceMetadata } from "@/shared/ocr/ocr.types";
+import { ExtractedInvoiceMetadata } from "@/shared/ocr/core/ocr.types";
 import {
   extractItems,
   extractProvider,
@@ -6,7 +6,7 @@ import {
   extractWarranty,
   extractTitle,
 } from "@/shared/ocr/extractors";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 import { calculateExpirationFromItems } from "./extractExpirationFromItems";
 
 export function extractMetadataFromText(

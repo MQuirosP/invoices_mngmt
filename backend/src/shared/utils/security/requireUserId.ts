@@ -1,6 +1,6 @@
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/appError.utils";
 import { AuthRequest } from "@/modules/auth/auth.types";
-import { logger } from "../logger";
+import { logger } from "../logging/logger";
 
 export const requireUserId = (req: AuthRequest): string => {
   const userId = req.user?.id;

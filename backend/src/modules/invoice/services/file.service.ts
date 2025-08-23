@@ -1,9 +1,9 @@
 import { prisma } from "@/config/prisma";
 import { CloudinaryService } from "@/shared/services/cloudinary.service";
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/appError.utils";
 import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 
 export class FileService {
   constructor(private cloudinaryService: CloudinaryService) {}

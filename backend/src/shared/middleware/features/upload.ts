@@ -1,5 +1,5 @@
 import multer, { FileFilterCallback } from "multer";
-import { mimeExtensionMap } from "../constants/mimeExtensionMap";
+import { mimeExtensionMap } from "@/shared";
 
 // Use of memory storage to directly upload to cloudinary
 const storage = multer.memoryStorage();

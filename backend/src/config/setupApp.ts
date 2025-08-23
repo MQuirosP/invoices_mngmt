@@ -1,8 +1,8 @@
 import express from "express";
-import { setupGlobalMiddleware } from "@/shared/middleware/setupGlobalMiddleware";
+import { setupGlobalMiddleware } from "@/shared/middleware/core/setupGlobalMiddleware";
 import routes from "@/routes";
-import { errorHandler } from "@/shared/middleware/errorHandler";
-import { logger } from "@/shared/utils/logger";
+import { errorHandler } from "@/shared/middleware/core/errorHandler";
+import { logger } from "@/shared/utils/logging/logger";
 
 export function setupApp(): express.Express {
   const app = express();

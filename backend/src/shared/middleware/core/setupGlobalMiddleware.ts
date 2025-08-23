@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 
 export function setupGlobalMiddleware(app: express.Express) {
   app.use(cors());

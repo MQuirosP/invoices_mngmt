@@ -1,5 +1,5 @@
 import { prisma } from "@/config/prisma";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 
 export async function checkDbHealth(jobId: string) {
   const startTime = Date.now();

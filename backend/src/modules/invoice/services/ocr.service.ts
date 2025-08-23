@@ -1,7 +1,7 @@
 import { invoiceIncludeOptions } from './../invoice.query';
 import { prisma } from "@/config/prisma";
 import { AppError, ImportService, AttachmentService } from "@/shared";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 
 export class OCRService {
   constructor(private importService: ImportService) {}

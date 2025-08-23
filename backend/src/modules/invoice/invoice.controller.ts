@@ -1,8 +1,8 @@
 import { Response, NextFunction } from "express";
 import { requireUserId } from "@/shared/utils/security/requireUserId";
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/appError.utils";
 import { AuthRequest } from "@/modules/auth/auth.types";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 
 import {
   createInvoice,

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { checkDbHealth } from "./dbHealth.service";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 
 export async function handleDbHealth(req: Request, res: Response) {
   const jobId = req.header("X-Job-ID") || "unknown";

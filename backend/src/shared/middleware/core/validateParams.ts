@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { AppError } from "@/shared/utils/AppError";
-import { logger } from "@/shared/utils/logger";
+import { AppError } from "@/shared/utils/appError.utils";
+import { logger } from "@/shared/utils/logging/logger";
 
 /**
  * Middleware para validar que ciertos parámetros estén presentes en req.params

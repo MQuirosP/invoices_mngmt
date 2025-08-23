@@ -1,9 +1,9 @@
 import { Router } from "express";
-import authRouter from "@/modules/auth/auth.routes";
-import invoiceRouter from "@/modules/invoice/invoice.routes";
-import { logger } from "../shared/utils/logger";
+import invoiceRouter from "@/routes/invoice.routes";
+import { logger } from "../shared/utils/logging/logger";
 import { redis } from "../lib/redis";
 import { prisma } from "../config/prisma";
+import authRouter from "./auth.routes";
 
 const router = Router();
 

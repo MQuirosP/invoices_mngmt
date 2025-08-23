@@ -2,9 +2,9 @@ import { Role, User } from "@prisma/client";
 import { RegisterInput, LoginInput } from "./auth.schema";
 import bcrypt from "bcrypt";
 import { prisma } from "@/config/prisma";
-import { AppError } from "@/shared/utils/AppError";
+import { AppError } from "@/shared/utils/appError.utils";
 import { hashPassword } from "@/shared/utils/security/hashPassword";
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 import { getCachedUserByEmail, setCachedUser } from "@/shared/services/userCache.service";
 import { signTokenWithJti } from "@/shared/utils/token/signTokenWithJti";
 

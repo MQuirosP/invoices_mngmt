@@ -7,7 +7,7 @@ import {
   normalizeNumericLine,
   regexPatterns,
 } from '@/shared/ocr/patterns/matchers';
-import { InvoiceItemInput } from "../ocr.types";
+import { InvoiceItemInput } from "../core/ocr.types";
 
 export function extractItems(
   lines: string[],

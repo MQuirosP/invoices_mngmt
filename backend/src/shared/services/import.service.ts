@@ -2,8 +2,8 @@ import {
   extractMetadataFromBuffer,
   extractMetadataFromUrl,
 } from "@/shared/ocr/extractors/metadataExtractor";
-import { logger } from "@/shared/utils/logger";
-import { AppError } from "@/shared/utils/AppError";
+import { logger } from "@/shared/utils/logging/logger";
+import { AppError } from "@/shared/utils/appError.utils";
 
 export class ImportService {
   async extractFromUrl(url: string) {

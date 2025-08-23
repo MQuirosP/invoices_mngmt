@@ -1,4 +1,4 @@
-import { logger } from "@/shared/utils/logger";
+import { logger } from "@/shared/utils/logging/logger";
 import { redis } from "../../../lib/redis";
 
 export const revokeToken = async (

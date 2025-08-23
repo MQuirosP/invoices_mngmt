@@ -1,14 +1,13 @@
 // 🔁 middleware
-export * from './middleware/errorHandler';
-export * from './middleware/requireRole';
-export * from './middleware/upload';
-export * from './middleware/validateParams';
+export * from './middleware/core/errorHandler';
+export * from './middleware/core/validateParams';
+export * from './middleware/core/setupGlobalMiddleware';
 
 // ⚙️ utils
-export * from './utils/AppError';
+export * from './utils/appError.utils';
 export * from './utils/file/getFileExtension';
 export * from './utils/file/generateRandomFilename';
-export * from './utils/logger';
+export * from './utils/logging/logger';
 export * from './utils/security/requireUserId';
 export * from './utils/file/validateRealMime';
 
@@ -20,8 +19,17 @@ export * from './services/import.service';
 
 // 🧠 OCR
 export * from './ocr/extractors/metadataExtractor';
-export * from './ocr/ocr.types';
+export * from './ocr/core/ocr.types';
+export * from './ocr/core/ocr.factory';
+export * from './ocr/core/preprocessing';
+export * from './ocr/providers/gcp';
+export * from './ocr/providers/tesseract';
 
 // 🔒 constantes
 export * from './constants/mimeExtensionMap';
 export * from './constants/roles';
+
+// 🛡️ features
+export * from './middleware/features/rateLimiter';
+export * from './middleware/features/requireRole';
+export * from './middleware/features/upload';

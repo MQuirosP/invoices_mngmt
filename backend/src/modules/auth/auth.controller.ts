@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { loginSchema, registerSchema } from "./auth.schema";
-import { AppError } from "@/shared/utils/AppError";
-import { logger } from "@/shared/utils/logger";
+import { AppError } from "@/shared/utils/appError.utils";
+import { logger } from "@/shared/utils/logging/logger";
 import { AuthRequest } from "./auth.types";
 import { revokeToken } from "@/shared/utils/token/revokeToken";
 import { AuthService } from "./auth.service";
