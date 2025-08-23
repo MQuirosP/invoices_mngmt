@@ -1,7 +1,7 @@
 import {
   extractMetadataFromBuffer,
   extractMetadataFromUrl,
-} from "@/shared/ocr/extractors/metadataExtractor";
+} from "@/shared/ocr/core/ocr.pipeline";
 import { logger } from "@/shared/utils/logging/logger";
 import { AppError } from "@/shared/utils/appError.utils";
 

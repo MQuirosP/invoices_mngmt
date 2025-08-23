@@ -18,7 +18,7 @@ export * from './services/fileFetcher.service';
 export * from './services/import.service';
 
 // 🧠 OCR
-export * from './ocr/extractors/metadataExtractor';
+export * from './ocr/core/ocr.pipeline';
 export * from './ocr/core/ocr.types';
 export * from './ocr/core/ocr.factory';
 export * from './ocr/core/preprocessing';
