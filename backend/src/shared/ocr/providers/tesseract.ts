@@ -1,6 +1,6 @@
 import Tesseract from "tesseract.js";
 import { OCRProvider } from "../core/ocr.types";
-import { extractMetadataFromText } from "@/shared/ocr/extractors/extractMetadata";
+import { extractMetadataFromText } from "@/shared/ocr/extractors/semanticExtractor";
 import { logger } from "@/shared/utils/logging/logger";
 
 export class TesseractOCRProvider implements OCRProvider {
