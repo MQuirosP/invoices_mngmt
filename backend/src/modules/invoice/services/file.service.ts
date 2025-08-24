@@ -22,39 +22,40 @@ export class FileService {
       fileCount: files?.length ?? 0,
     });
 
-    const uploads: {
-      secure_url: string;
-      original_filename: string;
-      format: string;
-    }[] = [];
+    const attachments = [];
 
     if (files && files.length > 0) {
       for (const file of files) {
-        const result = await AttachmentService.uploadValidated(
-          { buffer: file.buffer, mimetype: file.mimetype, originalname: file.originalname },
+        const draft = await AttachmentService.uploadValidated(
+          {
+            buffer: file.buffer,
+            mimetype: file.mimetype,
+            originalname: file.originalname,
+          },
           invoiceId,
           userId
-        )
+        );
+
+        const attachment = await prisma.attachment.create({
+          data: draft,
+        });
 
         logger.info({
           layer: "service",
           action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
           userId,
           invoiceId,
-          fileName: result.fileName,
-          mimeType: result.mimeType,
-          url: result.url,
+          attachmentId: attachment.id,
+          fileName: attachment.fileName,
+          mimeType: attachment.mimeType,
+          url: attachment.url,
         });
 
-        uploads.push({
-          secure_url: result.url,
-          original_filename: result.fileName,
-          format: result.mimeType,
-        });
+        attachments.push(attachment); // 👈 Retorna el objeto completo
       }
     }
 
-    return uploads;
+    return attachments; // 👈 Array de objetos completos
   }
 
   async downloadAttachment(
@@ -144,34 +145,47 @@ export class FileService {
       throw new AppError("Invoice not found", 404);
     }
 
-    for (const attachment of invoice.attachments) {
-      logger.info({
+    try {
+      await prisma.$transaction(async (tx) => {
+        for (const attachment of invoice.attachments) {
+          logger.info({
+            layer: "service",
+            action: "INVOICE_ATTACHMENT_DELETE_ATTEMPT",
+            userId,
+            invoiceId,
+            fileName: attachment.fileName,
+            mimeType: attachment.mimeType,
+          });
+
+          await this.cloudinaryService.delete(
+            userId,
+            attachment.fileName,
+            attachment.mimeType
+          );
+
+          logger.info({
+            layer: "service",
+            action: "INVOICE_ATTACHMENT_DELETE_SUCCESS",
+            userId,
+            invoiceId,
+            fileName: attachment.fileName,
+          });
+        }
+
+        await tx.attachment.deleteMany({
+          where: { invoiceId },
+        });
+      });
+    } catch (error: any) {
+      logger.error({
         layer: "service",
-        action: "INVOICE_ATTACHMENT_DELETE_ATTEMPT",
+        action: "INVOICE_ATTACHMENT_DELETE_BATCH_ERROR",
         userId,
         invoiceId,
-        fileName: attachment.fileName,
-        mimeType: attachment.mimeType,
+        reason: error instanceof Error ? error.message : String(error),
       });
-
-      await this.cloudinaryService.delete(
-        userId,
-        attachment.fileName,
-        attachment.mimeType
-      );
-
-      logger.info({
-        layer: "service",
-        action: "INVOICE_ATTACHMENT_DELETE_SUCCESS",
-        userId,
-        invoiceId,
-        fileName: attachment.fileName,
-      });
+      throw new AppError("Failed to delete attachments", 500);
     }
-
-    await prisma.attachment.deleteMany({
-      where: { invoiceId },
-    });
 
     logger.info({
       layer: "service",

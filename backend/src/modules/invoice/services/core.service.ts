@@ -19,11 +19,13 @@ export const createInvoice = async (
     },
   });
 
-  const invoice = await prisma.invoice.create({
-    data: {
-      ...data,
-      userId,
-    },
+  const invoice = await prisma.$transaction(async (tx) => {
+    return await tx.invoice.create({
+      data: {
+        ...data,
+        userId,
+      },
+    });
   });
 
   logger.info({
@@ -122,7 +124,10 @@ export const deleteInvoiceById = async (
     return null;
   }
 
-  await prisma.invoice.delete({ where: { id: invoiceId } });
+  await prisma.$transaction(async (tx) => {
+    await tx.invoice.delete({ where: { id: invoiceId } });
+  });
+
 
   logger.info({
     layer: "service",

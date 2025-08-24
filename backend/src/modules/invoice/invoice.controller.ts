@@ -163,7 +163,11 @@ export class InvoiceController {
       if (!invoice) throw new AppError("Invoice not found", 404);
 
       await this.fileService.deleteAttachments(userId, invoiceId);
-      const deletedInvoice = await deleteInvoiceById(invoiceId, userId, userRole);
+      const deletedInvoice = await deleteInvoiceById(
+        invoiceId,
+        userId,
+        userRole
+      );
 
       logger.info({
         layer: "controller",
@@ -201,11 +205,12 @@ export class InvoiceController {
         attachmentId,
       });
 
-      const { stream, mimeType, fileName } = await this.fileService.downloadAttachment(
-        userId,
-        invoiceId,
-        attachmentId
-      );
+      const { stream, mimeType, fileName } =
+        await this.fileService.downloadAttachment(
+          userId,
+          invoiceId,
+          attachmentId
+        );
 
       logger.info({
         layer: "controller",
@@ -216,7 +221,10 @@ export class InvoiceController {
         fileName,
       });
 
-      res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName}"`
+      );
       res.setHeader("Content-Type", mimeType);
       stream.pipe(res);
     } catch (error) {
@@ -262,7 +270,6 @@ export class InvoiceController {
         throw new AppError("Failed to create invoice from file", 500);
       }
 
-
       logger.info({
         layer: "controller",
         action: "INVOICE_IMPORT_LOCAL_SUCCESS",
@@ -301,7 +308,11 @@ export class InvoiceController {
 
       if (!url) throw new AppError("Missing URL", 400);
 
-      const invoice = await this.ocrService.updateInvoiceFromUrl(invoiceId, userId, url);
+      const invoice = await this.ocrService.updateInvoiceFromUrl(
+        invoiceId,
+        userId,
+        url
+      );
 
       logger.info({
         layer: "controller",
@@ -327,53 +338,62 @@ export class InvoiceController {
     }
   }
 
-  async importDataFromAttachment(req: AuthRequest, res: Response, next: NextFunction) {
-  const userId = requireUserId(req);
-  const invoiceId = req.params.invoiceId;
+  async importDataFromAttachment(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    const userId = requireUserId(req);
+    const invoiceId = req.params.invoiceId;
 
-  try {
-    logger.info({
-      layer: "controller",
-      action: "INVOICE_IMPORT_ATTACHMENT_ATTEMPT",
-      userId,
-      invoiceId,
-    });
-
-    const invoice = await getInvoiceById(invoiceId, userId);
-    const url = invoice?.attachments[0]?.url;
-
-    if (!url) {
-      logger.warn({
+    try {
+      logger.info({
         layer: "controller",
-        action: "INVOICE_IMPORT_ATTACHMENT_MISSING_URL",
+        action: "INVOICE_IMPORT_ATTACHMENT_ATTEMPT",
         userId,
         invoiceId,
       });
-      throw new AppError("Missing URL", 400);
+
+      const invoice = await getInvoiceById(invoiceId, userId);
+      const url = invoice?.attachments[0]?.url;
+
+      if (!url) {
+        logger.warn({
+          layer: "controller",
+          action: "INVOICE_IMPORT_ATTACHMENT_MISSING_URL",
+          userId,
+          invoiceId,
+        });
+        throw new AppError("Missing URL", 400);
+      }
+
+      const result = await this.ocrService.updateInvoiceFromUrl(
+        invoiceId,
+        userId,
+        url
+      );
+
+      logger.info({
+        layer: "controller",
+        action: "INVOICE_IMPORT_ATTACHMENT_SUCCESS",
+        userId,
+        invoiceId,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Invoice metadata updated from attachment",
+        data: result,
+      });
+    } catch (error) {
+      logger.error({
+        layer: "controller",
+        action: "INVOICE_IMPORT_ATTACHMENT_ERROR",
+        userId,
+        invoiceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      next(error);
     }
-
-    const result = await this.ocrService.updateInvoiceFromUrl(invoiceId, userId, url);
-
-    logger.info({
-      layer: "controller",
-      action: "INVOICE_IMPORT_ATTACHMENT_SUCCESS",
-      userId,
-      invoiceId,
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Invoice metadata updated from attachment",
-      data: result,
-    });
-  } catch (error) {
-    logger.error({
-      layer: "controller",
-      action: "INVOICE_IMPORT_ATTACHMENT_ERROR",
-      userId,
-      invoiceId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    next(error);
   }
-}}
+}
