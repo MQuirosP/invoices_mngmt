@@ -2,6 +2,7 @@ import vision from "@google-cloud/vision";
 import { OCRProvider } from "@/shared/ocr/core/ocr.types";
 import { extractMetadataFromText } from "@/shared/ocr/extractors/extractMetadata";
 import { logger } from "@/shared/utils/logging/logger";
+import { extractWordsFromAnnotation, reconstructLinesFromWords } from "../../utils/reconstructLinesFromAnnotation";
 
 const client = new vision.ImageAnnotatorClient();
 
@@ -12,15 +13,20 @@ export class GcpOCRProvider implements OCRProvider {
       context: "GCP_OCR_PROVIDER",
       msg: "Using Google Cloud Vision",
     });
+
     const [result] = await client.documentTextDetection({ image: { content: buffer } });
-    const text = result.fullTextAnnotation?.text;
-    if (!text) throw new Error("No text was extracted");
+    const annotation = result.fullTextAnnotation;
+    if (!annotation) throw new Error("No fullTextAnnotation found");
+
+    const words = extractWordsFromAnnotation(annotation);
+    const lines = reconstructLinesFromWords(words);
+
     logger.info({
-      action: "OCR_TEXT_EXTRACTED",
+      action: "OCR_TEXT_RECONSTRUCTED",
       context: "GCP_OCR_PROVIDER",
-      length: text.length,
+      lineCount: lines.length,
     });
 
-    return extractMetadataFromText(text);
+    return extractMetadataFromText(lines.join("\n"));
   }
 }
