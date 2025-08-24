@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { handleDbHealth } from './dbHealth.controller';
+import { handleDbHealth } from '@/modules/monitoring/dbHealth.controller';
 
 const router = Router();
 
