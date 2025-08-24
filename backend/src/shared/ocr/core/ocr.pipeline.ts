@@ -1,21 +1,8 @@
 import { logger } from "@/shared/utils/logging/logger";
 import { OCRFactory } from "./ocr.factory";
 import { preprocessImage } from "./preprocessing";
-import { FileFetcherService, AppError } from "@/shared";
+import { AppError } from "@/shared";
 
-// export const extractMetadataFromUrl = async (url: string) => {
-//   const fileFetcher = new FileFetcherService();
-//   logger.info({
-//     layer: "middleware",
-//     module: "ocr",
-//     action: "FILE_FETCH_INITIATED",
-//     sourceUrl: url,
-//     timestamp: new Date().toISOString(),
-//   });
-
-//   const buffer = await fileFetcher.fetchBuffer(url);
-//   return OCRProcessor(buffer);
-// };
 
 export const OCRProcessor = async (buffer: Buffer) => {
   const provider = process.env.OCR_PROVIDER || "tesseract";

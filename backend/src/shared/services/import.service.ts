@@ -37,47 +37,12 @@ export class ImportService {
 }
 
 async parseXmlMetadata (buffer: Buffer): Promise<ExtractedInvoiceMetadata> {
-  // TODO: implementar lógica de extracción desde XML
   return {} as ExtractedInvoiceMetadata;
 };
 
 async extractPdfMetadata (buffer: Buffer): Promise<ExtractedInvoiceMetadata> {
-  // TODO: implementar lógica de extracción desde PDF
   return {} as ExtractedInvoiceMetadata;
 };
-
-  // async extractFromUrl(url: string) {
-  //   const timestamp = new Date().toISOString();
-
-  //   logger.info({
-  //     layer: "service",
-  //     module: "import",
-  //     action: "IMPORT_FROM_URL",
-  //     url,
-  //     timestamp,
-  //   });
-
-  //   try {
-  //     return await extractMetadataFromUrl(url);
-  //   } catch (error: any) {
-  //     logger.error({
-  //       layer: "service",
-  //       module: "import",
-  //       action: "IMPORT_URL_FAILED",
-  //       url,
-  //       error: error instanceof Error ? error.message : String(error),
-  //       timestamp,
-  //     });
-
-  //     throw new AppError("Failed to extract metadata from URL", 500, true, error, {
-  //       layer: "service",
-  //       module: "import",
-  //       reason: "EXTRACTION_ERROR_FROM_URL",
-  //       url,
-  //       timestamp,
-  //     });
-  //   }
-  // }
 
   async extractFromBuffer(buffer: Buffer) {
     const timestamp = new Date().toISOString();
