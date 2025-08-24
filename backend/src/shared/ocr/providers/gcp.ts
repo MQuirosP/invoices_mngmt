@@ -12,7 +12,7 @@ export class GcpOCRProvider implements OCRProvider {
       context: "GCP_OCR_PROVIDER",
       msg: "Using Google Cloud Vision",
     });
-    const [result] = await client.textDetection({ image: { content: buffer } });
+    const [result] = await client.documentTextDetection({ image: { content: buffer } });
     const text = result.fullTextAnnotation?.text;
     if (!text) throw new Error("No text was extracted");
     logger.info({

@@ -9,6 +9,6 @@ export const preprocessImage = async (buffer: Buffer): Promise<Buffer> => {
     .toBuffer();
 };
 
-export const logOCR = (msg: string, data?: any) => {
-  console.log(`🧠 OCR: ${msg}`, data || "");
-};
+// export const logOCR = (msg: string, data?: any) => {
+//   console.log(`🧠 OCR: ${msg}`, data || "");
+// };
