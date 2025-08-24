@@ -8,7 +8,3 @@ export const preprocessImage = async (buffer: Buffer): Promise<Buffer> => {
     .threshold(150)
     .toBuffer();
 };
-
-// export const logOCR = (msg: string, data?: any) => {
-//   console.log(`🧠 OCR: ${msg}`, data || "");
-// };
