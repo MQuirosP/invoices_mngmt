@@ -14,10 +14,10 @@ export const extractMetadataFromUrl = async (url: string) => {
   });
 
   const buffer = await fileFetcher.fetchBuffer(url);
-  return extractMetadataFromBuffer(buffer);
+  return OCRProcessor(buffer);
 };
 
-export const extractMetadataFromBuffer = async (buffer: Buffer) => {
+export const OCRProcessor = async (buffer: Buffer) => {
   const provider = process.env.OCR_PROVIDER || "tesseract";
   const ocr = OCRFactory.create(provider);
 

@@ -1,6 +1,5 @@
 import {
-  extractMetadataFromBuffer,
-  extractMetadataFromUrl,
+  OCRProcessor,
 } from "@/shared/ocr/core/ocr.pipeline";
 import { logger } from "@/shared/utils/logging/logger";
 import { AppError } from "@/shared/utils/appError.utils";
@@ -31,7 +30,7 @@ export class ImportService {
       return this.extractPdfMetadata(buffer);
     case "image/jpeg":
     case "image/png":
-      return extractMetadataFromBuffer(buffer);
+      return OCRProcessor(buffer);
     default:
       throw new AppError(`Unsupported MIME type: ${mime}`, 415);
   }
@@ -92,7 +91,7 @@ async extractPdfMetadata (buffer: Buffer): Promise<ExtractedInvoiceMetadata> {
     });
 
     try {
-      return await extractMetadataFromBuffer(buffer);
+      return await OCRProcessor(buffer);
     } catch (error: any) {
       logger.error({
         layer: "service",
