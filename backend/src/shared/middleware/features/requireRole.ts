@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import { AppError } from "@/shared/utils/appError.utils";
-import { AuthRequest } from "../../modules/auth/auth.types";
 import { logger } from "@/shared/utils/logging/logger";
+import { AuthRequest } from "@/modules/auth";
 
 /**
  * Middleware para verificar que el usuario tenga el rol adecuado
