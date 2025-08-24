@@ -4,6 +4,7 @@ import { AppError } from "@/shared/utils/appError.utils";
 import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
 import { logger } from "@/shared/utils/logging/logger";
+import { AttachmentService } from "../../../shared";
 
 export class FileService {
   constructor(private cloudinaryService: CloudinaryService) {}
@@ -29,36 +30,26 @@ export class FileService {
 
     if (files && files.length > 0) {
       for (const file of files) {
-        const result = await this.cloudinaryService.upload(
-          file.buffer,
-          file.originalname,
-          file.mimetype,
+        const result = await AttachmentService.uploadValidated(
+          { buffer: file.buffer, mimetype: file.mimetype, originalname: file.originalname },
+          invoiceId,
           userId
-        );
-
-        await prisma.attachment.create({
-          data: {
-            invoiceId,
-            url: result.url,
-            fileName: result.type,
-            mimeType: file.mimetype,
-          },
-        });
+        )
 
         logger.info({
           layer: "service",
           action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
           userId,
           invoiceId,
-          fileName: result.type,
-          mimeType: file.mimetype,
+          fileName: result.fileName,
+          mimeType: result.mimeType,
           url: result.url,
         });
 
         uploads.push({
           secure_url: result.url,
-          original_filename: file.originalname,
-          format: file.mimetype,
+          original_filename: result.fileName,
+          format: result.mimeType,
         });
       }
     }
