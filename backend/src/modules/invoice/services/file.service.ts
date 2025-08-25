@@ -5,6 +5,7 @@ import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
 import { logger } from "@/shared/utils/logging/logger";
 import { AttachmentService } from "../../../shared";
+import { Prisma } from "@prisma/client";
 
 export class FileService {
   constructor(private cloudinaryService: CloudinaryService) {}
@@ -12,7 +13,8 @@ export class FileService {
   async uploadFiles(
     userId: string,
     invoiceId: string,
-    files?: Express.Multer.File[]
+    files?: Express.Multer.File[],
+    tx: Prisma.TransactionClient = prisma // 👈 usa tx si lo pasan, si no usa prisma
   ) {
     logger.info({
       layer: "service",
@@ -36,7 +38,8 @@ export class FileService {
           userId
         );
 
-        const attachment = await prisma.attachment.create({
+        // 👇 usa tx en lugar de prisma
+        const attachment = await tx.attachment.create({
           data: draft,
         });
 
@@ -51,11 +54,11 @@ export class FileService {
           url: attachment.url,
         });
 
-        attachments.push(attachment); // 👈 Retorna el objeto completo
+        attachments.push(attachment);
       }
     }
 
-    return attachments; // 👈 Array de objetos completos
+    return attachments;
   }
 
   async downloadAttachment(

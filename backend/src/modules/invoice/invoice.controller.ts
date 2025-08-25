@@ -241,57 +241,60 @@ export class InvoiceController {
   }
 
   async importFromLocal(req: AuthRequest, res: Response, next: NextFunction) {
-    const userId = requireUserId(req);
-    const file = req.file;
-    try {
-      logger.info({
-        layer: "controller",
-        action: "INVOICE_IMPORT_LOCAL_ATTEMPT",
-        userId,
-        fileName: file?.originalname,
-      });
+  const userId = requireUserId(req);
+  const file = req.file;
+  try {
+    logger.info({
+      layer: "controller",
+      action: "INVOICE_IMPORT_LOCAL_ATTEMPT",
+      userId,
+      fileName: file?.originalname,
+    });
 
-      if (!file) throw new AppError("No file uploaded", 400);
+    if (!file) throw new AppError("No file uploaded", 400);
 
-      const invoice = await this.ocrService.createInvoiceFromBuffer(
-        file.buffer,
-        userId,
-        file.originalname,
-        file.mimetype
-      );
+    const invoice = await this.ocrService.createInvoiceFromBuffer(
+      file.buffer,
+      userId,
+      file.originalname,
+      file.mimetype
+    );
 
-      if (!invoice) {
-        logger.error({
-          layer: "controller",
-          action: "INVOICE_IMPORT_LOCAL_ERROR",
-          userId,
-          error: "Failed to create invoice from file",
-        });
-        throw new AppError("Failed to create invoice from file", 500);
-      }
-
-      logger.info({
-        layer: "controller",
-        action: "INVOICE_IMPORT_LOCAL_SUCCESS",
-        userId,
-        invoiceId: invoice.id,
-      });
-
-      res.status(201).json({
-        success: true,
-        message: "Invoice imported from local file",
-        data: invoice,
-      });
-    } catch (error) {
+    if (!invoice) {
       logger.error({
         layer: "controller",
         action: "INVOICE_IMPORT_LOCAL_ERROR",
         userId,
-        error: error instanceof Error ? error.message : String(error),
+        error: "OCR service returned null invoice",
       });
-      next(error);
+      // 👇 IMPORTANTE: lanza un error claro en vez de ocultar la causa
+      throw new Error("OCR service returned null invoice");
     }
+
+    logger.info({
+      layer: "controller",
+      action: "INVOICE_IMPORT_LOCAL_SUCCESS",
+      userId,
+      invoiceId: invoice.id,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Invoice imported from local file",
+      data: invoice,
+    });
+  } catch (error: any) {
+    logger.error({
+      layer: "controller",
+      action: "INVOICE_IMPORT_LOCAL_ERROR",
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error?.stack, // 👈 añade esto
+    });
+    next(error); // 👈 lanza el error original, no el genérico
   }
+}
+
 
   async importFromUrl(req: AuthRequest, res: Response, next: NextFunction) {
     const userId = requireUserId(req);

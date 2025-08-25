@@ -3,13 +3,14 @@ import { prisma } from "@/config/prisma";
 import {
   AppError,
   ImportService,
-  AttachmentService,
   FileFetcherService,
   validateRealMime,
   mimeMetadataMap,
   ExtractedInvoiceMetadata,
+  CloudinaryService,
 } from "@/shared";
 import { logger } from "@/shared/utils/logging/logger";
+import { FileService } from "./file.service";
 
 export class OCRService {
   constructor(private importService: ImportService) {}
@@ -28,11 +29,12 @@ export class OCRService {
       mimeType,
     });
 
-    const metadata: ExtractedInvoiceMetadata = await this.importService.extractAndRoute({
-      buffer,
-      declaredMime: mimeType,
-      url: originalName,
-    });
+    const metadata: ExtractedInvoiceMetadata =
+      await this.importService.extractAndRoute({
+        buffer,
+        declaredMime: mimeType,
+        url: originalName,
+      });
 
     logger.info({
       layer: "service",
@@ -64,24 +66,28 @@ export class OCRService {
         });
       }
 
-      const attachmentData = await AttachmentService.uploadValidated(
-        { buffer, mimetype: mimeType, originalname: originalName },
+      const fileService = new FileService(new CloudinaryService());
+
+      const attachments = await fileService.uploadFiles(
+        userId,
         invoice.id,
-        userId
+        [
+          {
+            buffer,
+            mimetype: mimeType,
+            originalname: originalName,
+          } as Express.Multer.File,
+        ],
+        tx
       );
 
-      const attachment = await tx.attachment.create({
-        data: attachmentData,
-      });
-
+      const attachment = attachments[0];
       logger.info({
         layer: "service",
-        action: "OCR_ATTACHMENT_PERSISTED",
+        action: "OCR_ATTACHMENT_UPLOADED",
         userId,
         invoiceId: invoice.id,
         attachmentId: attachment.id,
-        fileName: attachment.fileName,
-        mimeType: attachment.mimeType,
         url: attachment.url,
       });
 
