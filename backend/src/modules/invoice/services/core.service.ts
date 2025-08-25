@@ -3,8 +3,8 @@ import { Invoice, Role } from "@prisma/client";
 import { FileService } from "@/modules/invoice";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
-import { CloudinaryService } from "../../../shared/services/cloudinary.service";
-import { ExtractedInvoiceMetadata } from "../../../shared/ocr/core/ocr.types";
+import { CloudinaryService } from "@/shared/services/cloudinary.service";
+import { ExtractedInvoiceMetadata } from "@/shared/ocr/core/ocr.types";
 
 const cloudinaryService = new CloudinaryService();
 const fileService = new FileService(cloudinaryService);

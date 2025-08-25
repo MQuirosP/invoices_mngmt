@@ -5,4 +5,3 @@ export { extractMetadataFromText } from "./semanticExtractor";
 export { extractProvider } from "./extractProvider";
 export { extractTitle } from "./extractTitle";
 export { extractWarranty } from "./extractWarranty";
-export { extractMetadataFromBuffer, extractMetadataFromUrl } from "../core/ocr.pipeline";

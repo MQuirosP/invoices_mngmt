@@ -4,3 +4,5 @@ export { isDescriptiveLine } from "./matchers";
 export { matchStructuredItem } from "./matchers";
 export { normalizeNumericLine } from "./matchers";
 export { regexPatterns } from "./regex"
+export * from "./matchers";
+export * from "./regex";
