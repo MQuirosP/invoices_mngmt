@@ -129,12 +129,13 @@ export const deleteInvoiceById = async (
   }
 
   await prisma.$transaction(async (tx) => {
-    await fileService.deleteAttachments(userId, invoiceId, tx);
+  await fileService.deleteAttachments(userId, invoiceId, tx);
 
-    await tx.invoice.delete({
-      where: { id: invoiceId },
-    });
+  await tx.invoice.delete({
+    where: { id: invoiceId },
   });
+});
+
 
   logger.info({
     layer: "service",
