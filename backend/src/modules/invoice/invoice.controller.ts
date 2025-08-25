@@ -3,15 +3,8 @@ import { requireUserId } from "@/shared/utils/security/requireUserId";
 import { AppError } from "@/shared/utils/appError.utils";
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { logger } from "@/shared/utils/logging/logger";
-
-import {
-  createInvoice,
-  getUserInvoices,
-  getInvoiceById,
-  deleteInvoiceById,
-} from "@/modules/invoice/services/core.service";
 import { Role } from "@prisma/client";
-import { FileService, OCRService } from "@/modules/invoice";
+import { FileService, InvoiceService, OCRService } from "@/modules/invoice";
 import { prisma } from "@/config/prisma";
 import { createInvoiceSchema } from "./schemas/invoice.schema";
 import { CloudinaryService, ImportService } from "@/shared";
@@ -19,15 +12,18 @@ import { CloudinaryService, ImportService } from "@/shared";
 export class InvoiceController {
   private fileService: FileService;
   private ocrService: OCRService;
+  private invoiceService!: InvoiceService;
 
   constructor() {
-    const cloudinaryService = new CloudinaryService();
-    const importService = new ImportService();
-    const fileService = new FileService(cloudinaryService);
+  const cloudinaryService = new CloudinaryService();
+  const importService = new ImportService();
+  const fileService = new FileService(cloudinaryService);
+  const invoiceService = new InvoiceService(fileService);
 
-    this.fileService = fileService; 
-    this.ocrService = new OCRService(importService, fileService); 
-  }
+  this.fileService = fileService;
+  this.invoiceService = invoiceService;
+  this.ocrService = new OCRService(importService, fileService, invoiceService);
+}
 
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     const startTime = Date.now();
@@ -51,7 +47,7 @@ export class InvoiceController {
         });
       }
 
-      const invoice = await createInvoice(userId, parsed);
+      const invoice = await this.invoiceService.createInvoice(userId, parsed);
       const uploads = files?.length
         ? await this.fileService.uploadFiles(userId, invoice.invoiceId, files)
         : [];
@@ -68,7 +64,7 @@ export class InvoiceController {
       res.status(201).json({
         success: true,
         message: `Invoice created with ${uploads.length} attachment(s)`,
-        data: await getInvoiceById(invoice.invoiceId, userId),
+        data: await this.invoiceService.getInvoiceById(invoice.invoiceId, userId),
       });
     } catch (error) {
       logger.error({
@@ -90,7 +86,7 @@ export class InvoiceController {
         userId,
       });
 
-      const invoices = await getUserInvoices(userId);
+      const invoices = await this.invoiceService.getUserInvoices(userId);
 
       logger.info({
         layer: "controller",
@@ -122,7 +118,7 @@ export class InvoiceController {
         invoiceId,
       });
 
-      const invoice = await getInvoiceById(invoiceId, userId);
+      const invoice = await this.invoiceService.getInvoiceById(invoiceId, userId);
 
       logger.info({
         layer: "controller",
@@ -164,7 +160,7 @@ export class InvoiceController {
       if (!invoice) throw new AppError("Invoice not found", 404);
 
       await this.fileService.deleteAttachments(userId, invoiceId);
-      const deletedInvoice = await deleteInvoiceById(
+      const deletedInvoice = await this.invoiceService.deleteInvoiceById(
         invoiceId,
         userId,
         userRole
@@ -268,7 +264,6 @@ export class InvoiceController {
           userId,
           error: "OCR service returned null invoice",
         });
-        // 👇 IMPORTANTE: lanza un error claro en vez de ocultar la causa
         throw new Error("OCR service returned null invoice");
       }
 
@@ -292,7 +287,7 @@ export class InvoiceController {
         error: error instanceof Error ? error.message : String(error),
         stack: error?.stack, // 👈 añade esto
       });
-      next(error); // 👈 lanza el error original, no el genérico
+      next(error);
     }
   }
 
@@ -357,7 +352,7 @@ export class InvoiceController {
         invoiceId,
       });
 
-      const invoice = await getInvoiceById(invoiceId, userId);
+      const invoice = await this.invoiceService.getInvoiceById(invoiceId, userId);
       const url = invoice?.attachments[0]?.url;
 
       if (!url) {

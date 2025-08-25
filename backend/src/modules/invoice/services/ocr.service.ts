@@ -1,14 +1,14 @@
-import { FileService } from '@/modules/invoice';
+import { FileService, InvoiceService } from '@/modules/invoice';
 import { ImportService, AppError } from "@/shared";
 import { prisma } from "@/config/prisma";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
-import { createInvoice, updateInvoiceFromMetadata } from "..";
 
 export class OCRService {
   constructor(
     private importService: ImportService,
-    private fileService: FileService
+    private fileService: FileService,
+     private invoiceService: InvoiceService
   ) {}
 
   async createInvoiceFromBuffer(
@@ -40,7 +40,7 @@ export class OCRService {
       itemCount: metadata.items?.length ?? 0,
     });
 
-    const invoice = await createInvoice(userId, metadata, {
+    const invoice = await this.invoiceService.createInvoice(userId, metadata, {
       buffer,
       mimetype: mimeType,
       originalname: originalName,
@@ -106,7 +106,7 @@ export class OCRService {
       validatedMime,
     });
 
-    await updateInvoiceFromMetadata(invoiceId, userId, metadata, url);
+    await this.invoiceService.updateInvoiceFromMetadata(invoiceId, userId, metadata, url);
 
     logger.info({
       layer: "service",

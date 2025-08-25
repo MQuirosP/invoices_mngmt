@@ -11,7 +11,7 @@ const controller = new InvoiceController();
 // Public invoice access
 // ====================
 router.get("/:id", authenticate, validateParams(["id"]) ,controller.get.bind(controller)); // Get single invoice
-router.get("/", authenticate, controller.list); // List invoices
+router.get("/", authenticate, controller.list.bind(controller)); // List invoices
 router.delete(
   "/:id",
   authenticate,
