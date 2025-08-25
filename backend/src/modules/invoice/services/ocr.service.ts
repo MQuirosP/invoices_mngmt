@@ -7,13 +7,16 @@ import {
   validateRealMime,
   mimeMetadataMap,
   ExtractedInvoiceMetadata,
-  CloudinaryService,
+  // CloudinaryService,
 } from "@/shared";
 import { logger } from "@/shared/utils/logging/logger";
 import { FileService } from "./file.service";
 
 export class OCRService {
-  constructor(private importService: ImportService) {}
+  constructor(
+    private importService: ImportService,
+    private fileService: FileService
+  ) {}
 
   async createInvoiceFromBuffer(
     buffer: Buffer,
@@ -66,9 +69,7 @@ export class OCRService {
         });
       }
 
-      const fileService = new FileService(new CloudinaryService());
-
-      const attachments = await fileService.uploadFiles(
+      const attachments = await this.fileService.uploadFiles(
         userId,
         invoice.id,
         [
