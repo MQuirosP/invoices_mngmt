@@ -1,8 +1,12 @@
 import { prisma } from "@/config/prisma";
 import { Invoice, Role } from "@prisma/client";
-import { CreateInvoiceInput } from "@/modules/invoice";
+import { CreateInvoiceInput, FileService } from "@/modules/invoice";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
+import { CloudinaryService } from "../../../shared/services/cloudinary.service";
+
+const cloudinaryService = new CloudinaryService();
+const fileService = new FileService(cloudinaryService);
 
 export const createInvoice = async (
   data: CreateInvoiceInput,
@@ -125,9 +129,12 @@ export const deleteInvoiceById = async (
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.invoice.delete({ where: { id: invoiceId } });
-  });
+    await fileService.deleteAttachments(userId, invoiceId, tx);
 
+    await tx.invoice.delete({
+      where: { id: invoiceId },
+    });
+  });
 
   logger.info({
     layer: "service",

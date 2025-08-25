@@ -125,7 +125,11 @@ export class FileService {
     };
   }
 
-  async deleteAttachments(userId: string, invoiceId: string) {
+  async deleteAttachments(
+    userId: string,
+    invoiceId: string,
+    tx: Prisma.TransactionClient = prisma
+  ) {
     logger.info({
       layer: "service",
       action: "INVOICE_ATTACHMENT_DELETE_BATCH_ATTEMPT",
@@ -149,35 +153,33 @@ export class FileService {
     }
 
     try {
-      await prisma.$transaction(async (tx) => {
-        for (const attachment of invoice.attachments) {
-          logger.info({
-            layer: "service",
-            action: "INVOICE_ATTACHMENT_DELETE_ATTEMPT",
-            userId,
-            invoiceId,
-            fileName: attachment.fileName,
-            mimeType: attachment.mimeType,
-          });
-
-          await this.cloudinaryService.delete(
-            userId,
-            attachment.fileName,
-            attachment.mimeType
-          );
-
-          logger.info({
-            layer: "service",
-            action: "INVOICE_ATTACHMENT_DELETE_SUCCESS",
-            userId,
-            invoiceId,
-            fileName: attachment.fileName,
-          });
-        }
-
-        await tx.attachment.deleteMany({
-          where: { invoiceId },
+      for (const attachment of invoice.attachments) {
+        logger.info({
+          layer: "service",
+          action: "INVOICE_ATTACHMENT_DELETE_ATTEMPT",
+          userId,
+          invoiceId,
+          fileName: attachment.fileName,
+          mimeType: attachment.mimeType,
         });
+
+        await this.cloudinaryService.delete(
+          userId,
+          attachment.fileName,
+          attachment.mimeType
+        );
+
+        logger.info({
+          layer: "service",
+          action: "INVOICE_ATTACHMENT_DELETE_SUCCESS",
+          userId,
+          invoiceId,
+          fileName: attachment.fileName,
+        });
+      }
+
+      await tx.attachment.deleteMany({
+        where: { invoiceId },
       });
     } catch (error: any) {
       logger.error({
