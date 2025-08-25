@@ -1,10 +1,5 @@
-import {
-  ImportService,
-  FileFetcherService,
-  validateRealMime,
-  mimeMetadataMap,
-  AppError,
-} from "@/shared";
+import { FileService } from '@/modules/invoice';
+import { ImportService, AppError } from "@/shared";
 import { prisma } from "@/config/prisma";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
@@ -12,7 +7,8 @@ import { createInvoice, updateInvoiceFromMetadata } from "..";
 
 export class OCRService {
   constructor(
-    private importService: ImportService
+    private importService: ImportService,
+    private fileService: FileService
   ) {}
 
   async createInvoiceFromBuffer(
@@ -44,21 +40,17 @@ export class OCRService {
       itemCount: metadata.items?.length ?? 0,
     });
 
-    const invoice = await createInvoice(
-      userId,
-      metadata,
-      {
-        buffer,
-        mimetype: mimeType,
-        originalname: originalName,
-      } as Express.Multer.File
-    );
+    const invoice = await createInvoice(userId, metadata, {
+      buffer,
+      mimetype: mimeType,
+      originalname: originalName,
+    } as Express.Multer.File);
 
     logger.info({
       layer: "service",
       action: "OCR_CREATE_FROM_BUFFER_SUCCESS",
       userId,
-        invoiceId: invoice.invoiceId,
+      invoiceId: invoice.invoiceId,
       itemCount: metadata.items?.length ?? 0,
     });
 
@@ -92,31 +84,12 @@ export class OCRService {
       throw new AppError("Invoice not found", 404);
     }
 
-    const fetcher = new FileFetcherService();
-    const buffer = await fetcher.fetchBuffer(url);
-
-    const filename = url.split("/").pop()?.split("?")[0] || "unknown";
-    const ext = filename.split(".").pop()?.toLowerCase();
-
-    if (!ext || !Object.values(mimeMetadataMap).some((meta) => meta.ext === ext)) {
-      throw new AppError("Unsupported or missing file extension", 415, true, undefined, {
-        layer: "ocr",
-        module: "ocr.service",
-        reason: "EXTENSION_NOT_ALLOWED",
-        filename,
-        url,
-      });
-    }
-
-    const declaredMime = Object.entries(mimeMetadataMap).find(
-      ([mime, meta]) => meta.ext === ext
-    )?.[0]!;
-
-    const { mime } = await validateRealMime(buffer, declaredMime, filename);
+    const { buffer, declaredMime, validatedMime, filename } =
+      await this.fileService.prepareBufferForExtraction(url);
 
     const metadata = await this.importService.extractAndRoute({
       buffer,
-      declaredMime: mime,
+      declaredMime: validatedMime,
       url,
     });
 
@@ -128,6 +101,9 @@ export class OCRService {
       invoiceId,
       title: metadata.title,
       itemCount: metadata.items?.length ?? 0,
+      filename,
+      declaredMime,
+      validatedMime,
     });
 
     await updateInvoiceFromMetadata(invoiceId, userId, metadata, url);

@@ -23,10 +23,10 @@ export class InvoiceController {
   constructor() {
     const cloudinaryService = new CloudinaryService();
     const importService = new ImportService();
-    const fileService = new FileService(cloudinaryService); // instancia única
+    const fileService = new FileService(cloudinaryService);
 
     this.fileService = fileService; 
-    this.ocrService = new OCRService(importService); 
+    this.ocrService = new OCRService(importService, fileService); 
   }
 
   async create(req: AuthRequest, res: Response, next: NextFunction) {

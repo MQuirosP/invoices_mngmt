@@ -43,7 +43,6 @@ export const createInvoice = async (
   });
 };
 
-
 export const getUserInvoices = async (userId: string): Promise<Invoice[]> => {
   logger.info({
     layer: "service",
