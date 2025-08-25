@@ -26,7 +26,7 @@ export class InvoiceController {
     const fileService = new FileService(cloudinaryService); // instancia única
 
     this.fileService = fileService; 
-    this.ocrService = new OCRService(importService, fileService); 
+    this.ocrService = new OCRService(importService); 
   }
 
   async create(req: AuthRequest, res: Response, next: NextFunction) {
@@ -51,16 +51,16 @@ export class InvoiceController {
         });
       }
 
-      const invoice = await createInvoice(parsed, userId);
+      const invoice = await createInvoice(userId, parsed);
       const uploads = files?.length
-        ? await this.fileService.uploadFiles(userId, invoice.id, files)
+        ? await this.fileService.uploadFiles(userId, invoice.invoiceId, files)
         : [];
 
       logger.info({
         layer: "controller",
         action: "INVOICE_CREATE_SUCCESS",
         userId,
-        invoiceId: invoice.id,
+        invoiceId: invoice.invoiceId,
         attachmentCount: uploads.length,
         durationMs: Date.now() - startTime,
       });
@@ -68,7 +68,7 @@ export class InvoiceController {
       res.status(201).json({
         success: true,
         message: `Invoice created with ${uploads.length} attachment(s)`,
-        data: await getInvoiceById(invoice.id, userId),
+        data: await getInvoiceById(invoice.invoiceId, userId),
       });
     } catch (error) {
       logger.error({

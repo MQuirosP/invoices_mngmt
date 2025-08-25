@@ -1,49 +1,48 @@
 import { prisma } from "@/config/prisma";
 import { Invoice, Role } from "@prisma/client";
-import { CreateInvoiceInput, FileService } from "@/modules/invoice";
+import { FileService } from "@/modules/invoice";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
 import { CloudinaryService } from "../../../shared/services/cloudinary.service";
+import { ExtractedInvoiceMetadata } from "../../../shared/ocr/core/ocr.types";
 
 const cloudinaryService = new CloudinaryService();
 const fileService = new FileService(cloudinaryService);
 
 export const createInvoice = async (
-  data: CreateInvoiceInput,
-  userId: string
-) => {
-  logger.info({
-    layer: "service",
-    action: "INVOICE_CREATE_ATTEMPT",
-    userId,
-    payload: {
-      title: data.title,
-      issueDate: data.issueDate,
-      expiration: data.expiration,
-    },
-  });
-
-  const invoice = await prisma.$transaction(async (tx) => {
-    return await tx.invoice.create({
+  userId: string,
+  metadata: ExtractedInvoiceMetadata,
+  file?: Express.Multer.File
+): Promise<{ invoiceId: string }> => {
+  return await prisma.$transaction(async (tx) => {
+    const invoice = await tx.invoice.create({
       data: {
-        ...data,
         userId,
+        title: metadata.title,
+        issueDate: metadata.issueDate,
+        expiration: metadata.expiration,
+        provider: metadata.provider,
+        extracted: true,
       },
     });
-  });
 
-  logger.info({
-    layer: "service",
-    action: "INVOICE_CREATE_SUCCESS",
-    userId,
-    invoiceId: invoice.id,
-    title: data.title,
-    issueDate: data.issueDate,
-    expiration: data.expiration,
-  });
+    if (metadata.items?.length) {
+      await tx.invoiceItem.createMany({
+        data: metadata.items.map((item) => ({
+          ...item,
+          invoiceId: invoice.id,
+        })),
+      });
+    }
 
-  return invoice;
+    if (file) {
+      await fileService.uploadFiles(userId, invoice.id, [file], tx);
+    }
+
+    return { invoiceId: invoice.id };
+  });
 };
+
 
 export const getUserInvoices = async (userId: string): Promise<Invoice[]> => {
   logger.info({
@@ -145,4 +144,58 @@ export const deleteInvoiceById = async (
   });
 
   return invoice;
+};
+
+export const updateInvoiceFromMetadata = async (
+  invoiceId: string,
+  userId: string,
+  metadata: ExtractedInvoiceMetadata,
+  url: string
+): Promise<void> => {
+  return await prisma.$transaction(async (tx) => {
+    const existingAttachment = await tx.attachment.findFirst({
+      where: { invoiceId, url },
+    });
+
+    if (!existingAttachment) {
+      await tx.attachment.create({
+        data: {
+          invoiceId,
+          url,
+          fileName: "file_from_url",
+          mimeType: "application/octet-stream",
+        },
+      });
+
+      logger.info({
+        layer: "service",
+        action: "OCR_ATTACHMENT_CREATED_FROM_URL",
+        userId,
+        invoiceId,
+        url,
+      });
+    }
+
+    await tx.invoice.update({
+      where: { id: invoiceId },
+      data: {
+        title: metadata.title,
+        issueDate: metadata.issueDate,
+        expiration: metadata.expiration,
+        provider: metadata.provider,
+        extracted: true,
+      },
+    });
+
+    await tx.invoiceItem.deleteMany({ where: { invoiceId } });
+
+    if (metadata.items?.length) {
+      await tx.invoiceItem.createMany({
+        data: metadata.items.map((item) => ({
+          ...item,
+          invoiceId,
+        })),
+      });
+    }
+  });
 };

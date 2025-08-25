@@ -17,7 +17,7 @@ export interface ExtractedInvoiceMetadata {
   duration?: number;
   validUntil?: Date;
   mimeType?: string;
-  items: InvoiceItemInput[];
+  items?: InvoiceItemInput[];
 }
 
 export interface OCRProvider {

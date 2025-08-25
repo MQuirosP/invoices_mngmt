@@ -1,21 +1,18 @@
-import { invoiceIncludeOptions } from "./../invoice.query";
-import { prisma } from "@/config/prisma";
 import {
-  AppError,
   ImportService,
   FileFetcherService,
   validateRealMime,
   mimeMetadataMap,
-  ExtractedInvoiceMetadata,
-  // CloudinaryService,
+  AppError,
 } from "@/shared";
+import { prisma } from "@/config/prisma";
+import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
-import { FileService } from "./file.service";
+import { createInvoice, updateInvoiceFromMetadata } from "..";
 
 export class OCRService {
   constructor(
-    private importService: ImportService,
-    private fileService: FileService
+    private importService: ImportService
   ) {}
 
   async createInvoiceFromBuffer(
@@ -32,12 +29,11 @@ export class OCRService {
       mimeType,
     });
 
-    const metadata: ExtractedInvoiceMetadata =
-      await this.importService.extractAndRoute({
-        buffer,
-        declaredMime: mimeType,
-        url: originalName,
-      });
+    const metadata = await this.importService.extractAndRoute({
+      buffer,
+      declaredMime: mimeType,
+      url: originalName,
+    });
 
     logger.info({
       layer: "service",
@@ -48,63 +44,26 @@ export class OCRService {
       itemCount: metadata.items?.length ?? 0,
     });
 
-    const result = await prisma.$transaction(async (tx) => {
-      const invoice = await tx.invoice.create({
-        data: {
-          userId,
-          title: metadata.title,
-          issueDate: metadata.issueDate,
-          expiration: metadata.expiration,
-          provider: metadata.provider,
-          extracted: true,
-        },
-      });
-
-      if (metadata.items?.length) {
-        await tx.invoiceItem.createMany({
-          data: metadata.items.map((item) => ({
-            ...item,
-            invoiceId: invoice.id,
-          })),
-        });
-      }
-
-      const attachments = await this.fileService.uploadFiles(
-        userId,
-        invoice.id,
-        [
-          {
-            buffer,
-            mimetype: mimeType,
-            originalname: originalName,
-          } as Express.Multer.File,
-        ],
-        tx
-      );
-
-      const attachment = attachments[0];
-      logger.info({
-        layer: "service",
-        action: "OCR_ATTACHMENT_UPLOADED",
-        userId,
-        invoiceId: invoice.id,
-        attachmentId: attachment.id,
-        url: attachment.url,
-      });
-
-      return invoice.id;
-    });
+    const invoice = await createInvoice(
+      userId,
+      metadata,
+      {
+        buffer,
+        mimetype: mimeType,
+        originalname: originalName,
+      } as Express.Multer.File
+    );
 
     logger.info({
       layer: "service",
       action: "OCR_CREATE_FROM_BUFFER_SUCCESS",
       userId,
-      invoiceId: result,
+        invoiceId: invoice.invoiceId,
       itemCount: metadata.items?.length ?? 0,
     });
 
     return prisma.invoice.findUnique({
-      where: { id: result },
+      where: { id: invoice.invoiceId },
       include: invoiceIncludeOptions,
     });
   }
@@ -139,23 +98,14 @@ export class OCRService {
     const filename = url.split("/").pop()?.split("?")[0] || "unknown";
     const ext = filename.split(".").pop()?.toLowerCase();
 
-    if (
-      !ext ||
-      !Object.values(mimeMetadataMap).some((meta) => meta.ext === ext)
-    ) {
-      throw new AppError(
-        "Unsupported or missing file extension",
-        415,
-        true,
-        undefined,
-        {
-          layer: "ocr",
-          module: "ocr.service",
-          reason: "EXTENSION_NOT_ALLOWED",
-          filename,
-          url,
-        }
-      );
+    if (!ext || !Object.values(mimeMetadataMap).some((meta) => meta.ext === ext)) {
+      throw new AppError("Unsupported or missing file extension", 415, true, undefined, {
+        layer: "ocr",
+        module: "ocr.service",
+        reason: "EXTENSION_NOT_ALLOWED",
+        filename,
+        url,
+      });
     }
 
     const declaredMime = Object.entries(mimeMetadataMap).find(
@@ -180,46 +130,7 @@ export class OCRService {
       itemCount: metadata.items?.length ?? 0,
     });
 
-    await prisma.$transaction(async (tx) => {
-      const existingAttachment = invoice.attachments.find((a) => a.url === url);
-      if (!existingAttachment) {
-        await tx.attachment.create({
-          data: {
-            invoiceId,
-            url,
-            fileName: "file_from_url",
-            mimeType: "application/octet-stream",
-          },
-        });
-
-        logger.info({
-          layer: "service",
-          action: "OCR_ATTACHMENT_CREATED_FROM_URL",
-          userId,
-          invoiceId,
-          url,
-        });
-      }
-
-      await tx.invoice.update({
-        where: { id: invoiceId },
-        data: {
-          title: metadata.title,
-          issueDate: metadata.issueDate,
-          expiration: metadata.expiration,
-          provider: metadata.provider,
-          extracted: true,
-        },
-      });
-
-      await tx.invoiceItem.deleteMany({ where: { invoiceId } });
-
-      if (metadata.items?.length) {
-        await tx.invoiceItem.createMany({
-          data: metadata.items.map((item) => ({ ...item, invoiceId })),
-        });
-      }
-    });
+    await updateInvoiceFromMetadata(invoiceId, userId, metadata, url);
 
     logger.info({
       layer: "service",
