@@ -123,10 +123,12 @@ form-data
 * **`prisma/`**: Prisma schema and migrations.
 * **`src/app.ts`**: Main application entry point.
 
-bash
+```bash
     git clone <https://github.com/MQuirosP/invoices_mngmt.git>
     cd invoices_mngmt/backend
-    env
+```
+
+```env
     DATABASE_URL="postgresql://user:password@localhost:5432/invoices_db"
     JWT_SECRET="your_secret_key"
     SALT_ROUNDS=10
@@ -134,7 +136,9 @@ bash
     CLOUDINARY_API_KEY="your_api_key"
     CLOUDINARY_API_SECRET="your_api_secret"
     GOOGLE_APPLICATION_CREDENTIALS="./path/to/your-ocr-key.json"
-    *   **Multer:** Used for handling file uploads. Configured with `memoryStorage` to store files in memory before uploading to Cloudinary.
+```
+
+* **Multer:** Used for handling file uploads. Configured with `memoryStorage` to store files in memory before uploading to Cloudinary.
 
 * **Cloudinary:** Used for storing and managing file attachments.
 * **MIME Type Validation:** Implemented using `file-type` to validate the MIME type of uploaded files.
