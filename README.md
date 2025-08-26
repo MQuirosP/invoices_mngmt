@@ -124,6 +124,8 @@ form-data
 * **`prisma/`**: Prisma schema and migrations.
 * **`src/app.ts`**: Main application entry point.
 
+## Clone repository
+
 ```bash
     git clone <https://github.com/MQuirosP/invoices_mngmt.git>
     cd invoices_mngmt/backend
@@ -144,7 +146,7 @@ form-data
 * **Cloudinary:** Used for storing and managing file attachments.
 * **MIME Type Validation:** Implemented using `file-type` to validate the MIME type of uploaded files.
 
-> Example of MIME type validation middleware:
+    > Example of MIME type validation middleware:
 
 ``` ts
         import { validateRealMime } from './shared/utils/file/validateRealMime';
