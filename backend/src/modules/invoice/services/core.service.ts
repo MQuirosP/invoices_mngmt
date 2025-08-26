@@ -1,195 +1,195 @@
 import { prisma } from "@/config/prisma";
 import { Invoice, Role } from "@prisma/client";
-import { FileService } from "@/modules/invoice";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
 import { ExtractedInvoiceMetadata } from "@/shared/ocr/core/ocr.types";
+import { uploadFiles, deleteAttachments } from "./file.service";
 
-export class InvoiceService {
-  constructor(private fileService: FileService) {}
+export const createInvoice = async (
+  userId: string,
+  metadata: ExtractedInvoiceMetadata,
+  file?: Express.Multer.File
+): Promise<{ invoiceId: string }> => {
+  return await prisma.$transaction(async (tx) => {
+    const invoice = await tx.invoice.create({
+      data: {
+        userId,
+        title: metadata.title,
+        issueDate: metadata.issueDate,
+        expiration: metadata.expiration,
+        provider: metadata.provider,
+        extracted: true,
+      },
+    });
 
-  async createInvoice(
-    userId: string,
-    metadata: ExtractedInvoiceMetadata,
-    file?: Express.Multer.File
-  ): Promise<{ invoiceId: string }> {
-    return await prisma.$transaction(async (tx) => {
-      const invoice = await tx.invoice.create({
-        data: {
-          userId,
-          title: metadata.title,
-          issueDate: metadata.issueDate,
-          expiration: metadata.expiration,
-          provider: metadata.provider,
-          extracted: true,
-        },
+    if (metadata.items?.length) {
+      await tx.invoiceItem.createMany({
+        data: metadata.items.map((item) => ({
+          ...item,
+          invoiceId: invoice.id,
+        })),
       });
+    }
 
-      if (metadata.items?.length) {
-        await tx.invoiceItem.createMany({
-          data: metadata.items.map((item) => ({
-            ...item,
-            invoiceId: invoice.id,
-          })),
-        });
-      }
+    if (file) {
+      await uploadFiles(userId, invoice.id, [file], undefined, tx);
+    }
 
-      if (file) {
-        await this.fileService.uploadFiles(userId, invoice.id, [file], tx);
-      }
+    return { invoiceId: invoice.id };
+  });
+};
 
-      return { invoiceId: invoice.id };
-    });
-  }
+export const getUserInvoices = async (userId: string): Promise<Invoice[]> => {
+  logger.info({
+    layer: "service",
+    action: "INVOICE_GET_ALL_ATTEMPT",
+    userId,
+  });
 
-  async getUserInvoices(userId: string): Promise<Invoice[]> {
-    logger.info({
+  const invoices = await prisma.invoice.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: invoiceIncludeOptions,
+  });
+
+  logger.info({
+    layer: "service",
+    action: "INVOICE_GET_ALL_SUCCESS",
+    userId,
+    invoiceCount: invoices.length,
+  });
+
+  return invoices;
+};
+
+export const getInvoiceById = async (id: string, userId: string) => {
+  logger.info({
+    layer: "service",
+    action: "INVOICE_GET_BY_ID_ATTEMPT",
+    userId,
+    invoiceId: id,
+  });
+
+  const invoice = await prisma.invoice.findFirst({
+    where: { id, userId },
+    include: invoiceIncludeOptions,
+  });
+
+  if (!invoice) {
+    logger.warn({
       layer: "service",
-      action: "INVOICE_GET_ALL_ATTEMPT",
-      userId,
-    });
-
-    const invoices = await prisma.invoice.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      include: invoiceIncludeOptions,
-    });
-
-    logger.info({
-      layer: "service",
-      action: "INVOICE_GET_ALL_SUCCESS",
-      userId,
-      invoiceCount: invoices.length,
-    });
-
-    return invoices;
-  }
-
-  async getInvoiceById(id: string, userId: string) {
-    logger.info({
-      layer: "service",
-      action: "INVOICE_GET_BY_ID_ATTEMPT",
+      action: "INVOICE_GET_BY_ID_NOT_FOUND",
       userId,
       invoiceId: id,
     });
-
-    const invoice = await prisma.invoice.findFirst({
-      where: { id, userId },
-      include: invoiceIncludeOptions,
-    });
-
-    if (!invoice) {
-      logger.warn({
-        layer: "service",
-        action: "INVOICE_GET_BY_ID_NOT_FOUND",
-        userId,
-        invoiceId: id,
-      });
-    } else {
-      logger.info({
-        layer: "service",
-        action: "INVOICE_GET_BY_ID_SUCCESS",
-        userId,
-        invoiceId: id,
-      });
-    }
-
-    return invoice;
-  }
-
-  async deleteInvoiceById(invoiceId: string, userId: string, userRole: Role) {
+  } else {
     logger.info({
       layer: "service",
-      action: "INVOICE_DELETE_ATTEMPT",
+      action: "INVOICE_GET_BY_ID_SUCCESS",
+      userId,
+      invoiceId: id,
+    });
+  }
+
+  return invoice;
+};
+
+export const deleteInvoiceById = async (
+  invoiceId: string,
+  userId: string,
+  userRole: Role
+) => {
+  logger.info({
+    layer: "service",
+    action: "INVOICE_DELETE_ATTEMPT",
+    invoiceId,
+    userId,
+    userRole,
+  });
+
+  const invoice = await prisma.invoice.findFirst({
+    where: { id: invoiceId },
+    include: { attachments: true },
+  });
+
+  if (!invoice) {
+    logger.warn({
+      layer: "service",
+      action: "INVOICE_DELETE_NOT_FOUND",
       invoiceId,
       userId,
-      userRole,
     });
+    return null;
+  }
 
-    const invoice = await prisma.invoice.findFirst({
+  await prisma.$transaction(async (tx) => {
+    await deleteAttachments(userId, invoiceId, undefined, tx);
+
+    await tx.invoice.delete({
       where: { id: invoiceId },
-      include: { attachments: true },
+    });
+  });
+
+  logger.info({
+    layer: "service",
+    action: "INVOICE_DELETE_SUCCESS",
+    invoiceId,
+    userId,
+  });
+
+  return invoice;
+};
+
+export const updateInvoiceFromMetadata = async (
+  invoiceId: string,
+  userId: string,
+  metadata: ExtractedInvoiceMetadata,
+  url: string
+): Promise<void> => {
+  return await prisma.$transaction(async (tx) => {
+    const existingAttachment = await tx.attachment.findFirst({
+      where: { invoiceId, url },
     });
 
-    if (!invoice) {
-      logger.warn({
-        layer: "service",
-        action: "INVOICE_DELETE_NOT_FOUND",
-        invoiceId,
-        userId,
-      });
-      return null;
-    }
-
-    await prisma.$transaction(async (tx) => {
-      await this.fileService.deleteAttachments(userId, invoiceId, tx);
-
-      await tx.invoice.delete({
-        where: { id: invoiceId },
-      });
-    });
-
-    logger.info({
-      layer: "service",
-      action: "INVOICE_DELETE_SUCCESS",
-      invoiceId,
-      userId,
-    });
-
-    return invoice;
-  }
-
-  async updateInvoiceFromMetadata(
-    invoiceId: string,
-    userId: string,
-    metadata: ExtractedInvoiceMetadata,
-    url: string
-  ): Promise<void> {
-    return await prisma.$transaction(async (tx) => {
-      const existingAttachment = await tx.attachment.findFirst({
-        where: { invoiceId, url },
-      });
-
-      if (!existingAttachment) {
-        await tx.attachment.create({
-          data: {
-            invoiceId,
-            url,
-            fileName: "file_from_url",
-            mimeType: "application/octet-stream",
-          },
-        });
-
-        logger.info({
-          layer: "service",
-          action: "OCR_ATTACHMENT_CREATED_FROM_URL",
-          userId,
+    if (!existingAttachment) {
+      await tx.attachment.create({
+        data: {
           invoiceId,
           url,
-        });
-      }
-
-      await tx.invoice.update({
-        where: { id: invoiceId },
-        data: {
-          title: metadata.title,
-          issueDate: metadata.issueDate,
-          expiration: metadata.expiration,
-          provider: metadata.provider,
-          extracted: true,
+          fileName: "file_from_url",
+          mimeType: "application/octet-stream",
         },
       });
 
-      await tx.invoiceItem.deleteMany({ where: { invoiceId } });
+      logger.info({
+        layer: "service",
+        action: "OCR_ATTACHMENT_CREATED_FROM_URL",
+        userId,
+        invoiceId,
+        url,
+      });
+    }
 
-      if (metadata.items?.length) {
-        await tx.invoiceItem.createMany({
-          data: metadata.items.map((item) => ({
-            ...item,
-            invoiceId,
-          })),
-        });
-      }
+    await tx.invoice.update({
+      where: { id: invoiceId },
+      data: {
+        title: metadata.title,
+        issueDate: metadata.issueDate,
+        expiration: metadata.expiration,
+        provider: metadata.provider,
+        extracted: true,
+      },
     });
-  }
-}
+
+    await tx.invoiceItem.deleteMany({ where: { invoiceId } });
+
+    if (metadata.items?.length) {
+      await tx.invoiceItem.createMany({
+        data: metadata.items.map((item) => ({
+          ...item,
+          invoiceId,
+        })),
+      });
+    }
+  });
+};

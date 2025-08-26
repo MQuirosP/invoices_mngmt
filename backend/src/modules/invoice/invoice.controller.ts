@@ -4,28 +4,12 @@ import { AppError } from "@/shared/utils/appError.utils";
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { logger } from "@/shared/utils/logging/logger";
 import { Role } from "@prisma/client";
-import { FileService, InvoiceService, OCRService } from "@/modules/invoice";
+import { createInvoice, createInvoiceFromBuffer, deleteAttachments, deleteInvoiceById, downloadAttachment, getInvoiceById, getUserInvoices, updateInvoiceFromUrl, uploadFiles } from "@/modules/invoice";
 import { prisma } from "@/config/prisma";
 import { createInvoiceSchema } from "./schemas/invoice.schema";
-import { CloudinaryService, ImportService } from "@/shared";
 
-export class InvoiceController {
-  private fileService: FileService;
-  private ocrService: OCRService;
-  private invoiceService!: InvoiceService;
 
-  constructor() {
-  const cloudinaryService = new CloudinaryService();
-  const importService = new ImportService();
-  const fileService = new FileService(cloudinaryService);
-  const invoiceService = new InvoiceService(fileService);
-
-  this.fileService = fileService;
-  this.invoiceService = invoiceService;
-  this.ocrService = new OCRService(importService, fileService, invoiceService);
-}
-
-  async create(req: AuthRequest, res: Response, next: NextFunction) {
+  export const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const startTime = Date.now();
     const userId = requireUserId(req);
     try {
@@ -47,9 +31,9 @@ export class InvoiceController {
         });
       }
 
-      const invoice = await this.invoiceService.createInvoice(userId, parsed);
+      const invoice = await createInvoice(userId, parsed);
       const uploads = files?.length
-        ? await this.fileService.uploadFiles(userId, invoice.invoiceId, files)
+        ? await uploadFiles(userId, invoice.invoiceId, files)
         : [];
 
       logger.info({
@@ -64,7 +48,7 @@ export class InvoiceController {
       res.status(201).json({
         success: true,
         message: `Invoice created with ${uploads.length} attachment(s)`,
-        data: await this.invoiceService.getInvoiceById(invoice.invoiceId, userId),
+        data: await getInvoiceById(invoice.invoiceId, userId),
       });
     } catch (error) {
       logger.error({
@@ -77,7 +61,7 @@ export class InvoiceController {
     }
   }
 
-  async list(req: AuthRequest, res: Response, next: NextFunction) {
+  export const list = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const userId = requireUserId(req);
     try {
       logger.info({
@@ -86,7 +70,7 @@ export class InvoiceController {
         userId,
       });
 
-      const invoices = await this.invoiceService.getUserInvoices(userId);
+      const invoices = await getUserInvoices(userId);
 
       logger.info({
         layer: "controller",
@@ -107,7 +91,7 @@ export class InvoiceController {
     }
   }
 
-  async get(req: AuthRequest, res: Response, next: NextFunction) {
+  export const get = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.invoiceId;
     try {
@@ -118,7 +102,7 @@ export class InvoiceController {
         invoiceId,
       });
 
-      const invoice = await this.invoiceService.getInvoiceById(invoiceId, userId);
+      const invoice = await getInvoiceById(invoiceId, userId);
 
       logger.info({
         layer: "controller",
@@ -140,7 +124,7 @@ export class InvoiceController {
     }
   }
 
-  async remove(req: AuthRequest, res: Response, next: NextFunction) {
+  export const remove = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
     const userRole = req.user?.role as Role;
@@ -159,8 +143,8 @@ export class InvoiceController {
 
       if (!invoice) throw new AppError("Invoice not found", 404);
 
-      await this.fileService.deleteAttachments(userId, invoiceId);
-      const deletedInvoice = await this.invoiceService.deleteInvoiceById(
+      await deleteAttachments(userId, invoiceId);
+      const deletedInvoice = await deleteInvoiceById(
         invoiceId,
         userId,
         userRole
@@ -190,7 +174,7 @@ export class InvoiceController {
     }
   }
 
-  async download(req: AuthRequest, res: Response, next: NextFunction) {
+  export const download = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const userId = requireUserId(req);
     const { invoiceId, attachmentId } = req.params;
     try {
@@ -203,7 +187,7 @@ export class InvoiceController {
       });
 
       const { stream, mimeType, fileName } =
-        await this.fileService.downloadAttachment(
+        await downloadAttachment(
           userId,
           invoiceId,
           attachmentId
@@ -237,7 +221,7 @@ export class InvoiceController {
     }
   }
 
-  async importFromLocal(req: AuthRequest, res: Response, next: NextFunction) {
+  export const importFromLocal = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const userId = requireUserId(req);
     const file = req.file;
     try {
@@ -250,7 +234,7 @@ export class InvoiceController {
 
       if (!file) throw new AppError("No file uploaded", 400);
 
-      const invoice = await this.ocrService.createInvoiceFromBuffer(
+      const invoice = await createInvoiceFromBuffer(
         file.buffer,
         userId,
         file.originalname,
@@ -291,7 +275,7 @@ export class InvoiceController {
     }
   }
 
-  async importFromUrl(req: AuthRequest, res: Response, next: NextFunction) {
+  export const importFromUrl = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.invoiceId;
     const { url } = req.body;
@@ -306,7 +290,7 @@ export class InvoiceController {
 
       if (!url) throw new AppError("Missing URL", 400);
 
-      const invoice = await this.ocrService.updateInvoiceFromUrl(
+      const invoice = await updateInvoiceFromUrl(
         invoiceId,
         userId,
         url
@@ -336,11 +320,11 @@ export class InvoiceController {
     }
   }
 
-  async importDataFromAttachment(
+  export const importDataFromAttachment = async (
     req: AuthRequest,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.invoiceId;
 
@@ -352,7 +336,7 @@ export class InvoiceController {
         invoiceId,
       });
 
-      const invoice = await this.invoiceService.getInvoiceById(invoiceId, userId);
+      const invoice = await getInvoiceById(invoiceId, userId);
       const url = invoice?.attachments[0]?.url;
 
       if (!url) {
@@ -365,7 +349,7 @@ export class InvoiceController {
         throw new AppError("Missing URL", 400);
       }
 
-      const result = await this.ocrService.updateInvoiceFromUrl(
+      const result = await updateInvoiceFromUrl(
         invoiceId,
         userId,
         url
@@ -394,4 +378,3 @@ export class InvoiceController {
       next(error);
     }
   }
-}
