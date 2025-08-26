@@ -4,7 +4,9 @@ import { AppError } from "@/shared/utils/appError.utils";
 import { logger } from "@/shared/utils/logging/logger";
 import { AuthRequest } from "./auth.types";
 import { revokeToken } from "@/shared/utils/token/revokeToken";
-import { registerUser, loginUser, getUsers } from "./auth.service";
+import { AuthService } from "./auth.service";
+
+const authService = AuthService;
 
 export const AuthController = {
   register: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -18,7 +20,7 @@ export const AuthController = {
 
     try {
       const parsed = registerSchema.parse(req.body);
-      const result = await registerUser(parsed);
+      const result = await authService.registerUser(parsed);
 
       logger.info({
         layer: "controller",
@@ -66,7 +68,7 @@ export const AuthController = {
 
     try {
       const parsed = loginSchema.parse(req.body);
-      const result = await loginUser(parsed);
+      const result = await authService.loginUser(parsed);
 
       logger.info({
         layer: "controller",
@@ -115,7 +117,7 @@ export const AuthController = {
     });
 
     try {
-      const users = await getUsers();
+      const users = await authService.getUsers();
 
       logger.info({
         layer: "controller",
