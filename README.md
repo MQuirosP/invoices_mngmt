@@ -36,7 +36,7 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
 
     > Request:
 
-    json
+    ```json
     {
         "message": "User registered successfully",
         "user": {
@@ -44,36 +44,38 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
             "email": "<user@example.com>"
         }
     }
+
+    ```
+
   * **Get Authenticated User:** `GET /api/auth/me`
 
     > Request:
     > Headers: `Authorization: Bearer <token>`
     > Response:
 
-json
-    {
-        "id": "user_id",
-        "email": "<user@example.com>"
-    }
-        > Request (with file upload):
-    > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
+    ```json
+        {
+            "id": "user_id",
+            "email": "<user@example.com>"
+        }
+            > Request (with file upload):
+        > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
 
-json
-    {
-        "id": "invoice_id",
-        "provider": "Example Provider",
-        "title": "Invoice Title",
-        "issueDate": "2024-01-01",
-        "attachments": []
-    }
-        > Request:
-    > Headers: `Authorization: Bearer <token>`
+        {
+            "id": "invoice_id",
+            "provider": "Example Provider",
+            "title": "Invoice Title",
+            "issueDate": "2024-01-01",
+            "attachments": []
+        }
 
-    > Response:
+    ```
 
     > Request:
     > Headers: `Authorization: Bearer <token>`
-
+    > Response:
+    > Request:
+    > Headers: `Authorization: Bearer <token>`
     > Response:
 
     ```json
@@ -96,14 +98,11 @@ json
         }
 
     ```
-    
-        > Request:
+
+    > Request:
     > Headers: `Authorization: Bearer <token>`
-
     > Response:
-
-        > Downloads the specified attachment
-
+    > Downloads the specified attachment
     > *Authentication Required:* Yes, using JWT.
 
 * **Import Invoice via OCR:** `POST /api/invoices/import`
@@ -117,8 +116,7 @@ form-data
         "invoiceFile": &lt;File Object&gt;
         }
 
-    *   **`modules/`**: Contains feature-specific modules like `auth` and `invoice`.
-
+* **`modules/`**: Contains feature-specific modules like `auth` and `invoice`.
 * **`shared/`**: Includes reusable components such as `middleware`, `OCR`, and `services`.
 * **`config/`**: Configuration files for Prisma, Cloudinary, and environment variables.
 * **`prisma/`**: Prisma schema and migrations.
@@ -142,7 +140,7 @@ bash
 
 > Example of MIME type validation middleware:
 
-    ``` ts
+``` ts
         import { validateRealMime } from './shared/utils/file/validateRealMime';
 
         const uploadMiddleware = (req, res, next) => {
@@ -157,7 +155,7 @@ bash
             next();
         };
 
-    ```
+```
 
 The project uses Google Cloud Vision for OCR (Optical Character Recognition) to automatically extract data from invoice images.
 
@@ -167,7 +165,7 @@ The project uses Google Cloud Vision for OCR (Optical Character Recognition) to 
 
 > Example of OCR configuration:
 
-    ``` ts
+``` ts
         // config/index.ts
         export const config = {
         ocrProvider: process.env.OCR_PROVIDER || 'gcp', // Default to Google Cloud Vision
@@ -220,7 +218,7 @@ The project uses Google Cloud Vision for OCR (Optical Character Recognition) to 
         });
         });
 
-    ```
+```
 
 [![GitHub](https://img.shields.io/github/followers/MQuirosP?style=social)](https://github.com/MQuirosP)
 [![GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-3f3f3f?style=flat-square&logo=github&logoColor=white)](https://github.com/MQuirosP/invoices_mngmt)
@@ -237,5 +235,5 @@ The project uses Google Cloud Vision for OCR (Optical Character Recognition) to 
 
 ## Contributing
 
-    - Follow conventional commits
-    - Ensure all tests pass before PR
+* Follow conventional commits
+* Ensure all tests pass before PR
