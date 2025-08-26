@@ -76,7 +76,7 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
         "attachments": []
         }
 
-            ```
+    ```
 
     > Request:
     > Headers: `Authorization: Bearer <token>`
