@@ -47,7 +47,7 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
 
     ```
 
-  * **Get Authenticated User:
+* Get Authenticated User:
   ** `GET /api/auth/me`
 
     > Request:
@@ -60,7 +60,7 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
             "email": "<user@example.com>"
         }
 
-  * **Post invoice:
+* Post invoice:
 
   ** `GET /api/auth/me`
 
