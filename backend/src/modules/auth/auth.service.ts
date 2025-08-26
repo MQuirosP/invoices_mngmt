@@ -1,4 +1,3 @@
-// modules/auth/auth.service.ts
 import { Role } from "@prisma/client";
 import { RegisterInput, LoginInput } from "./auth.schema";
 import bcrypt from "bcrypt";
@@ -7,59 +6,65 @@ import { signTokenWithJti } from "@/shared/utils/token/signTokenWithJti";
 import { logger, AppError } from "../../shared";
 import { UserRepository } from "./user.repository";
 
-export class AuthService {
-  private readonly userRepo: UserRepository;
+const userRepo = new UserRepository();
 
-  constructor(userRepo?: UserRepository) {
-    this.userRepo = userRepo ?? new UserRepository();
+export const registerUser = async (data: RegisterInput) => {
+  logger.info({ layer: "service", action: "USER_REGISTER_ATTEMPT", email: data.email });
+
+  const existing = await userRepo.findByEmail(data.email);
+  if (existing) {
+    throw new AppError("Email already registered", 409);
   }
 
-  async registerUser(data: RegisterInput) {
-    logger.info({ layer: "service", action: "USER_REGISTER_ATTEMPT", email: data.email });
+  const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
+  const hashedPassword = await hashPassword(data.password, saltRounds);
 
-    const existing = await this.userRepo.findByEmail(data.email);
-    if (existing) {
-      throw new AppError("Email already registered", 409);
-    }
+  const user = await userRepo.createUser({
+    email: data.email,
+    password: hashedPassword,
+    fullname: data.fullname,
+    role: (data.role ?? "USER") as Role,
+  });
 
-    const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
-    const hashedPassword = await hashPassword(data.password, saltRounds);
+  const { token } = await signTokenWithJti({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+  });
 
-    const user = await this.userRepo.createUser({
-      email: data.email,
-      password: hashedPassword,
-      fullname: data.fullname,
-      role: (data.role ?? "USER") as Role,
-    });
+  return {
+    id: user.id,
+    email: user.email,
+    fullname: user.fullname,
+    role: user.role,
+    token,
+  };
+};
 
-    const { token } = await signTokenWithJti({
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    });
+export const loginUser = async (data: LoginInput) => {
+  logger.info({ layer: "service", action: "USER_LOGIN_ATTEMPT", email: data.email });
 
-    return { id: user.id, email: user.email, fullname: user.fullname, role: user.role, token };
-  }
+  const user = await userRepo.findByEmail(data.email);
+  if (!user) throw new AppError("User not found.", 404);
 
-  async loginUser(data: LoginInput) {
-    logger.info({ layer: "service", action: "USER_LOGIN_ATTEMPT", email: data.email });
+  const isPasswordValid = await bcrypt.compare(data.password, user.password);
+  if (!isPasswordValid) throw new AppError("Invalid password.", 401);
 
-    const user = await this.userRepo.findByEmail(data.email);
-    if (!user) throw new AppError("User not found.", 404);
+  const { token } = await signTokenWithJti({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+  });
 
-    const isPasswordValid = await bcrypt.compare(data.password, user.password);
-    if (!isPasswordValid) throw new AppError("Invalid password.", 401);
+  return {
+    id: user.id,
+    email: user.email,
+    fullname: user.fullname,
+    role: user.role,
+    token,
+  };
+};
 
-    const { token } = await signTokenWithJti({
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    });
-
-    return { id: user.id, email: user.email, fullname: user.fullname, role: user.role, token };
-  }
-
-  async getUsers() {
-    return this.userRepo.findAll();
-  }
-}
+export const getUsers = async () => {
+  return userRepo.findAll();
+};

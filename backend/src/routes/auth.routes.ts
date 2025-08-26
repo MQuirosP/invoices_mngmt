@@ -1,15 +1,19 @@
 import { Router } from "express";
 import { loginRateLimiter } from "@/shared/middleware/features/rateLimiter";
 import { authenticate, AuthRequest } from "@/modules/auth/auth.middleware";
-import { AuthController } from "../modules/auth/auth.controller";
+import {
+  register,
+  login,
+  logoutUser,
+  listUsers,
+} from "@/modules/auth/auth.controller";
 
 const authRouter = Router();
-const controller = new AuthController();
 
-authRouter.post("/register", controller.register.bind(controller));
-authRouter.post("/login", loginRateLimiter, controller.login.bind(controller));
-authRouter.post("/logout", authenticate, controller.logoutUser.bind(controller));
-authRouter.get("/list", authenticate, controller.listUsers.bind(controller));
+authRouter.post("/register", register);
+authRouter.post("/login", loginRateLimiter, login);
+authRouter.post("/logout", authenticate, logoutUser);
+authRouter.get("/list", authenticate, listUsers);
 
 authRouter.get("/me", authenticate, (req: AuthRequest, res) => {
   res.json({
