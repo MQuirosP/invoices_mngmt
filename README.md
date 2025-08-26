@@ -5,10 +5,10 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
 
 ## Project Goals
 
-*   Provide a secure and reliable API for managing invoices and warranties.
-*   Enable efficient data validation and storage.
-*   Facilitate automated invoice processing using OCR technology.
-*   Offer a modular and maintainable codebase.
+* Provide a secure and reliable API for managing invoices and warranties.
+* Enable efficient data validation and storage.
+* Facilitate automated invoice processing using OCR technology.
+* Offer a modular and maintainable codebase.
 
 ---
 
@@ -32,7 +32,7 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
 
 ### Authentication Endpoints (`/api/auth`)
 
-*   **Register:** `POST /api/auth/register`
+* **Register:** `POST /api/auth/register`
 
     > Request:
 
@@ -41,20 +41,19 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
         "message": "User registered successfully",
         "user": {
             "id": "user_id",
-            "email": "user@example.com"
+            "email": "<user@example.com>"
         }
     }
-    *   **Get Authenticated User:** `GET /api/auth/me`
+  * **Get Authenticated User:** `GET /api/auth/me`
 
     > Request:
     > Headers: `Authorization: Bearer <token>`
-
     > Response:
 
 json
     {
         "id": "user_id",
-        "email": "user@example.com"
+        "email": "<user@example.com>"
     }
         > Request (with file upload):
     > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
@@ -104,23 +103,26 @@ json
 
     > *Authentication Required:* Yes, using JWT.
 
-*   **Import Invoice via OCR:** `POST /api/invoices/import`
+* **Import Invoice via OCR:** `POST /api/invoices/import`
 
     > Request:
     > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
 
 form-data
-    {
-        "invoiceFile": <File Object>
-    }
+    ```markdown
+        {
+        "invoiceFile": &lt;File Object&gt;
+        }
+
     *   **`modules/`**: Contains feature-specific modules like `auth` and `invoice`.
-*   **`shared/`**: Includes reusable components such as `middleware`, `OCR`, and `services`.
-*   **`config/`**: Configuration files for Prisma, Cloudinary, and environment variables.
-*   **`prisma/`**: Prisma schema and migrations.
-*   **`src/app.ts`**: Main application entry point.
+
+* **`shared/`**: Includes reusable components such as `middleware`, `OCR`, and `services`.
+* **`config/`**: Configuration files for Prisma, Cloudinary, and environment variables.
+* **`prisma/`**: Prisma schema and migrations.
+* **`src/app.ts`**: Main application entry point.
 
 bash
-    git clone https://github.com/MQuirosP/invoices_mngmt.git
+    git clone <https://github.com/MQuirosP/invoices_mngmt.git>
     cd invoices_mngmt/backend
     env
     DATABASE_URL="postgresql://user:password@localhost:5432/invoices_db"
@@ -131,8 +133,9 @@ bash
     CLOUDINARY_API_SECRET="your_api_secret"
     GOOGLE_APPLICATION_CREDENTIALS="./path/to/your-ocr-key.json"
     *   **Multer:** Used for handling file uploads. Configured with `memoryStorage` to store files in memory before uploading to Cloudinary.
-*   **Cloudinary:** Used for storing and managing file attachments.
-*   **MIME Type Validation:** Implemented using `file-type` to validate the MIME type of uploaded files.
+
+* **Cloudinary:** Used for storing and managing file attachments.
+* **MIME Type Validation:** Implemented using `file-type` to validate the MIME type of uploaded files.
 
 > Example of MIME type validation middleware:
 
@@ -152,9 +155,9 @@ const uploadMiddleware = (req, res, next) => {
 };
 The project uses Google Cloud Vision for OCR (Optical Character Recognition) to automatically extract data from invoice images.
 
-*   **OCR Factory:** The `OCRFactory` class in `shared/ocr/ocr.factory.ts` is responsible for creating OCR provider instances.
-*   **Providers:** Supports multiple OCR providers, including Google Cloud Vision and Tesseract.
-*   **Automatic Import:** The `/api/invoices/import` endpoint uses the OCR service to extract text from uploaded invoice images and create invoice records.
+* **OCR Factory:** The `OCRFactory` class in `shared/ocr/ocr.factory.ts` is responsible for creating OCR provider instances.
+* **Providers:** Supports multiple OCR providers, including Google Cloud Vision and Tesseract.
+* **Automatic Import:** The `/api/invoices/import` endpoint uses the OCR service to extract text from uploaded invoice images and create invoice records.
 
 > Example of OCR configuration:
 
@@ -224,4 +227,3 @@ describe('Invoice Controller', () => {
 ---
 
 ## Contributing
-
