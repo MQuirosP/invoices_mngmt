@@ -59,23 +59,23 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
             "email": "<user@example.com>"
         }
 
-* **Post invoice:
+    * **Post invoice:
 
-    ** `GET /api/auth/me`
+        ** `GET /api/auth/me`
 
-    > Request (with file upload):
-    > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
+            > Request (with file upload):
+            > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
 
-    ```json
-    {
-        "id": "invoice_id",
-        "provider": "Example Provider",
-        "title": "Invoice Title",
-        "issueDate": "2024-01-01",
-        "attachments": []
-    }
+            ```json
+            {
+                "id": "invoice_id",
+                "provider": "Example Provider",
+                "title": "Invoice Title",
+                "issueDate": "2024-01-01",
+                "attachments": []
+            }
 
-    ```
+            ```
 
     > Request:
     > Headers: `Authorization: Bearer <token>`
