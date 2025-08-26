@@ -118,7 +118,7 @@ form-data
 
 ```json
         {
-        "invoiceFile": "File Object";
+        "invoiceFile": "File Object"
         }
 ```
 
