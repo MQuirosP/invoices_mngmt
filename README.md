@@ -1,297 +1,227 @@
-# invoices-mngmt – Backend API
 
-Sistema de gestión de facturas y garantías con autenticación segura, validación robusta y almacenamiento en la nube.
+# Invoices Management API
 
----
+A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL for managing invoices and warranties. This API features secure authentication, robust validation, and cloud storage integration.
 
-## Tecnologías
+## Project Goals
 
-[![Node.js](https://img.shields.io/badge/Node.js-%3E=18.0.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-Routing--Layer-000000?logo=express&logoColor=white)](https://expressjs.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict--Types-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-ORM--Auditable-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Relational--DB-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![JWT](https://img.shields.io/badge/JWT-Token--Based--Auth-000000?logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
-[![Bcrypt](https://img.shields.io/badge/Bcrypt-Password--Hashing-F2B300?logoColor=black)](https://github.com/kelektiv/node.bcrypt.js)
-[![Zod](https://img.shields.io/badge/Zod-Strict--Validation-3f3f3f)](https://zod.dev/)
-[![Multer](https://img.shields.io/badge/Multer-File--Upload--Middleware-3f3f3f)](https://github.com/expressjs/multer)
-[![Cloudinary](https://img.shields.io/badge/Cloudinary-Asset--Storage-3448C5?logo=cloudinary&logoColor=white)](https://cloudinary.com/)
-[![Google Cloud Vision](https://img.shields.io/badge/Google--Vision-OCR--API-4285F4?logo=googlecloud&logoColor=white)](https://cloud.google.com/vision)
+*   Provide a secure and reliable API for managing invoices and warranties.
+*   Enable efficient data validation and storage.
+*   Facilitate automated invoice processing using OCR technology.
+*   Offer a modular and maintainable codebase.
 
 ---
 
-## Estructura del Proyecto
+## Technologies Used
 
-- Arquitectura modular
-
-## mquirosp-invoices_mngmt
-
-```bash
-└──
-    ├── README.md
-    ├── CHANGELOG.md
-    ├── LICENSE
-    ├── render.yaml
-    ├── backend/
-    │   ├── global.d.ts
-    │   ├── jest.config.ts
-    │   ├── package.json
-    │   ├── prisma-to-xata.sql
-    │   ├── tsconfig.build.json
-    │   ├── tsconfig.dev.json
-    │   ├── tsconfig.json
-    │   ├── tsconfig.test.json
-    │   ├── prisma/
-    │   │   ├── schema.prisma
-    │   │   └── migrations/
-    │   │       ├── migration_lock.toml
-    │   │       ├── 20250706235007_init/
-    │   │       │   └── migration.sql
-    │   │       ├── 20250708025655_rename_extrated_to_extracted/
-    │   │       │   └── migration.sql
-    │   │       ├── 20250709024520_add_attachments_model/
-    │   │       │   └── migration.sql
-    │   │       ├── 20250709025629_remove_file_fields/
-    │   │       │   └── migration.sql
-    │   │       ├── 20250713222846_add_cascade_attachment_model/
-    │   │       │   └── migration.sql
-    │   │       ├── 20250713223153_add_cascade_warranty_model/
-    │   │       │   └── migration.sql
-    │   │       ├── 20250715210145_add_user_role/
-    │   │       │   └── migration.sql
-    │   │       ├── 20250726230951_add_invoice_items/
-    │   │       │   └── migration.sql
-    │   │       └── 20250730235818_add_item_warranty_fields/
-    │   │           └── migration.sql
-    │   └── src/
-    │       ├── app.ts
-    │       ├── server.ts
-    │       ├── cache/
-    │       │   └── userCache.ts
-    │       ├── config/
-    │       │   ├── cloudinary.ts
-    │       │   ├── index.ts
-    │       │   ├── prisma.ts
-    │       │   └── validateEnv.ts
-    │       ├── lib/
-    │       │   └── redis.ts
-    │       ├── modules/
-    │       │   ├── auth/
-    │       │   │   ├── auth.controller.ts
-    │       │   │   ├── auth.middleware.ts
-    │       │   │   ├── auth.routes.ts
-    │       │   │   ├── auth.schema.ts
-    │       │   │   ├── auth.service.ts
-    │       │   │   ├── auth.types.ts
-    │       │   │   └── index.ts
-    │       │   └── invoice/
-    │       │       ├── index.ts
-    │       │       ├── invoice.controller.ts
-    │       │       ├── invoice.query.ts
-    │       │       ├── invoice.routes.ts
-    │       │       ├── invoice.schema.ts
-    │       │       ├── invoice.service.ts
-    │       │       └── invoiceItems.schema.ts
-    │       ├── routes/
-    │       │   └── index.ts
-    │       └── shared/
-    │           ├── index.ts
-    │           ├── constants/
-    │           │   ├── mimeExtensionMap.ts
-    │           │   └── roles.ts
-    │           ├── middleware/
-    │           │   ├── errorHandler.ts
-    │           │   ├── rateLimiter.ts
-    │           │   ├── requireRole.ts
-    │           │   ├── upload.ts
-    │           │   └── validateParams.ts
-    │           ├── ocr/
-    │           │   ├── index.ts
-    │           │   ├── ocr.factory.ts
-    │           │   ├── ocr.types.ts
-    │           │   ├── preprocessing.ts
-    │           │   ├── extractors/
-    │           │   │   ├── extractIssueDate.ts
-    │           │   │   ├── extractItems.ts
-    │           │   │   ├── extractMetadata.ts
-    │           │   │   ├── extractProvider.ts
-    │           │   │   ├── extractTitle.ts
-    │           │   │   ├── extractWarranty.ts
-    │           │   │   └── index.ts
-    │           │   ├── ocr.providers/
-    │           │   │   ├── aws.ts
-    │           │   │   ├── gcp.ts
-    │           │   │   └── tesseract.ts
-    │           │   └── patterns/
-    │           │       ├── index.ts
-    │           │       ├── matchers.ts
-    │           │       └── regex.ts
-    │           ├── services/
-    │           │   ├── attachment.service.ts
-    │           │   ├── cache.service.ts
-    │           │   ├── cloudinary.service.ts
-    │           │   ├── fileFetcher.service.ts
-    │           │   └── import.service.ts
-    │           └── utils/
-    │               ├── AppError.utils.ts
-    │               ├── hashPassword.ts
-    │               ├── logger.ts
-    │               ├── requireUserId.ts
-    │               └── file/
-    │                   ├── generateRandomFilename.ts
-    │                   ├── getFileExtension.ts
-    │                   └── validateRealMime.ts
-└── .github/
-    └── workflows/
-        └── keep-alive.yml
-
-```
-
-## 🔐 Autenticación
-
-- Registro: `POST /api/auth/register`
-- Login: `POST /api/auth/login`
-- Datos autenticados: `GET /api/auth/me`
-
-Características:
-
-- Validación con Zod
-- Contraseñas hasheadas con bcrypt
-- JWT con `sub`, `email`, expiración segura
-- Middleware `authenticate` para proteger rutas
+[![Node.js](https://img.shields.io/badge/Node.js-%3E=18.0.0-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-Routing--Layer-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict--Types-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM--Auditable-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Relational--DB-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![JWT](https://img.shields.io/badge/JWT-Token--Based--Auth-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+[![Bcrypt](https://img.shields.io/badge/Bcrypt-Password--Hashing-F2B300?style=flat-square&logoColor=black)](https://github.com/kelektiv/node.bcrypt.js)
+[![Zod](https://img.shields.io/badge/Zod-Strict--Validation-3f3f3f?style=flat-square)](https://zod.dev/)
+[![Multer](https://img.shields.io/badge/Multer-File--Upload--Middleware-3f3f3f?style=flat-square)](https://github.com/expressjs/multer)
+[![Cloudinary](https://img.shields.io/badge/Cloudinary-Asset--Storage-3448C5?style=flat-square&logo=cloudinary&logoColor=white)](https://cloudinary.com/)
+[![Google Cloud Vision](https://img.shields.io/badge/Google--Vision-OCR--API-4285F4?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/vision)
 
 ---
 
-## 🧾 Gestión de facturas (`/api/invoices`)
+## API Documentation
 
-- `POST /` → Crear factura con o sin archivos
-- `GET /` → Listar facturas propias
-- `GET /:id` → Obtener detalle
-- `DELETE /:id` → Borrar factura y sus archivos
+### Authentication Endpoints (`/api/auth`)
 
-- ✅ Incluye adjuntos (`attachments`) y garantía (`warranty`) en las respuestas  
-- ✅ Validación MIME declarada + real (buffer)
+*   **Register:** `POST /api/auth/register`
 
----
+    > Request:
 
-## 📎 Archivos adjuntos (Attachments)
+    json
+    {
+        "message": "User registered successfully",
+        "user": {
+            "id": "user_id",
+            "email": "user@example.com"
+        }
+    }
+    *   **Get Authenticated User:** `GET /api/auth/me`
 
-- Multer configurado con `memoryStorage`
-- Validación MIME binaria con `file-type`
-- Tipos permitidos: PDF, XML, JPG, PNG
-- Tamaño máximo: 5MB
-- Subida directa a Cloudinary (`resource_type: raw`)
-- Nombre generado aleatoriamente (`generateRandomFilename`)
-- Registrados en la base como `Attachment` con metadata
+    > Request:
+    > Headers: `Authorization: Bearer <token>`
 
-### 📥 Descargas
+    > Response:
 
-- `GET /api/invoices/:id/download` → Descarga principal
-- `GET /api/invoices/:invoiceId/attachments/:attachmentId/download` → Descarga por archivo
+json
+    {
+        "id": "user_id",
+        "email": "user@example.com"
+    }
+        > Request (with file upload):
+    > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
 
-- 🔐 Verifica propiedad del usuario  
-- 📎 Descarga como `stream` con `Content-Disposition` seguro  
-- 🌐 No se expone la URL pública de Cloudinary
+json
+    {
+        "id": "invoice_id",
+        "provider": "Example Provider",
+        "title": "Invoice Title",
+        "issueDate": "2024-01-01",
+        "attachments": []
+    }
+        > Request:
+    > Headers: `Authorization: Bearer <token>`
 
----
+    > Response:
 
-## 🧠 Importación automática con OCR (`/api/invoices/import`)
+    > Request:
+    > Headers: `Authorization: Bearer <token>`
 
-- OCR desde buffer o URL (`Vision API`, `Tesseract`)
-- Extrae texto y genera factura + garantía + attachment
-- Servicios desacoplados (`OCRFactory`, `ImportService`)
-- Validación MIME antes de procesar OCR
-- OCR también disponible sobre archivo existente (`POST /:id/import-url`)
+    > Response:
 
----
+json
+    {
+        "id": "invoice_id",
+        "provider": "Example Provider",
+        "title": "Invoice Title",
+        "issueDate": "2024-01-01",
+        "attachments": [
+            {
+                "id": "attachment_id",
+                "filename": "invoice.pdf",
+                "url": "cloudinary_url"
+            }
+        ],
+         "warranty":{
+             "id": "warranty_id",
+             "duration": "2 years"
+         }
+    }
+        > Request:
+    > Headers: `Authorization: Bearer <token>`
 
-## ⏳ Gestión de garantías (`/api/warranties`)
+    > Response:
 
----
+        > Downloads the specified attachment
 
-## 🧪 Testing y calidad
+    > *Authentication Required:* Yes, using JWT.
 
-- Unit tests con Jest (`invoice.controller.test.ts`)
-- Supertest para integración de OCR y subida
-- Validación de errores, cobertura de casos límite
+*   **Import Invoice via OCR:** `POST /api/invoices/import`
 
----
+    > Request:
+    > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
 
-## 📖 Documentación
+form-data
+    {
+        "invoiceFile": <File Object>
+    }
+    *   **`modules/`**: Contains feature-specific modules like `auth` and `invoice`.
+*   **`shared/`**: Includes reusable components such as `middleware`, `OCR`, and `services`.
+*   **`config/`**: Configuration files for Prisma, Cloudinary, and environment variables.
+*   **`prisma/`**: Prisma schema and migrations.
+*   **`src/app.ts`**: Main application entry point.
 
-- ✅ OCR modular con fallback y configuración vía `.env`
-- ✅ Refactor para servicios de attachments centralizados
--- ZIP de múltiples archivos  
--- Paginación y filtros en listado  
--- Endpoint PATCH parcial  
--- Dashboard API para métricas  
--- UI mínima en React/Vite  
--- OCR para PDFs en Google Cloud Storage  
--- Swagger completo y colección Postman pública
+bash
+    git clone https://github.com/MQuirosP/invoices_mngmt.git
+    cd invoices_mngmt/backend
+    env
+    DATABASE_URL="postgresql://user:password@localhost:5432/invoices_db"
+    JWT_SECRET="your_secret_key"
+    SALT_ROUNDS=10
+    CLOUDINARY_CLOUD_NAME="your_cloud_name"
+    CLOUDINARY_API_KEY="your_api_key"
+    CLOUDINARY_API_SECRET="your_api_secret"
+    GOOGLE_APPLICATION_CREDENTIALS="./path/to/your-ocr-key.json"
+    *   **Multer:** Used for handling file uploads. Configured with `memoryStorage` to store files in memory before uploading to Cloudinary.
+*   **Cloudinary:** Used for storing and managing file attachments.
+*   **MIME Type Validation:** Implemented using `file-type` to validate the MIME type of uploaded files.
 
----
+> Example of MIME type validation middleware:
 
-## Scripts
+typescript
+import { validateRealMime } from './shared/utils/file/validateRealMime';
 
-```bash
-npm run dev       # Desarrollo con recarga
-npm run build     # Compilación TypeScript
-npm run start     # Producción
-npx prisma ...    # Comandos Prisma
-```
+const uploadMiddleware = (req, res, next) => {
+    if (req.file) {
+        const validMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+        const isValidMime = validateRealMime(req.file, validMimeTypes);
 
----
+        if (!isValidMime) {
+            return next(new Error('Invalid MIME type'));
+        }
+    }
+    next();
+};
+The project uses Google Cloud Vision for OCR (Optical Character Recognition) to automatically extract data from invoice images.
 
-``` bash
+*   **OCR Factory:** The `OCRFactory` class in `shared/ocr/ocr.factory.ts` is responsible for creating OCR provider instances.
+*   **Providers:** Supports multiple OCR providers, including Google Cloud Vision and Tesseract.
+*   **Automatic Import:** The `/api/invoices/import` endpoint uses the OCR service to extract text from uploaded invoice images and create invoice records.
 
-npm install
+> Example of OCR configuration:
 
-```
+typescript
+// config/index.ts
+export const config = {
+  ocrProvider: process.env.OCR_PROVIDER || 'gcp', // Default to Google Cloud Vision
+};
 
-### Configura variables de entorno
+// shared/ocr/ocr.factory.ts
+import { GoogleCloudVision } from './ocr.providers/gcp';
+import { TesseractOCR } from './ocr.providers/tesseract';
 
-```env
-DATABASE_URL=postgresql://usuario:password@localhost:5432/facturas_db
-JWT_SECRET=tu_clave_secreta
-SALT_ROUNDS=10
-CLOUDINARY_CLOUD_NAME=xxx
-CLOUDINARY_API_KEY=xxx
-CLOUDINARY_API_SECRET=xxx
-GOOGLE_APPLICATION_CREDENTIALS=./ruta/clave-ocr.json
-```
+export class OCRFactory {
+    static create(providerName: string) {
+        switch (providerName) {
+            case 'gcp':
+                return new GoogleCloudVision();
+            case 'tesseract':
+                return new TesseractOCR();
+            default:
+                throw new Error('Invalid OCR provider');
+        }
+    }
+}
+typescript
+// src/modules/invoice/invoice.schema.ts
+import { z } from 'zod';
 
-### Ejecuta migraciones
+export const createInvoiceSchema = z.object({
+    body: z.object({
+        provider: z.string().min(1),
+        title: z.string().min(1),
+        issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    }),
+});
+typescript
+// src/modules/invoice/invoice.controller.test.ts
+import { createInvoice } from './invoice.controller';
+import { Request, Response } from 'express';
 
-```bash
-npx prisma migrate dev --name init
-```
+describe('Invoice Controller', () => {
+  it('should create an invoice', async () => {
+    const mockRequest = {} as Request;
+    const mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
 
-### Inicia el servidor
+    await createInvoice(mockRequest, mockResponse);
 
-```bash
-npm run dev
-```
-
----
-
----
-
-## 📝 Licencia
-
-- Este proyecto está bajo la licencia MIT. Libre para uso, modificación y distribución con atribución.
-
----
-
-## 🙋‍♂️ Autor
-
-### Desarrollado por Mario Quirós
-
-[![GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-3f3f3f?logo=github&logoColor=white)](https://github.com/MQuirosP/invoices_mngmt)
+    expect(mockResponse.status).toHaveBeenCalledWith(201);
+    expect(mockResponse.json).toHaveBeenCalled();
+  });
+});
+[![GitHub](https://img.shields.io/github/followers/MQuirosP?style=social)](https://github.com/MQuirosP)
+[![GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-3f3f3f?style=flat-square&logo=github&logoColor=white)](https://github.com/MQuirosP/invoices_mngmt)
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/MQuirosP/invoices_mngmt)
-[![Audit Ready](https://img.shields.io/badge/Audit--Ready-Strict--Validation-3f3f3f)](https://github.com/MQuirosP/invoices_mngmt)
-[![Modular Core](https://img.shields.io/badge/Architecture-Modular--Core-3f3f3f)](https://github.com/MQuirosP/invoices_mngmt)
-[![Build Status](https://img.shields.io/badge/Build-Passing-3f3f3f?logo=githubactions)](https://github.com/MQuirosP/invoices_mngmt/actions)
-[![Coverage](https://img.shields.io/badge/Coverage-100%25-3f3f3f)](https://github.com/MQuirosP/invoices_mngmt)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E=18.0.0-3f3f3f?logo=node.js)](https://nodejs.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-ORM--Strict-3f3f3f?logo=prisma)](https://www.prisma.io/)
-[![Redis](https://img.shields.io/badge/Redis-Backoff--Events--Tracing-3f3f3f?logo=redis)](https://redis.io/)
+[![Audit Ready](https://img.shields.io/badge/Audit--Ready-Strict--Validation-3f3f3f?style=flat-square)](https://github.com/MQuirosP/invoices_mngmt)
+[![Modular Core](https://img.shields.io/badge/Architecture-Modular--Core-3f3f3f?style=flat-square)](https://github.com/MQuirosP/invoices_mngmt)
+[![Build Status](https://img.shields.io/badge/Build-Passing-3f3f3f?style=flat-square&logo=githubactions)](https://github.com/MQuirosP/invoices_mngmt/actions)
+[![Coverage](https://img.shields.io/badge/Coverage-100%25-3f3f3f?style=flat-square)](https://github.com/MQuirosP/invoices_mngmt)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E=18.0.0-3f3f3f?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM--Strict-3f3f3f?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![Redis](https://img.shields.io/badge/Redis-Backoff--Events--Tracing-3f3f3f?style=flat-square&logo=redis)](https://redis.io/)
+
+---
+
+## Contributing
+
