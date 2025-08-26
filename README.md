@@ -76,24 +76,27 @@ json
 
     > Response:
 
-json
-    {
-        "id": "invoice_id",
-        "provider": "Example Provider",
-        "title": "Invoice Title",
-        "issueDate": "2024-01-01",
-        "attachments": [
-            {
-                "id": "attachment_id",
-                "filename": "invoice.pdf",
-                "url": "cloudinary_url"
+    ```json
+        {
+            "id": "invoice_id",
+            "provider": "Example Provider",
+            "title": "Invoice Title",
+            "issueDate": "2024-01-01",
+            "attachments": [
+                {
+                    "id": "attachment_id",
+                    "filename": "invoice.pdf",
+                    "url": "cloudinary_url"
+                }
+            ],
+            "warranty":{
+                "id": "warranty_id",
+                "duration": "2 years"
             }
-        ],
-         "warranty":{
-             "id": "warranty_id",
-             "duration": "2 years"
-         }
-    }
+        }
+
+    ```
+    
         > Request:
     > Headers: `Authorization: Bearer <token>`
 
