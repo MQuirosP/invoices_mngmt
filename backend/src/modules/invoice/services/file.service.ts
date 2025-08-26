@@ -43,7 +43,6 @@ export const uploadFiles = async (
       mimeType: attachment.mimeType,
       url: attachment.url,
     });
-    attachments.push(attachment);
   }
 
 
