@@ -1,5 +1,5 @@
 import multer, { FileFilterCallback } from "multer";
-import { mimeExtensionMap } from "@/shared";
+import { MimeConfig } from "../../constants/mimeExtensionMap";
 
 // Use of memory storage to directly upload to cloudinary
 const storage = multer.memoryStorage();
@@ -10,13 +10,15 @@ const fileFilter = (
   cb: FileFilterCallback
 ) => {
   const declaredMime = file.mimetype;
-  const originalName = file.originalname || '';
+  const originalName = file.originalname || "";
 
-  const acceptedMimes = Object.keys(mimeExtensionMap);
-  const acceptedExts = Object.values(mimeExtensionMap); // ej: ['pdf', 'jpg', 'png', 'xml']
+  const acceptedMimes = MimeConfig.safeTypes();
+  const acceptedExts = acceptedMimes
+    .map(MimeConfig.getExtension)
+    .filter(Boolean);
 
   const isMimeValid = acceptedMimes.includes(declaredMime);
-  const hasValidExtension = acceptedExts.some(ext =>
+  const hasValidExtension = acceptedExts.some((ext) =>
     originalName.toLowerCase().endsWith(`.${ext}`)
   );
 
@@ -26,7 +28,6 @@ const fileFilter = (
     cb(new Error("Unsupported file type. Only PDF, XML, JPG, PNG allowed"));
   }
 };
-
 
 export const upload = multer({
   storage,

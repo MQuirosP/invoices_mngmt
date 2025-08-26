@@ -1,6 +1,5 @@
 import { AppError } from "@/shared/utils/appError.utils";
-import { mimeMetadataMap } from "@/shared/constants/mimeExtensionMap";
-import { logger } from "@/shared";
+import { logger, MimeConfig } from "@/shared";
 
 /**
  * Checks whether the declared MIME matches the actual MIME of the file
@@ -25,17 +24,23 @@ export const validateRealMime = async (
       timestamp,
     });
 
-    throw new AppError("Unable to identify the actual MIME type", 422, true, undefined, {
-      layer: "shared",
-      module: "validate-mime",
-      reason: "NO_MIME_DETECTED",
-      declaredMime,
-      filename,
-      timestamp,
-    });
+    throw new AppError(
+      "Unable to identify the actual MIME type",
+      422,
+      true,
+      undefined,
+      {
+        layer: "shared",
+        module: "validate-mime",
+        reason: "NO_MIME_DETECTED",
+        declaredMime,
+        filename,
+        timestamp,
+      }
+    );
   }
 
-  const metadata = mimeMetadataMap[detected.mime];
+  const metadata = MimeConfig.metadata[detected.mime];
   if (!metadata) {
     logger.warn({
       layer: "shared",

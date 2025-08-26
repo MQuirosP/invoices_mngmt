@@ -1,38 +1,45 @@
-export const mimeMetadataMap: Record<
-  string,
-  { ext: string; label: string; safe: boolean }
-> = {
-  "application/pdf": { ext: "pdf", label: "PDF", safe: true },
-  "application/xml": { ext: "xml", label: "XML (application)", safe: true },
-  "text/xml": { ext: "xml", label: "XML (text)", safe: true },
-  "image/jpeg": { ext: "jpg", label: "JPEG", safe: true },
-  "image/png": { ext: "png", label: "PNG", safe: true },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
-    ext: "docx",
-    label: "Word DOCX",
-    safe: true,
-  },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
-    ext: "xlsx",
-    label: "Excel XLSX",
-    safe: true,
-  },
-  // Insecure generic MIME types
-  "application/octet-stream": {
-    ext: "bin",
-    label: "Binary Stream",
-    safe: false,
-  },
+export type MimeMetadata = {
+  ext: string;
+  label: string;
+  safe: boolean;
 };
 
-export const mimeExtensionMap: Record<string, string> = Object.fromEntries(
-  Object.entries(mimeMetadataMap).map(([mime, meta]) => [mime, meta.ext])
-);
+export const MimeConfig = {
+  metadata: {
+    "application/pdf": { ext: "pdf", label: "PDF", safe: true },
+    "application/xml": { ext: "xml", label: "XML (application)", safe: true },
+    "text/xml": { ext: "xml", label: "XML (text)", safe: true },
+    "image/jpeg": { ext: "jpg", label: "JPEG", safe: true },
+    "image/png": { ext: "png", label: "PNG", safe: true },
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+      ext: "docx",
+      label: "Word DOCX",
+      safe: true,
+    },
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+      ext: "xlsx",
+      label: "Excel XLSX",
+      safe: true,
+    },
+    "application/octet-stream": {
+      ext: "bin",
+      label: "Binary Stream",
+      safe: false,
+    },
+  } as Record<string, MimeMetadata>,
 
-export const extensionMimeMap: Record<string, string> = Object.fromEntries(
-  Object.entries(mimeMetadataMap).map(([mime, meta]) => [meta.ext, mime])
-);
+  getExtension: (mime: string): string | undefined =>
+    MimeConfig.metadata[mime]?.ext,
 
-export const safeMimeTypes = Object.keys(mimeMetadataMap).filter(
-  (mime) => mimeMetadataMap[mime].safe
-);
+  getMimeFromExt: (ext: string): string | undefined =>
+    Object.entries(MimeConfig.metadata).find(
+      ([, meta]) => meta.ext === ext
+    )?.[0],
+
+  isSafe: (mime: string): boolean => MimeConfig.metadata[mime]?.safe === true,
+
+  safeTypes: (): string[] =>
+    Object.keys(MimeConfig.metadata).filter(
+      (mime) => MimeConfig.metadata[mime].safe
+    ),
+};

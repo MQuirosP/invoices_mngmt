@@ -1,8 +1,8 @@
-import { mimeMetadataMap } from "@/shared/constants/mimeExtensionMap";
 import { AppError } from "@/shared/utils/appError.utils";
 import { validateRealMime } from "./validateRealMime";
 import { logger } from "@/shared/utils/logging/logger";
 import { FileFetcherService } from "@/shared/services/fileFetcher.service";
+import { MimeConfig } from "../../constants/mimeExtensionMap";
 
 export const prepareBufferForExtraction = async (
   url: string
@@ -18,20 +18,41 @@ export const prepareBufferForExtraction = async (
   const filename = url.split("/").pop()?.split("?")[0] || "unknown";
   const ext = filename.split(".").pop()?.toLowerCase();
 
-  if (!ext || !Object.values(mimeMetadataMap).some((meta) => meta.ext === ext)) {
-    throw new AppError("Unsupported or missing file extension", 415, true, undefined, {
-      layer: "file",
-      module: "file.core",
-      reason: "EXTENSION_NOT_ALLOWED",
-      filename,
-      url,
-    });
+  if (
+    !ext ||
+    !Object.values(MimeConfig.metadata).some((meta) => meta.ext === ext)
+  ) {
+    throw new AppError(
+      "Unsupported or missing file extension",
+      415,
+      true,
+      undefined,
+      {
+        layer: "file",
+        module: "file.core",
+        reason: "EXTENSION_NOT_ALLOWED",
+        filename,
+        url,
+      }
+    );
   }
 
-  const declaredMime = Object.entries(mimeMetadataMap).find(
-    ([mime, meta]) => meta.ext === ext
-  )?.[0]!;
-
+  const declaredMime = MimeConfig.getMimeFromExt(ext);
+  if (!declaredMime) {
+    throw new AppError(
+      "Unsupported or missing declared MIME type",
+      415,
+      true,
+      undefined,
+      {
+        layer: "file",
+        module: "file.core",
+        reason: "MIME_TYPE_NOT_ALLOWED",
+        filename,
+        url,
+      }
+    );
+  }
   const { mime: validatedMime } = await validateRealMime(
     buffer,
     declaredMime,

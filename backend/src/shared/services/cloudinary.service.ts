@@ -1,9 +1,9 @@
 import cloudinary from "@/config/cloudinary";
 import { AppError } from "@/shared/utils/appError.utils";
-import { mimeExtensionMap } from "@/shared/constants/mimeExtensionMap";
 import path from "path";
 import { logger } from "@/shared/utils/logging/logger";
 import { uploadWithRetry } from "../utils/retries/uploadWithRetry";
+import { MimeConfig } from "../constants/mimeExtensionMap";
 
 export class CloudinaryService {
   async upload(
@@ -13,7 +13,7 @@ export class CloudinaryService {
     userId: string
   ): Promise<{ url: string; type: string }> {
     const timestamp = new Date().toISOString();
-    const ext = mimeExtensionMap[mimetype];
+    const ext = MimeConfig.getExtension(mimetype);
 
     logger.info({
       layer: "service",
@@ -105,7 +105,10 @@ export class CloudinaryService {
     mimetype: string
   ): Promise<void> {
     const timestamp = new Date().toISOString();
-    const nameWithoutExtension = path.basename(filename, path.extname(filename));
+    const nameWithoutExtension = path.basename(
+      filename,
+      path.extname(filename)
+    );
     const publicId = `${userId}/${nameWithoutExtension}`;
 
     let resource_type: "image" | "video" | "raw" = "raw";

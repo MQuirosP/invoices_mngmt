@@ -4,10 +4,7 @@ import { AppError } from "@/shared/utils/appError.utils";
 import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
 import { logger } from "@/shared/utils/logging/logger";
-import {
-  generateRandomFilename,
-  validateRealMime,
-} from "@/shared";
+import { generateRandomFilename, validateRealMime } from "@/shared";
 import { Prisma } from "@prisma/client";
 
 const cloudinaryService = new CloudinaryService();
@@ -31,25 +28,22 @@ export const uploadFiles = async (
 
   if (files && files.length > 0) {
     for (const file of files ?? []) {
-    const attachment = await uploadValidatedFile(file, invoiceId, userId, tx);
-    attachments.push(attachment);
-    logger.info({
-      layer: "service",
-      action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
-      userId,
-      invoiceId,
-      attachmentId: attachment.id,
-      fileName: attachment.fileName,
-      mimeType: attachment.mimeType,
-      url: attachment.url,
-    });
-  }
-
-
-
+      const attachment = await uploadValidatedFile(file, invoiceId, userId, tx);
+      attachments.push(attachment);
+      logger.info({
+        layer: "service",
+        action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
+        userId,
+        invoiceId,
+        attachmentId: attachment.id,
+        fileName: attachment.fileName,
+        mimeType: attachment.mimeType,
+        url: attachment.url,
+      });
     }
-    return attachments;
   }
+  return attachments;
+};
 
 export const downloadAttachment = async (
   userId: string,
@@ -168,7 +162,6 @@ export const deleteAttachments = async (
         fileName: attachment.fileName,
       });
     }
-
   } catch (error: any) {
     logger.error({
       layer: "service",
@@ -190,7 +183,6 @@ export const deleteAttachments = async (
 
   return { success: true, deleted: invoice.attachments.length };
 };
-
 
 export const uploadValidatedFile = async (
   file: Express.Multer.File,
