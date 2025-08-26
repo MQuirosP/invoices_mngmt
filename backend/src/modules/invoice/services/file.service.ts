@@ -5,11 +5,9 @@ import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
 import { logger } from "@/shared/utils/logging/logger";
 import {
-  AttachmentService,
-  FileFetcherService,
-  mimeMetadataMap,
+  generateRandomFilename,
   validateRealMime,
-} from "../../../shared";
+} from "@/shared";
 import { Prisma } from "@prisma/client";
 
 const cloudinaryService = new CloudinaryService();
@@ -32,36 +30,27 @@ export const uploadFiles = async (
   const attachments = [];
 
   if (files && files.length > 0) {
-    for (const file of files) {
-      const draft = await AttachmentService.uploadValidated(
-        {
-          buffer: file.buffer,
-          mimetype: file.mimetype,
-          originalname: file.originalname,
-        },
-        invoiceId,
-        userId
-      );
-
-      const attachment = await tx.attachment.create({ data: draft });
-
-      logger.info({
-        layer: "service",
-        action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
-        userId,
-        invoiceId,
-        attachmentId: attachment.id,
-        fileName: attachment.fileName,
-        mimeType: attachment.mimeType,
-        url: attachment.url,
-      });
-
-      attachments.push(attachment);
-    }
+    for (const file of files ?? []) {
+    const attachment = await uploadValidatedFile(file, invoiceId, userId, tx);
+    attachments.push(attachment);
+    logger.info({
+      layer: "service",
+      action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
+      userId,
+      invoiceId,
+      attachmentId: attachment.id,
+      fileName: attachment.fileName,
+      mimeType: attachment.mimeType,
+      url: attachment.url,
+    });
+    attachments.push(attachment);
   }
 
-  return attachments;
-};
+
+
+    }
+    return attachments;
+  }
 
 export const downloadAttachment = async (
   userId: string,
@@ -181,7 +170,6 @@ export const deleteAttachments = async (
       });
     }
 
-    // await tx.attachment.deleteMany({ where: { invoiceId } });
   } catch (error: any) {
     logger.error({
       layer: "service",
@@ -204,48 +192,26 @@ export const deleteAttachments = async (
   return { success: true, deleted: invoice.attachments.length };
 };
 
-export const prepareBufferForExtraction = async (
-  url: string
-): Promise<{
-  buffer: Buffer;
-  filename: string;
-  declaredMime: string;
-  validatedMime: string;
-}> => {
-  const fetcher = new FileFetcherService();
-  const buffer = await fetcher.fetchBuffer(url);
 
-  const filename = url.split("/").pop()?.split("?")[0] || "unknown";
-  const ext = filename.split(".").pop()?.toLowerCase();
+export const uploadValidatedFile = async (
+  file: Express.Multer.File,
+  invoiceId: string,
+  userId: string,
+  tx: Prisma.TransactionClient = prisma
+) => {
+  const { buffer, mimetype } = file;
+  const { mime, ext } = await validateRealMime(buffer, mimetype);
+  const filename = generateRandomFilename(mime, invoiceId);
+  const result = await cloudinaryService.upload(buffer, filename, mime, userId);
 
-  if (!ext || !Object.values(mimeMetadataMap).some((meta) => meta.ext === ext)) {
-    throw new AppError("Unsupported or missing file extension", 415, true, undefined, {
-      layer: "file",
-      module: "file.core",
-      reason: "EXTENSION_NOT_ALLOWED",
-      filename,
-      url,
-    });
-  }
+  if (!result?.url) throw new AppError("Upload failed", 500);
 
-  const declaredMime = Object.entries(mimeMetadataMap).find(
-    ([mime, meta]) => meta.ext === ext
-  )?.[0]!;
-
-  const { mime: validatedMime } = await validateRealMime(
-    buffer,
-    declaredMime,
-    filename
-  );
-
-  logger.info({
-    layer: "service",
-    action: "FILE_PREPARE_FOR_EXTRACTION_SUCCESS",
-    filename,
-    declaredMime,
-    validatedMime,
-    url,
+  return tx.attachment.create({
+    data: {
+      invoiceId,
+      url: result.url,
+      mimeType: mime,
+      fileName: `${filename}.${ext}`,
+    },
   });
-
-  return { buffer, filename, declaredMime, validatedMime };
 };

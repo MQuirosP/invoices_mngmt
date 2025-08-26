@@ -1,9 +1,8 @@
-import { AppError, ImportService } from "@/shared";
+import { AppError, ImportService, prepareBufferForExtraction } from "@/shared";
 import { prisma } from "@/config/prisma";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
 import { createInvoice, updateInvoiceFromMetadata } from "./core.service";
-import { prepareBufferForExtraction } from "./file.service";
 
 export const createInvoiceFromBuffer = async (
   buffer: Buffer,

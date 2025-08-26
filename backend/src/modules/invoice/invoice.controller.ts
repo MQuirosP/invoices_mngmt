@@ -143,7 +143,6 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
 
       if (!invoice) throw new AppError("Invoice not found", 404);
 
-      // await deleteAttachments(userId, invoiceId);
       const deletedInvoice = await deleteInvoiceById(
         invoiceId,
         userId,
@@ -269,7 +268,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
         action: "INVOICE_IMPORT_LOCAL_ERROR",
         userId,
         error: error instanceof Error ? error.message : String(error),
-        stack: error?.stack, // 👈 añade esto
+        stack: error?.stack, // Include stack trace for better debugging
       });
       next(error);
     }

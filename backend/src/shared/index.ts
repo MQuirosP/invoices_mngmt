@@ -12,7 +12,7 @@ export * from './utils/security/requireUserId';
 export * from './utils/file/validateRealMime';
 
 // 📦 services
-export * from './services/attachment.service';
+export * from './utils/file/file.utils';
 export * from './services/cloudinary.service';
 export * from './services/fileFetcher.service';
 export * from './services/import.service';
