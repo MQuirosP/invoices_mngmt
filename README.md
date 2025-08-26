@@ -110,11 +110,12 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
     > Request:
     > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
 
+```json
 form-data
-    ```json
         {
         "invoiceFile": &lt;File Object&gt;
         }
+```
 
 * **`modules/`**: Contains feature-specific modules like `auth` and `invoice`.
 * **`shared/`**: Includes reusable components such as `middleware`, `OCR`, and `services`.
