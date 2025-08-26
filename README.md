@@ -109,7 +109,7 @@ json
     > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
 
 form-data
-    ```markdown
+    ```json
         {
         "invoiceFile": &lt;File Object&gt;
         }
@@ -139,20 +139,23 @@ bash
 
 > Example of MIME type validation middleware:
 
-typescript
-import { validateRealMime } from './shared/utils/file/validateRealMime';
+    ``` ts
+        import { validateRealMime } from './shared/utils/file/validateRealMime';
 
-const uploadMiddleware = (req, res, next) => {
-    if (req.file) {
-        const validMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-        const isValidMime = validateRealMime(req.file, validMimeTypes);
+        const uploadMiddleware = (req, res, next) => {
+            if (req.file) {
+                const validMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+                const isValidMime = validateRealMime(req.file, validMimeTypes);
 
-        if (!isValidMime) {
-            return next(new Error('Invalid MIME type'));
-        }
-    }
-    next();
-};
+                if (!isValidMime) {
+                    return next(new Error('Invalid MIME type'));
+                }
+            }
+            next();
+        };
+
+    ```
+
 The project uses Google Cloud Vision for OCR (Optical Character Recognition) to automatically extract data from invoice images.
 
 * **OCR Factory:** The `OCRFactory` class in `shared/ocr/ocr.factory.ts` is responsible for creating OCR provider instances.
@@ -161,58 +164,61 @@ The project uses Google Cloud Vision for OCR (Optical Character Recognition) to 
 
 > Example of OCR configuration:
 
-typescript
-// config/index.ts
-export const config = {
-  ocrProvider: process.env.OCR_PROVIDER || 'gcp', // Default to Google Cloud Vision
-};
+    ``` ts
+        // config/index.ts
+        export const config = {
+        ocrProvider: process.env.OCR_PROVIDER || 'gcp', // Default to Google Cloud Vision
+        };
 
-// shared/ocr/ocr.factory.ts
-import { GoogleCloudVision } from './ocr.providers/gcp';
-import { TesseractOCR } from './ocr.providers/tesseract';
+        // shared/ocr/ocr.factory.ts
+        import { GoogleCloudVision } from './ocr.providers/gcp';
+        import { TesseractOCR } from './ocr.providers/tesseract';
 
-export class OCRFactory {
-    static create(providerName: string) {
-        switch (providerName) {
-            case 'gcp':
-                return new GoogleCloudVision();
-            case 'tesseract':
-                return new TesseractOCR();
-            default:
-                throw new Error('Invalid OCR provider');
+        export class OCRFactory {
+            static create(providerName: string) {
+                switch (providerName) {
+                    case 'gcp':
+                        return new GoogleCloudVision();
+                    case 'tesseract':
+                        return new TesseractOCR();
+                    default:
+                        throw new Error('Invalid OCR provider');
+                }
+            }
         }
-    }
-}
-typescript
-// src/modules/invoice/invoice.schema.ts
-import { z } from 'zod';
 
-export const createInvoiceSchema = z.object({
-    body: z.object({
-        provider: z.string().min(1),
-        title: z.string().min(1),
-        issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-    }),
-});
-typescript
-// src/modules/invoice/invoice.controller.test.ts
-import { createInvoice } from './invoice.controller';
-import { Request, Response } from 'express';
+        // src/modules/invoice/invoice.schema.ts
+        import { z } from 'zod';
 
-describe('Invoice Controller', () => {
-  it('should create an invoice', async () => {
-    const mockRequest = {} as Request;
-    const mockResponse = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    } as unknown as Response;
+        export const createInvoiceSchema = z.object({
+            body: z.object({
+                provider: z.string().min(1),
+                title: z.string().min(1),
+                issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            }),
+        });
 
-    await createInvoice(mockRequest, mockResponse);
+        // src/modules/invoice/invoice.controller.test.ts
+        import { createInvoice } from './invoice.controller';
+        import { Request, Response } from 'express';
 
-    expect(mockResponse.status).toHaveBeenCalledWith(201);
-    expect(mockResponse.json).toHaveBeenCalled();
-  });
-});
+        describe('Invoice Controller', () => {
+        it('should create an invoice', async () => {
+            const mockRequest = {} as Request;
+            const mockResponse = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            } as unknown as Response;
+
+            await createInvoice(mockRequest, mockResponse);
+
+            expect(mockResponse.status).toHaveBeenCalledWith(201);
+            expect(mockResponse.json).toHaveBeenCalled();
+        });
+        });
+
+    ```
+
 [![GitHub](https://img.shields.io/github/followers/MQuirosP?style=social)](https://github.com/MQuirosP)
 [![GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-3f3f3f?style=flat-square&logo=github&logoColor=white)](https://github.com/MQuirosP/invoices_mngmt)
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/MQuirosP/invoices_mngmt)
@@ -227,3 +233,6 @@ describe('Invoice Controller', () => {
 ---
 
 ## Contributing
+
+    - Follow conventional commits
+    - Ensure all tests pass before PR
