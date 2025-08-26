@@ -47,7 +47,7 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
 
     ```
 
-* Get Authenticated User:** `GET /api/auth/me`
+* **Get Authenticated User:** `GET /api/auth/me`
 
     > Request:
     > Headers: `Authorization: Bearer <token>`
@@ -59,7 +59,7 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
             "email": "<user@example.com>"
         }
 
-* Post Invoice:** `GET /api/auth/me`
+* **Post Invoice:** `GET /api/auth/me`
 
     > Request (with file upload):
     > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
