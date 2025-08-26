@@ -4,7 +4,7 @@ import { AppError } from "@/shared/utils/appError.utils";
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { logger } from "@/shared/utils/logging/logger";
 import { Role } from "@prisma/client";
-import { createInvoice, createInvoiceFromBuffer, deleteAttachments, deleteInvoiceById, downloadAttachment, getInvoiceById, getUserInvoices, updateInvoiceFromUrl, uploadFiles } from "@/modules/invoice";
+import { createInvoice, createInvoiceFromBuffer, deleteInvoiceById, downloadAttachment, getInvoiceById, getUserInvoices, updateInvoiceFromUrl, uploadFiles } from "@/modules/invoice";
 import { prisma } from "@/config/prisma";
 import { createInvoiceSchema } from "./schemas/invoice.schema";
 
@@ -143,7 +143,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
 
       if (!invoice) throw new AppError("Invoice not found", 404);
 
-      await deleteAttachments(userId, invoiceId);
+      // await deleteAttachments(userId, invoiceId);
       const deletedInvoice = await deleteInvoiceById(
         invoiceId,
         userId,

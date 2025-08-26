@@ -181,7 +181,7 @@ export const deleteAttachments = async (
       });
     }
 
-    await tx.attachment.deleteMany({ where: { invoiceId } });
+    // await tx.attachment.deleteMany({ where: { invoiceId } });
   } catch (error: any) {
     logger.error({
       layer: "service",

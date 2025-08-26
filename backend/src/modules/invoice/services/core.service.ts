@@ -125,7 +125,7 @@ export const deleteInvoiceById = async (
   await prisma.$transaction(async (tx) => {
     await deleteAttachments(userId, invoiceId, undefined, tx);
 
-    await tx.invoice.delete({
+    await tx.invoice.deleteMany({
       where: { id: invoiceId },
     });
   });
