@@ -58,8 +58,9 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
             "id": "user_id",
             "email": "<user@example.com>"
         }
-            > Request (with file upload):
-        > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
+
+    > Request (with file upload):
+    > Headers: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
 
         {
             "id": "invoice_id",
@@ -71,9 +72,6 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
 
     ```
 
-    > Request:
-    > Headers: `Authorization: Bearer <token>`
-    > Response:
     > Request:
     > Headers: `Authorization: Bearer <token>`
     > Response:
