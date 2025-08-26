@@ -135,6 +135,8 @@ form-data
     cd invoices_mngmt/backend
 ```
 
+## Set environment
+
 ```env
     DATABASE_URL="postgresql://user:password@localhost:5432/invoices_db"
     JWT_SECRET="your_secret_key"
