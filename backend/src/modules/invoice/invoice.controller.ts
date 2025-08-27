@@ -386,3 +386,5 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
     }
   }
 }
+
+export type InvoiceControllerType = typeof InvoiceController;
