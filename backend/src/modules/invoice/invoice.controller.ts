@@ -4,11 +4,11 @@ import { AppError } from "@/shared/utils/appError.utils";
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { logger } from "@/shared/utils/logging/logger";
 import { Role } from "@prisma/client";
-import { prisma } from "@/config/prisma";
 import { createInvoiceSchema } from "./schemas/invoice.schema";
 import { InvoiceService } from "./services/core.service";
 import { InvoiceFileService } from "./services/file.service";
 import { InvoiceOcrService } from "./services/ocr.service";
+import { getInvoiceById } from "./invoice.query";
 
 const invoiceService = InvoiceService
 const invoiceFileService = InvoiceFileService
@@ -54,7 +54,7 @@ const invoiceOcrService = InvoiceOcrService
       res.status(201).json({
         success: true,
         message: `Invoice created with ${uploads.length} attachment(s)`,
-        data: await invoiceService.getInvoiceById(invoice.invoiceId, userId),
+        data: await getInvoiceById(invoice.invoiceId, userId),
       });
     } catch (error) {
       logger.error({
@@ -108,7 +108,7 @@ const invoiceOcrService = InvoiceOcrService
         invoiceId,
       });
 
-      const invoice = await invoiceService.getInvoiceById(invoiceId, userId);
+      const invoice = await getInvoiceById(invoiceId, userId);
 
       logger.info({
         layer: "controller",
@@ -142,30 +142,27 @@ const invoiceOcrService = InvoiceOcrService
         invoiceId,
       });
 
-      const invoice = await prisma.invoice.findFirst({
-        where: { id: invoiceId, userId },
-        include: { attachments: true },
-      });
-
+      const invoice = await getInvoiceById(invoiceId, userId);
       if (!invoice) throw new AppError("Invoice not found", 404);
 
-      const deletedInvoice = await invoiceService.deleteInvoiceById(
-        invoiceId,
-        userId,
-        userRole
-      );
+      // const deletedInvoice = await invoiceService.deleteInvoiceById(
+      //   invoiceId,
+      //   userId,
+      //   userRole
+      // );
 
       logger.info({
         layer: "controller",
         action: "INVOICE_REMOVE_SUCCESS",
         userId,
         invoiceId,
+        userRole
       });
 
       res.status(200).json({
         success: true,
         message: "Invoice deleted",
-        data: deletedInvoice,
+        data: invoice,
       });
     } catch (error) {
       logger.error({
@@ -341,7 +338,7 @@ const invoiceOcrService = InvoiceOcrService
         invoiceId,
       });
 
-      const invoice = await invoiceService.getInvoiceById(invoiceId, userId);
+      const invoice = await getInvoiceById(invoiceId, userId);
       const url = invoice?.attachments[0]?.url;
 
       if (!url) {

@@ -159,6 +159,15 @@ export const InvoiceRepository = {
     };
   },
 
+  createAttachment: async (data: {
+  invoiceId: string;
+  url: string;
+  mimeType: string;
+  fileName: string;
+}): Promise<Attachment> => {
+  return prisma.attachment.create({ data });
+}
+
   // findAll: async (filters?: {
   //   userId?: string;
   //   provider?: string;

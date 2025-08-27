@@ -7,6 +7,7 @@ import { logger } from "@/shared/utils/logging/logger";
 import { generateRandomFilename, validateRealMime } from "@/shared";
 import { Attachment, Prisma } from "@prisma/client";
 import { InvoiceRepository } from "../invoice.repository";
+import { getInvoiceById } from "../invoice.query";
 
 const cloudinaryService = new CloudinaryService();
 const invoiceRepo = InvoiceRepository;
@@ -122,10 +123,11 @@ export const InvoiceFileService = {
       invoiceId,
     });
 
-    const invoice = await prisma.invoice.findFirst({
-      where: { id: invoiceId, userId },
-      include: { attachments: true },
-    });
+    const invoice = await getInvoiceById(invoiceId, userId);
+    // const invoice = await prisma.invoice.findFirst({
+    //   where: { id: invoiceId, userId },
+    //   include: { attachments: true },
+    // });
 
     if (!invoice) {
       logger.warn({
@@ -183,33 +185,24 @@ export const InvoiceFileService = {
 
     return { success: true, deleted: invoice.attachments.length };
   },
-
-  
 };
 
 const uploadValidatedFile = async (
-    file: Express.Multer.File,
-    invoiceId: string,
-    userId: string
-  ): Promise<Attachment> => {
-    const { buffer, mimetype } = file;
-    const { mime, ext } = await validateRealMime(buffer, mimetype);
-    const filename = generateRandomFilename(mime, invoiceId);
-    const result = await cloudinaryService.upload(
-      buffer,
-      filename,
-      mime,
-      userId
-    );
+  file: Express.Multer.File,
+  invoiceId: string,
+  userId: string
+): Promise<Attachment> => {
+  const { buffer, mimetype } = file;
+  const { mime, ext } = await validateRealMime(buffer, mimetype);
+  const filename = generateRandomFilename(mime, invoiceId);
+  const result = await cloudinaryService.upload(buffer, filename, mime, userId);
 
-    if (!result?.url) throw new AppError("Upload failed", 500);
+  if (!result?.url) throw new AppError("Upload failed", 500);
 
-    return prisma.attachment.create({
-      data: {
-        invoiceId,
-        url: result.url,
-        mimeType: mime,
-        fileName: `${filename}.${ext}`,
-      },
-    });
-  }
+  return invoiceRepo.createAttachment({
+    invoiceId,
+    url: result.url,
+    mimeType: mime,
+    fileName: `${filename}.${ext}`,
+  });
+};
