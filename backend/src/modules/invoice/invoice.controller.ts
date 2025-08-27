@@ -16,7 +16,8 @@ const invoiceOcrService = InvoiceOcrService
 
 type ApiResponse<T> = { success: true; data: T } | { success: false; message: string };
 
-  export const create = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  export const InvoiceController = {
+    create: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const startTime = Date.now();
     const userId = requireUserId(req);
     try {
@@ -66,9 +67,9 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       });
       next(error);
     }
-  }
+  },
 
-  export const list = async (req: AuthRequest, res: Response<ApiResponse<Invoice[]>>, next: NextFunction) => {
+  list: async (req: AuthRequest, res: Response<ApiResponse<Invoice[]>>, next: NextFunction) => {
     const userId = requireUserId(req);
     try {
       logger.info({
@@ -96,9 +97,9 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       });
       next(error);
     }
-  }
+  },
 
-  export const get = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  get: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
     try {
@@ -129,9 +130,9 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       });
       next(error);
     }
-  }
+  },
 
-  export const remove = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  remove: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
     const userRole = req.user?.role as Role;
@@ -178,9 +179,9 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       });
       next(error);
     }
-  }
+  },
 
-  export const download = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  download: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const { invoiceId, attachmentId } = req.params;
     try {
@@ -225,9 +226,9 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       });
       next(error);
     }
-  }
+  },
 
-  export const importFromLocal = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  importFromLocal: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const file = req.file;
     try {
@@ -279,9 +280,9 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       });
       next(error);
     }
-  }
+  },
 
-  export const importFromUrl = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  importFromUrl: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.invoiceId;
     const { url } = req.body;
@@ -324,9 +325,9 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       });
       next(error);
     }
-  }
+  },
 
-  export const importDataFromAttachment = async (
+  importDataFromAttachment: async (
     req: AuthRequest,
     res: Response<ApiResponse<Invoice>>,
     next: NextFunction
@@ -384,3 +385,4 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       next(error);
     }
   }
+}
