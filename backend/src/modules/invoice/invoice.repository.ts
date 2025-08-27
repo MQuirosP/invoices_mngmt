@@ -1,5 +1,5 @@
 import { prisma } from "@/config/prisma";
-import { Attachment, Invoice, InvoiceItem, Prisma, User } from "@prisma/client";
+import { Attachment, Invoice, InvoiceItem, User } from "@prisma/client";
 
 export type FullInvoice = Invoice & {
   items: InvoiceItem[];
