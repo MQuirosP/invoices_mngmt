@@ -158,7 +158,7 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
     {"message": "API is running"}
 ```
 
-* Check database connectivity:** Access http://localhost:3000/api/health/db to verify the database connection. You should see:
+* Check database connectivity:** Access <http://localhost:3000/api/health/db> to verify the database connection. You should see:
 
 ```json
     {"status": "ok", "jobId": "unknown"}
@@ -267,7 +267,6 @@ The project uses Google Cloud Vision for OCR (Optical Character Recognition) to 
 [![GitHub](https://img.shields.io/badge/GitHub-invoices_mngmt-3f3f3f?style=flat-square&logo=github&logoColor=white)](https://github.com/MQuirosP/invoices_mngmt)
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/MQuirosP/invoices_mngmt)
 [![Zread AI](https://img.shields.io/badge/Zread%20AI-brightgreen)](https://zread.ai)
-
 
 [![Audit Ready](https://img.shields.io/badge/Audit--Ready-Strict--Validation-3f3f3f?style=flat-square)](https://github.com/MQuirosP/invoices_mngmt)
 [![Modular Core](https://img.shields.io/badge/Architecture-Modular--Core-3f3f3f?style=flat-square)](https://github.com/MQuirosP/invoices_mngmt)
