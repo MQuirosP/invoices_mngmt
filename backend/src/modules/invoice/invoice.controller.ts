@@ -145,18 +145,21 @@ const invoiceOcrService = InvoiceOcrService
       const invoice = await getInvoiceById(invoiceId, userId);
       if (!invoice) throw new AppError("Invoice not found", 404);
 
-      // const deletedInvoice = await invoiceService.deleteInvoiceById(
-      //   invoiceId,
-      //   userId,
-      //   userRole
-      // );
+      const deletedInvoice = await invoiceService.deleteInvoiceById(
+        invoiceId,
+        userId,
+        userRole
+      );
+      if(!deletedInvoice) {
+        throw new AppError("Invoice not found or not authorized", 404);
+      }
 
       logger.info({
         layer: "controller",
         action: "INVOICE_REMOVE_SUCCESS",
         userId,
         invoiceId,
-        userRole
+        userRole,
       });
 
       res.status(200).json({
