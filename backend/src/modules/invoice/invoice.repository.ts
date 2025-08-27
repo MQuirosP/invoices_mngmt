@@ -159,42 +159,42 @@ export const InvoiceRepository = {
     };
   },
 
-  findAll: async (filters?: {
-    userId?: string;
-    provider?: string;
-    extracted?: boolean;
-  }): Promise<Invoice[]> => {
-    const where: Prisma.InvoiceWhereInput = {};
+  // findAll: async (filters?: {
+  //   userId?: string;
+  //   provider?: string;
+  //   extracted?: boolean;
+  // }): Promise<Invoice[]> => {
+  //   const where: Prisma.InvoiceWhereInput = {};
+    
+  //   if (filters) {
+  //     if (filters.userId) where.userId = filters.userId;
+  //     if (filters.provider?.trim()) {
+  //       where.provider = { contains: filters.provider, mode: "insensitive" };
+  //     }
+  //     if (Object.prototype.hasOwnProperty.call(filters, "extracted")) {
+  //       where.extracted = filters.extracted;
+  //     }
+  //   }
 
-    if (filters) {
-      if (filters.userId) where.userId = filters.userId;
-      if (filters.provider?.trim()) {
-        where.provider = { contains: filters.provider, mode: "insensitive" };
-      }
-      if (Object.prototype.hasOwnProperty.call(filters, "extracted")) {
-        where.extracted = filters.extracted;
-      }
-    }
+  //   const include = {
+  //     items: true,
+  //     attachments: true,
+  //     ...(filters?.userId && {
+  //       user: {
+  //         select: {
+  //           id: true,
+  //           email: true,
+  //           fullname: true,
+  //           role: true,
+  //         },
+  //       },
+  //     }),
+  //   };
 
-    const include = {
-      items: true,
-      attachments: true,
-      ...(filters?.userId && {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            fullname: true,
-            role: true,
-          },
-        },
-      }),
-    };
-
-    return prisma.invoice.findMany({
-      where,
-      include,
-      orderBy: { createdAt: "desc" },
-    });
-  },
+  //   return prisma.invoice.findMany({
+  //     where,
+  //     include,
+  //     orderBy: { createdAt: "desc" },
+  //   });
+  // },
 };
