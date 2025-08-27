@@ -3,7 +3,7 @@ import { requireUserId } from "@/shared/utils/security/requireUserId";
 import { AppError } from "@/shared/utils/appError.utils";
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { logger } from "@/shared/utils/logging/logger";
-import { Role } from "@prisma/client";
+import { Invoice, Role } from "@prisma/client";
 import { createInvoiceSchema } from "./schemas/invoice.schema";
 import { InvoiceService } from "./services/core.service";
 import { InvoiceFileService } from "./services/file.service";
@@ -14,8 +14,9 @@ const invoiceService = InvoiceService
 const invoiceFileService = InvoiceFileService
 const invoiceOcrService = InvoiceOcrService
 
+type ApiResponse<T> = { success: true; data: T } | { success: false; message: string };
 
-  export const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  export const create = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const startTime = Date.now();
     const userId = requireUserId(req);
     try {
@@ -53,7 +54,7 @@ const invoiceOcrService = InvoiceOcrService
 
       res.status(201).json({
         success: true,
-        message: `Invoice created with ${uploads.length} attachment(s)`,
+        // message: `Invoice created with ${uploads.length} attachment(s)`,
         data: await getInvoiceById(invoice.invoiceId, userId),
       });
     } catch (error) {
@@ -67,7 +68,7 @@ const invoiceOcrService = InvoiceOcrService
     }
   }
 
-  export const list = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  export const list = async (req: AuthRequest, res: Response<ApiResponse<Invoice[]>>, next: NextFunction) => {
     const userId = requireUserId(req);
     try {
       logger.info({
@@ -97,7 +98,7 @@ const invoiceOcrService = InvoiceOcrService
     }
   }
 
-  export const get = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  export const get = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
     try {
@@ -130,7 +131,7 @@ const invoiceOcrService = InvoiceOcrService
     }
   }
 
-  export const remove = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  export const remove = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
     const userRole = req.user?.role as Role;
@@ -164,7 +165,7 @@ const invoiceOcrService = InvoiceOcrService
 
       res.status(200).json({
         success: true,
-        message: "Invoice deleted",
+        // message: "Invoice deleted",
         data: invoice,
       });
     } catch (error) {
@@ -179,7 +180,7 @@ const invoiceOcrService = InvoiceOcrService
     }
   }
 
-  export const download = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  export const download = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const { invoiceId, attachmentId } = req.params;
     try {
@@ -226,7 +227,7 @@ const invoiceOcrService = InvoiceOcrService
     }
   }
 
-  export const importFromLocal = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  export const importFromLocal = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const file = req.file;
     try {
@@ -265,7 +266,7 @@ const invoiceOcrService = InvoiceOcrService
 
       res.status(201).json({
         success: true,
-        message: "Invoice imported from local file",
+        // message: "Invoice imported from local file",
         data: invoice,
       });
     } catch (error: any) {
@@ -280,7 +281,7 @@ const invoiceOcrService = InvoiceOcrService
     }
   }
 
-  export const importFromUrl = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  export const importFromUrl = async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.invoiceId;
     const { url } = req.body;
@@ -310,7 +311,7 @@ const invoiceOcrService = InvoiceOcrService
 
       res.status(200).json({
         success: true,
-        message: "Invoice updated from OCR",
+        // message: "Invoice updated from OCR",
         data: invoice,
       });
     } catch (error) {
@@ -327,7 +328,7 @@ const invoiceOcrService = InvoiceOcrService
 
   export const importDataFromAttachment = async (
     req: AuthRequest,
-    res: Response,
+    res: Response<ApiResponse<Invoice>>,
     next: NextFunction
   ) => {
     const userId = requireUserId(req);
@@ -369,7 +370,7 @@ const invoiceOcrService = InvoiceOcrService
 
       res.status(200).json({
         success: true,
-        message: "Invoice metadata updated from attachment",
+        // message: "Invoice metadata updated from attachment",
         data: result,
       });
     } catch (error) {
