@@ -2,6 +2,7 @@ import { AppError, ImportService, prepareBufferForExtraction } from "@/shared";
 import { logger } from "@/shared/utils/logging/logger";
 import { InvoiceService } from "./core.service";
 import { InvoiceRepository } from "../invoice.repository";
+import { getInvoiceById } from "../invoice.query";
 
 const invoiceRepo = InvoiceRepository;
 const invoiceService = InvoiceService;
@@ -66,7 +67,7 @@ export const InvoiceOcrService = {
       url,
     });
 
-    const invoice = await invoiceService.getInvoiceById(invoiceId, userId);
+    const invoice = await getInvoiceById(invoiceId, userId);
 
     if (!invoice) {
       logger.warn({
@@ -115,6 +116,6 @@ export const InvoiceOcrService = {
       itemCount: metadata.items?.length ?? 0,
     });
 
-    return invoiceService.getInvoiceById(invoiceId, userId);
+    return getInvoiceById(invoiceId, userId);
   },
 };
