@@ -222,3 +222,5 @@ export const AuthController = {
     }
   },
 };
+
+export type AuthControllerType = typeof AuthController;
