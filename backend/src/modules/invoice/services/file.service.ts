@@ -5,9 +5,8 @@ import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
 import { logger } from "@/shared/utils/logging/logger";
 import { generateRandomFilename, validateRealMime } from "@/shared";
-import { Attachment, Prisma } from "@prisma/client";
+import { Attachment, Invoice, Prisma } from "@prisma/client";
 import { InvoiceRepository } from "../invoice.repository";
-import { getInvoiceById } from "../invoice.query";
 
 const cloudinaryService = new CloudinaryService();
 const invoiceRepo = InvoiceRepository;
@@ -111,23 +110,18 @@ export const InvoiceFileService = {
   },
 
   deleteAttachments: async (
-    userId: string,
-    invoiceId: string,
-    _unused?: unknown,
+    invoice: Invoice & { attachments: Attachment[] },
     tx: Prisma.TransactionClient = prisma
   ) => {
+    const invoiceId = invoice.id;
+    const userId = invoice.userId;
+
     logger.info({
       layer: "service",
       action: "INVOICE_ATTACHMENT_DELETE_BATCH_ATTEMPT",
-      userId,
-      invoiceId,
+      invoiceId: invoice.id,
+      userId: invoice.userId,
     });
-
-    const invoice = await getInvoiceById(invoiceId, userId);
-    // const invoice = await prisma.invoice.findFirst({
-    //   where: { id: invoiceId, userId },
-    //   include: { attachments: true },
-    // });
 
     if (!invoice) {
       logger.warn({
@@ -183,7 +177,7 @@ export const InvoiceFileService = {
       deletedCount: invoice.attachments.length,
     });
 
-    return { success: true, deleted: invoice.attachments.length };
+    return { success: true, deleted: invoice.attachments.length, tx };
   },
 };
 

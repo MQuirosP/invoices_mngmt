@@ -4,6 +4,7 @@ import { Invoice, Role } from "@prisma/client";
 import { logger } from "@/shared/utils/logging/logger";
 import { ExtractedInvoiceMetadata } from "@/shared/ocr/core/ocr.types";
 import { InvoiceFileService } from "./file.service";
+import { getInvoiceById } from "../invoice.query";
 
 const invoiceRepo = InvoiceRepository;
 const fileService = InvoiceFileService;
@@ -77,11 +78,7 @@ export const InvoiceService = {
       userRole,
     });
 
-    const invoice = await invoiceRepo.findById(invoiceId);
-    // const invoice = await prisma.invoice.findFirst({
-    //   where: { id: invoiceId },
-    //   include: { attachments: true },
-    // });
+    const invoice = await getInvoiceById(invoiceId, userId);
     
     if (!invoice) {
       logger.warn({
@@ -94,7 +91,7 @@ export const InvoiceService = {
     }
 
     await prisma.$transaction(async (tx) => {
-      await fileService.deleteAttachments(userId, invoiceId, undefined, tx);
+      await fileService.deleteAttachments(invoice, tx);
 
       await tx.invoice.deleteMany({
         where: { id: invoiceId },
