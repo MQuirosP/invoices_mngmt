@@ -11,197 +11,205 @@ import { InvoiceRepository } from "../invoice.repository";
 const cloudinaryService = new CloudinaryService();
 const invoiceRepo = InvoiceRepository;
 
-export const uploadFiles = async (
-  userId: string,
-  invoiceId: string,
-  files?: Express.Multer.File[]
-): Promise<Attachment[]> => {
-  logger.info({
-    layer: "service",
-    action: "INVOICE_ATTACHMENT_UPLOAD_ATTEMPT",
-    userId,
-    invoiceId,
-    fileCount: files?.length ?? 0,
-  });
-
-  const attachments: Attachment[] = [];
-
-  if (files?.length) {
-    for (const file of files) {
-      const attachment = await uploadValidatedFile(file, invoiceId, userId);
-      attachments.push(attachment);
-
-      logger.info({
-        layer: "service",
-        action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
-        userId,
-        invoiceId,
-        attachmentId: attachment.id,
-        fileName: attachment.fileName,
-        mimeType: attachment.mimeType,
-        url: attachment.url,
-      });
-    }
-  }
-
-  return attachments;
-};
-
-export const downloadAttachment = async (
-  userId: string,
-  invoiceId: string,
-  attachmentId: string
-) => {
-  logger.info({
-    layer: "service",
-    action: "INVOICE_ATTACHMENT_DOWNLOAD_ATTEMPT",
-    userId,
-    invoiceId,
-    attachmentId,
-  });
-
-  const invoice = await invoiceRepo.findById(invoiceId);
-
-
-  if (!invoice) {
-    logger.warn({
+export const InvoiceFileService = {
+  uploadFiles: async (
+    userId: string,
+    invoiceId: string,
+    files?: Express.Multer.File[]
+  ): Promise<Attachment[]> => {
+    logger.info({
       layer: "service",
-      action: "INVOICE_ATTACHMENT_DOWNLOAD_INVOICE_NOT_FOUND",
+      action: "INVOICE_ATTACHMENT_UPLOAD_ATTEMPT",
       userId,
       invoiceId,
+      fileCount: files?.length ?? 0,
     });
-    throw new AppError("Invoice not found", 404);
-  }
 
-  const attachment = invoice.attachments.find((a) => a.id === attachmentId);
-  if (!attachment) {
-    logger.warn({
+    const attachments: Attachment[] = [];
+
+    if (files?.length) {
+      for (const file of files) {
+        const attachment = await uploadValidatedFile(file, invoiceId, userId);
+        attachments.push(attachment);
+
+        logger.info({
+          layer: "service",
+          action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
+          userId,
+          invoiceId,
+          attachmentId: attachment.id,
+          fileName: attachment.fileName,
+          mimeType: attachment.mimeType,
+          url: attachment.url,
+        });
+      }
+    }
+
+    return attachments;
+  },
+
+  downloadAttachment: async (
+    userId: string,
+    invoiceId: string,
+    attachmentId: string
+  ) => {
+    logger.info({
       layer: "service",
-      action: "INVOICE_ATTACHMENT_DOWNLOAD_NOT_FOUND",
+      action: "INVOICE_ATTACHMENT_DOWNLOAD_ATTEMPT",
       userId,
       invoiceId,
       attachmentId,
     });
-    throw new AppError("Attachment not found", 404);
-  }
 
-  const response = await axios.get(attachment.url, {
-    responseType: "stream",
-  });
+    const invoice = await invoiceRepo.findById(invoiceId);
 
-  const ext = getFileExtension(attachment.url) || "bin";
-  const fileName = `${invoice.title.replace(/\s+/g, "_")}.${ext}`;
-
-  logger.info({
-    layer: "service",
-    action: "INVOICE_ATTACHMENT_DOWNLOAD_SUCCESS",
-    userId,
-    invoiceId,
-    attachmentId,
-    fileName,
-    mimeType: response.headers["content-type"],
-  });
-
-  return {
-    stream: response.data,
-    mimeType: response.headers["content-type"],
-    fileName,
-  };
-};
-
-export const deleteAttachments = async (
-  userId: string,
-  invoiceId: string,
-  _unused?: unknown,
-  tx: Prisma.TransactionClient = prisma
-) => {
-  logger.info({
-    layer: "service",
-    action: "INVOICE_ATTACHMENT_DELETE_BATCH_ATTEMPT",
-    userId,
-    invoiceId,
-  });
-
-  const invoice = await prisma.invoice.findFirst({
-    where: { id: invoiceId, userId },
-    include: { attachments: true },
-  });
-
-  if (!invoice) {
-    logger.warn({
-      layer: "service",
-      action: "INVOICE_ATTACHMENT_DELETE_INVOICE_NOT_FOUND",
-      userId,
-      invoiceId,
-    });
-    throw new AppError("Invoice not found", 404);
-  }
-
-  try {
-    for (const attachment of invoice.attachments) {
-      logger.info({
+    if (!invoice) {
+      logger.warn({
         layer: "service",
-        action: "INVOICE_ATTACHMENT_DELETE_ATTEMPT",
+        action: "INVOICE_ATTACHMENT_DOWNLOAD_INVOICE_NOT_FOUND",
         userId,
         invoiceId,
-        fileName: attachment.fileName,
-        mimeType: attachment.mimeType,
       });
-
-      await cloudinaryService.delete(
-        userId,
-        attachment.fileName,
-        attachment.mimeType
-      );
-
-      logger.info({
-        layer: "service",
-        action: "INVOICE_ATTACHMENT_DELETE_SUCCESS",
-        userId,
-        invoiceId,
-        fileName: attachment.fileName,
-      });
+      throw new AppError("Invoice not found", 404);
     }
-  } catch (error: any) {
-    logger.error({
+
+    const attachment = invoice.attachments.find((a) => a.id === attachmentId);
+    if (!attachment) {
+      logger.warn({
+        layer: "service",
+        action: "INVOICE_ATTACHMENT_DOWNLOAD_NOT_FOUND",
+        userId,
+        invoiceId,
+        attachmentId,
+      });
+      throw new AppError("Attachment not found", 404);
+    }
+
+    const response = await axios.get(attachment.url, {
+      responseType: "stream",
+    });
+
+    const ext = getFileExtension(attachment.url) || "bin";
+    const fileName = `${invoice.title.replace(/\s+/g, "_")}.${ext}`;
+
+    logger.info({
       layer: "service",
-      action: "INVOICE_ATTACHMENT_DELETE_BATCH_ERROR",
+      action: "INVOICE_ATTACHMENT_DOWNLOAD_SUCCESS",
       userId,
       invoiceId,
-      reason: error instanceof Error ? error.message : String(error),
+      attachmentId,
+      fileName,
+      mimeType: response.headers["content-type"],
     });
-    throw new AppError("Failed to delete attachments", 500);
-  }
 
-  logger.info({
-    layer: "service",
-    action: "INVOICE_ATTACHMENT_DELETE_BATCH_SUCCESS",
-    userId,
-    invoiceId,
-    deletedCount: invoice.attachments.length,
-  });
+    return {
+      stream: response.data,
+      mimeType: response.headers["content-type"],
+      fileName,
+    };
+  },
 
-  return { success: true, deleted: invoice.attachments.length };
-};
-
-export const uploadValidatedFile = async (
-  file: Express.Multer.File,
-  invoiceId: string,
-  userId: string
-): Promise<Attachment> => {
-  const { buffer, mimetype } = file;
-  const { mime, ext } = await validateRealMime(buffer, mimetype);
-  const filename = generateRandomFilename(mime, invoiceId);
-  const result = await cloudinaryService.upload(buffer, filename, mime, userId);
-
-  if (!result?.url) throw new AppError("Upload failed", 500);
-
-  return prisma.attachment.create({
-    data: {
+  deleteAttachments: async (
+    userId: string,
+    invoiceId: string,
+    _unused?: unknown,
+    tx: Prisma.TransactionClient = prisma
+  ) => {
+    logger.info({
+      layer: "service",
+      action: "INVOICE_ATTACHMENT_DELETE_BATCH_ATTEMPT",
+      userId,
       invoiceId,
-      url: result.url,
-      mimeType: mime,
-      fileName: `${filename}.${ext}`,
-    },
-  });
+    });
+
+    const invoice = await prisma.invoice.findFirst({
+      where: { id: invoiceId, userId },
+      include: { attachments: true },
+    });
+
+    if (!invoice) {
+      logger.warn({
+        layer: "service",
+        action: "INVOICE_ATTACHMENT_DELETE_INVOICE_NOT_FOUND",
+        userId,
+        invoiceId,
+      });
+      throw new AppError("Invoice not found", 404);
+    }
+
+    try {
+      for (const attachment of invoice.attachments) {
+        logger.info({
+          layer: "service",
+          action: "INVOICE_ATTACHMENT_DELETE_ATTEMPT",
+          userId,
+          invoiceId,
+          fileName: attachment.fileName,
+          mimeType: attachment.mimeType,
+        });
+
+        await cloudinaryService.delete(
+          userId,
+          attachment.fileName,
+          attachment.mimeType
+        );
+
+        logger.info({
+          layer: "service",
+          action: "INVOICE_ATTACHMENT_DELETE_SUCCESS",
+          userId,
+          invoiceId,
+          fileName: attachment.fileName,
+        });
+      }
+    } catch (error: any) {
+      logger.error({
+        layer: "service",
+        action: "INVOICE_ATTACHMENT_DELETE_BATCH_ERROR",
+        userId,
+        invoiceId,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+      throw new AppError("Failed to delete attachments", 500);
+    }
+
+    logger.info({
+      layer: "service",
+      action: "INVOICE_ATTACHMENT_DELETE_BATCH_SUCCESS",
+      userId,
+      invoiceId,
+      deletedCount: invoice.attachments.length,
+    });
+
+    return { success: true, deleted: invoice.attachments.length };
+  },
+
+  
 };
+
+const uploadValidatedFile = async (
+    file: Express.Multer.File,
+    invoiceId: string,
+    userId: string
+  ): Promise<Attachment> => {
+    const { buffer, mimetype } = file;
+    const { mime, ext } = await validateRealMime(buffer, mimetype);
+    const filename = generateRandomFilename(mime, invoiceId);
+    const result = await cloudinaryService.upload(
+      buffer,
+      filename,
+      mime,
+      userId
+    );
+
+    if (!result?.url) throw new AppError("Upload failed", 500);
+
+    return prisma.attachment.create({
+      data: {
+        invoiceId,
+        url: result.url,
+        mimeType: mime,
+        fileName: `${filename}.${ext}`,
+      },
+    });
+  }

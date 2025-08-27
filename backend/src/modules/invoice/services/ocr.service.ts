@@ -2,17 +2,19 @@ import { AppError, ImportService, prepareBufferForExtraction } from "@/shared";
 import { prisma } from "@/config/prisma";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
-import { createInvoice, updateInvoiceFromMetadata } from "./core.service";
+import { InvoiceService } from "./core.service";
 import { InvoiceRepository } from "../invoice.repository";
 
 const invoiceRepo = InvoiceRepository;
+const invoiceService = InvoiceService;
 
-export const createInvoiceFromBuffer = async (
-  buffer: Buffer,
-  userId: string,
-  originalName: string,
-  mimeType: string
-) => {
+export const InvoiceOcrService = {
+  createInvoiceFromBuffer: async (
+    buffer: Buffer,
+    userId: string,
+    originalName: string,
+    mimeType: string
+  ) => {
   logger.info({
     layer: "service",
     action: "OCR_CREATE_FROM_BUFFER_ATTEMPT",
@@ -36,7 +38,7 @@ export const createInvoiceFromBuffer = async (
     itemCount: metadata.items?.length ?? 0,
   });
 
-  const invoice = await createInvoice(userId, metadata, {
+  const invoice = await invoiceService.createInvoice(userId, metadata, {
     buffer,
     mimetype: mimeType,
     originalname: originalName,
@@ -51,9 +53,9 @@ export const createInvoiceFromBuffer = async (
   });
 
   return invoiceRepo.findById(invoice.invoiceId);
-};
+},
 
-export const updateInvoiceFromUrl = async (
+updateInvoiceFromUrl: async (
   invoiceId: string,
   userId: string,
   url: string
@@ -103,7 +105,7 @@ export const updateInvoiceFromUrl = async (
     validatedMime,
   });
 
-  await updateInvoiceFromMetadata(invoiceId, userId, metadata, url);
+  await invoiceService.updateInvoiceFromMetadata(invoiceId, userId, metadata, url);
 
   logger.info({
     layer: "service",
@@ -117,4 +119,4 @@ export const updateInvoiceFromUrl = async (
     where: { id: invoiceId },
     include: invoiceIncludeOptions,
   });
-};
+}}

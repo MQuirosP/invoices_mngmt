@@ -4,9 +4,15 @@ import { AppError } from "@/shared/utils/appError.utils";
 import { AuthRequest } from "@/modules/auth/auth.types";
 import { logger } from "@/shared/utils/logging/logger";
 import { Role } from "@prisma/client";
-import { createInvoice, createInvoiceFromBuffer, deleteInvoiceById, downloadAttachment, getInvoiceById, getUserInvoices, updateInvoiceFromUrl, uploadFiles } from "@/modules/invoice";
 import { prisma } from "@/config/prisma";
 import { createInvoiceSchema } from "./schemas/invoice.schema";
+import { InvoiceService } from "./services/core.service";
+import { InvoiceFileService } from "./services/file.service";
+import { InvoiceOcrService } from "./services/ocr.service";
+
+const invoiceService = InvoiceService
+const invoiceFileService = InvoiceFileService
+const invoiceOcrService = InvoiceOcrService
 
 
   export const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -31,9 +37,9 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
         });
       }
 
-      const invoice = await createInvoice(userId, parsed);
+      const invoice = await invoiceService.createInvoice(userId, parsed);
       const uploads = files?.length
-        ? await uploadFiles(userId, invoice.invoiceId, files)
+        ? await invoiceFileService.uploadFiles(userId, invoice.invoiceId, files)
         : [];
 
       logger.info({
@@ -48,7 +54,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
       res.status(201).json({
         success: true,
         message: `Invoice created with ${uploads.length} attachment(s)`,
-        data: await getInvoiceById(invoice.invoiceId, userId),
+        data: await invoiceService.getInvoiceById(invoice.invoiceId, userId),
       });
     } catch (error) {
       logger.error({
@@ -70,7 +76,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
         userId,
       });
 
-      const invoices = await getUserInvoices(userId);
+      const invoices = await invoiceService.getUserInvoices(userId);
 
       logger.info({
         layer: "controller",
@@ -102,7 +108,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
         invoiceId,
       });
 
-      const invoice = await getInvoiceById(invoiceId, userId);
+      const invoice = await invoiceService.getInvoiceById(invoiceId, userId);
 
       logger.info({
         layer: "controller",
@@ -143,7 +149,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
 
       if (!invoice) throw new AppError("Invoice not found", 404);
 
-      const deletedInvoice = await deleteInvoiceById(
+      const deletedInvoice = await invoiceService.deleteInvoiceById(
         invoiceId,
         userId,
         userRole
@@ -186,7 +192,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
       });
 
       const { stream, mimeType, fileName } =
-        await downloadAttachment(
+        await invoiceFileService.downloadAttachment(
           userId,
           invoiceId,
           attachmentId
@@ -233,7 +239,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
 
       if (!file) throw new AppError("No file uploaded", 400);
 
-      const invoice = await createInvoiceFromBuffer(
+      const invoice = await invoiceOcrService.createInvoiceFromBuffer(
         file.buffer,
         userId,
         file.originalname,
@@ -289,7 +295,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
 
       if (!url) throw new AppError("Missing URL", 400);
 
-      const invoice = await updateInvoiceFromUrl(
+      const invoice = await invoiceOcrService.updateInvoiceFromUrl(
         invoiceId,
         userId,
         url
@@ -335,7 +341,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
         invoiceId,
       });
 
-      const invoice = await getInvoiceById(invoiceId, userId);
+      const invoice = await invoiceService.getInvoiceById(invoiceId, userId);
       const url = invoice?.attachments[0]?.url;
 
       if (!url) {
@@ -348,7 +354,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
         throw new AppError("Missing URL", 400);
       }
 
-      const result = await updateInvoiceFromUrl(
+      const result = await invoiceOcrService.updateInvoiceFromUrl(
         invoiceId,
         userId,
         url
