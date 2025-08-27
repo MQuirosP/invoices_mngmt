@@ -132,6 +132,38 @@ A RESTful API built with Node.js, Express, TypeScript, Prisma, and PostgreSQL fo
     cd invoices_mngmt/backend
 ```
 
+## Install dependencies
+
+```bash
+    npm install
+```
+
+## Set up the database
+
+```bash
+    npx prisma migrate dev
+    npx prisma generate
+```
+
+## Start the development server
+
+```bash
+    npm run dev
+```
+
+* The server should now be running on <http://localhost:3000> (or the port specified in your .env file).
+* Open your browser or use a tool like curl to access <http://localhost:3000/api>. You should see a JSON response:
+
+```json
+    {"message": "API is running"}
+```
+
+* Check database connectivity:** Access http://localhost:3000/api/health/db to verify the database connection. You should see:
+
+```json
+    {"status": "ok", "jobId": "unknown"}
+```
+
 ## Set environment
 
 ```env
