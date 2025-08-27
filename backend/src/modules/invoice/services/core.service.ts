@@ -93,7 +93,7 @@ export const InvoiceService = {
     await prisma.$transaction(async (tx) => {
       await fileService.deleteAttachments(invoice, tx);
 
-      await tx.invoice.deleteMany({
+      await tx.invoice.delete({
         where: { id: invoiceId },
       });
     });
