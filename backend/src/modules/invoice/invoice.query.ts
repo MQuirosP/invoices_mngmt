@@ -1,4 +1,4 @@
-import { logger } from "../../shared";
+import { AppError, logger } from "../../shared";
 import { InvoiceRepository } from "./invoice.repository";
 
 export const invoiceIncludeOptions = {
@@ -34,8 +34,7 @@ export const getInvoiceById = async (invoiceId: string, userId: string) => {
     const invoiceRepo = InvoiceRepository
 
     const invoice = await invoiceRepo.findById(invoiceId);
-    if (invoice?.userId !== userId) return null;
-
+    
     if (!invoice) {
       logger.warn({
         layer: "service",
@@ -43,6 +42,7 @@ export const getInvoiceById = async (invoiceId: string, userId: string) => {
         userId,
         invoiceId: invoiceId,
       });
+      throw new AppError("Invoice not found", 404);
     } else {
       logger.info({
         layer: "service",

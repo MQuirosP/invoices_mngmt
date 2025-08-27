@@ -7,25 +7,24 @@ export type FullInvoice = Invoice & {
   user: Pick<User, "id" | "email" | "fullname" | "role">;
 };
 
-
 export const InvoiceRepository = {
   findById: async (id: string): Promise<FullInvoice | null> => {
-  return prisma.invoice.findUnique({
-    where: { id },
-    include: {
-      items: true,
-      attachments: true,
-      user: {
-        select: {
-          id: true,
-          email: true,
-          fullname: true,
-          role: true,
+    return prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        items: true,
+        attachments: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            fullname: true,
+            role: true,
+          },
         },
       },
-    },
-  });
-},
+    });
+  },
 
   findByUserId: async (userId: string): Promise<Invoice[]> => {
     return prisma.invoice.findMany({
@@ -160,13 +159,13 @@ export const InvoiceRepository = {
   },
 
   createAttachment: async (data: {
-  invoiceId: string;
-  url: string;
-  mimeType: string;
-  fileName: string;
-}): Promise<Attachment> => {
-  return prisma.attachment.create({ data });
-}
+    invoiceId: string;
+    url: string;
+    mimeType: string;
+    fileName: string;
+  }): Promise<Attachment> => {
+    return prisma.attachment.create({ data });
+  },
 
   // findAll: async (filters?: {
   //   userId?: string;
@@ -174,7 +173,7 @@ export const InvoiceRepository = {
   //   extracted?: boolean;
   // }): Promise<Invoice[]> => {
   //   const where: Prisma.InvoiceWhereInput = {};
-    
+
   //   if (filters) {
   //     if (filters.userId) where.userId = filters.userId;
   //     if (filters.provider?.trim()) {
