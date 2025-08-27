@@ -1,9 +1,11 @@
+import { InvoiceRepository } from "./../invoice.repository";
 import { prisma } from "@/config/prisma";
 import { Invoice, Role } from "@prisma/client";
-import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
 import { ExtractedInvoiceMetadata } from "@/shared/ocr/core/ocr.types";
 import { uploadFiles, deleteAttachments } from "./file.service";
+
+const invoiceRepo = InvoiceRepository;
 
 export const createInvoice = async (
   userId: string,
@@ -11,15 +13,15 @@ export const createInvoice = async (
   file?: Express.Multer.File
 ): Promise<{ invoiceId: string }> => {
   return await prisma.$transaction(async (tx) => {
-    const invoice = await tx.invoice.create({
-      data: {
+    const invoice = await invoiceRepo.create({
+      
         userId,
         title: metadata.title,
         issueDate: metadata.issueDate,
         expiration: metadata.expiration,
         provider: metadata.provider,
         extracted: true,
-      },
+      
     });
 
     if (metadata.items?.length) {
@@ -32,7 +34,7 @@ export const createInvoice = async (
     }
 
     if (file) {
-      await uploadFiles(userId, invoice.id, [file], undefined, tx);
+      await uploadFiles(userId, invoice.id, [file]);
     }
 
     return { invoiceId: invoice.id };
@@ -46,11 +48,7 @@ export const getUserInvoices = async (userId: string): Promise<Invoice[]> => {
     userId,
   });
 
-  const invoices = await prisma.invoice.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    include: invoiceIncludeOptions,
-  });
+  const invoices = await invoiceRepo.findByUserId(userId);
 
   logger.info({
     layer: "service",
@@ -70,10 +68,8 @@ export const getInvoiceById = async (id: string, userId: string) => {
     invoiceId: id,
   });
 
-  const invoice = await prisma.invoice.findFirst({
-    where: { id, userId },
-    include: invoiceIncludeOptions,
-  });
+  const invoice = await InvoiceRepository.findById(id);
+  if (invoice?.userId !== userId) return null;
 
   if (!invoice) {
     logger.warn({

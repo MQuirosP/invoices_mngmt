@@ -3,7 +3,7 @@ import { RegisterInput, LoginInput } from "./auth.schema";
 import bcrypt from "bcrypt";
 import { hashPassword } from "@/shared/utils/security/hashPassword";
 import { signTokenWithJti } from "@/shared/utils/token/signTokenWithJti";
-import { logger, AppError } from "../../shared";
+import { logger, AppError } from "@/shared";
 import { UserRepository } from "./user.repository";
 
 const userRepo = UserRepository;

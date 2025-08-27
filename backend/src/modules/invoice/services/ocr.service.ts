@@ -3,6 +3,9 @@ import { prisma } from "@/config/prisma";
 import { invoiceIncludeOptions } from "../invoice.query";
 import { logger } from "@/shared/utils/logging/logger";
 import { createInvoice, updateInvoiceFromMetadata } from "./core.service";
+import { InvoiceRepository } from "../invoice.repository";
+
+const invoiceRepo = InvoiceRepository;
 
 export const createInvoiceFromBuffer = async (
   buffer: Buffer,
@@ -47,10 +50,7 @@ export const createInvoiceFromBuffer = async (
     itemCount: metadata.items?.length ?? 0,
   });
 
-  return prisma.invoice.findUnique({
-    where: { id: invoice.invoiceId },
-    include: invoiceIncludeOptions,
-  });
+  return invoiceRepo.findById(invoice.invoiceId);
 };
 
 export const updateInvoiceFromUrl = async (

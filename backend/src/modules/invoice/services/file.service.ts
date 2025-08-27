@@ -5,17 +5,17 @@ import axios from "axios";
 import { getFileExtension } from "@/shared/utils/file/getFileExtension";
 import { logger } from "@/shared/utils/logging/logger";
 import { generateRandomFilename, validateRealMime } from "@/shared";
-import { Prisma } from "@prisma/client";
+import { Attachment, Prisma } from "@prisma/client";
+import { InvoiceRepository } from "../invoice.repository";
 
 const cloudinaryService = new CloudinaryService();
+const invoiceRepo = InvoiceRepository;
 
 export const uploadFiles = async (
   userId: string,
   invoiceId: string,
-  files?: Express.Multer.File[],
-  _unused?: unknown,
-  tx: Prisma.TransactionClient = prisma
-) => {
+  files?: Express.Multer.File[]
+): Promise<Attachment[]> => {
   logger.info({
     layer: "service",
     action: "INVOICE_ATTACHMENT_UPLOAD_ATTEMPT",
@@ -24,12 +24,13 @@ export const uploadFiles = async (
     fileCount: files?.length ?? 0,
   });
 
-  const attachments = [];
+  const attachments: Attachment[] = [];
 
-  if (files && files.length > 0) {
-    for (const file of files ?? []) {
-      const attachment = await uploadValidatedFile(file, invoiceId, userId, tx);
+  if (files?.length) {
+    for (const file of files) {
+      const attachment = await uploadValidatedFile(file, invoiceId, userId);
       attachments.push(attachment);
+
       logger.info({
         layer: "service",
         action: "INVOICE_ATTACHMENT_UPLOAD_SUCCESS",
@@ -42,6 +43,7 @@ export const uploadFiles = async (
       });
     }
   }
+
   return attachments;
 };
 
@@ -58,10 +60,8 @@ export const downloadAttachment = async (
     attachmentId,
   });
 
-  const invoice = await prisma.invoice.findFirst({
-    where: { id: invoiceId, userId },
-    include: { attachments: true },
-  });
+  const invoice = await invoiceRepo.findById(invoiceId);
+
 
   if (!invoice) {
     logger.warn({
@@ -187,9 +187,8 @@ export const deleteAttachments = async (
 export const uploadValidatedFile = async (
   file: Express.Multer.File,
   invoiceId: string,
-  userId: string,
-  tx: Prisma.TransactionClient = prisma
-) => {
+  userId: string
+): Promise<Attachment> => {
   const { buffer, mimetype } = file;
   const { mime, ext } = await validateRealMime(buffer, mimetype);
   const filename = generateRandomFilename(mime, invoiceId);
@@ -197,7 +196,7 @@ export const uploadValidatedFile = async (
 
   if (!result?.url) throw new AppError("Upload failed", 500);
 
-  return tx.attachment.create({
+  return prisma.attachment.create({
     data: {
       invoiceId,
       url: result.url,

@@ -93,7 +93,7 @@ import { createInvoiceSchema } from "./schemas/invoice.schema";
 
   export const get = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const userId = requireUserId(req);
-    const invoiceId = req.params.invoiceId;
+    const invoiceId = req.params.id;
     try {
       logger.info({
         layer: "controller",
