@@ -5,7 +5,7 @@ import { logger } from "@/shared/utils/logging/logger";
 import { AppError } from "@/shared/utils/appError.utils";
 import { ExtractedInvoiceMetadata } from "../ocr/core/ocr.types";
 import { FileFetcherService } from "./fileFetcher.service";
-import { validateRealMime } from "../utils/file/validateRealMime";
+import { validateRealMime } from "../validators/validateRealMime";
 
 export class ImportService {
 

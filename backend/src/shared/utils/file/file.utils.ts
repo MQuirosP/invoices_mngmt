@@ -1,5 +1,5 @@
 import { AppError } from "@/shared/utils/appError.utils";
-import { validateRealMime } from "./validateRealMime";
+import { validateRealMime } from "../../validators/validateRealMime";
 import { logger } from "@/shared/utils/logging/logger";
 import { FileFetcherService } from "@/shared/services/fileFetcher.service";
 import { MimeConfig } from "../../constants/mimeExtensionMap";

@@ -3,7 +3,7 @@ import { OCRFactory } from "./ocr.factory";
 import { preprocessImage } from "./preprocessing";
 import { AppError } from "@/shared";
 // import { extractMetadataFromText } from "./extractors";
-import { validateSemanticMetadata } from "../validateSemanticMetadata";
+import { validateSemanticMetadata } from "../../validators/validateSemanticMetadata";
 
 export const OCRProcessor = async (buffer: Buffer) => {
   const primaryProvider = process.env.OCR_PROVIDER || "gcp";

@@ -1,4 +1,4 @@
-import { ExtractedInvoiceMetadata } from "./core/ocr.types";
+import { ExtractedInvoiceMetadata } from "../ocr/core/ocr.types";
 
 export function validateSemanticMetadata(meta: ExtractedInvoiceMetadata): boolean {
   if (!meta.title || meta.title.length < 3) return false;

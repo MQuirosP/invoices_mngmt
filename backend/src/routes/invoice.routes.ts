@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "@/modules/auth/auth.middleware";
-import { validateParams } from "@/shared/middleware/core/validateParams";
+import { validateParams } from "@/shared/validators/validateParams";
 import { requireRole } from "@/shared/middleware/features/requireRole";
 import { upload } from "@/shared/middleware/features/upload";
 import { InvoiceController } from "@/modules/invoice";

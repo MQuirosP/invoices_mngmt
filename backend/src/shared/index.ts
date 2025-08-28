@@ -1,12 +1,12 @@
 // 🔁 middleware
 export * from './middleware/core/errorHandler';
-export * from './middleware/core/validateParams';
+export * from './validators/validateParams';
 export * from './middleware/core/setupGlobalMiddleware';
 
 // ⚙️ utils
 export * from './utils/file/getFileExtension';
 export * from './utils/file/generateRandomFilename';
-export * from './utils/file/validateRealMime';
+export * from './validators/validateRealMime';
 export * from './utils/file/file.utils';
 export * from './utils/logging/logger';
 export * from './utils/security/requireUserId';

@@ -2,7 +2,7 @@ import vision from "@google-cloud/vision";
 import { OCRProvider } from "@/shared/ocr/core/ocr.types";
 import { extractMetadataFromText } from "@/shared/ocr/extractors/semanticExtractor";
 import { logger } from "@/shared/utils/logging/logger";
-import { extractWordsFromAnnotation, reconstructLinesFromWords } from "../../utils/reconstructLinesFromAnnotation";
+import { extractWordsFromAnnotation, reconstructLinesFromWords } from "../extractors/reconstructLinesFromAnnotation";
 
 const client = new vision.ImageAnnotatorClient();
 
