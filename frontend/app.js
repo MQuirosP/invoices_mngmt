@@ -3,6 +3,7 @@ const scanBtn = document.getElementById("scanBtn");
 const historyBtn = document.getElementById("historyBtn");
 const scanSection = document.getElementById("scanSection");
 const historySection = document.getElementById("historySection");
+const HOST = 'https://invoices-mngmt.onrender.com';
 
 scanBtn.addEventListener("click", () => {
   scanBtn.classList.add("active");
@@ -21,7 +22,7 @@ historyBtn.addEventListener("click", async () => {
   if (!token) return alert("Proporciona el token");
 
   try {
-    const res = await fetch("http://localhost:3000/api/invoices", {
+    const res = await fetch(`${HOST}/api/invoices`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`
@@ -52,7 +53,7 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   formData.append("file", file);
 
   try {
-    const res = await fetch("http://localhost:3000/api/invoices/ocrscan", {
+    const res = await fetch(`${HOST}/api/invoices/ocrscan`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`
@@ -129,7 +130,7 @@ async function deleteInvoice(id) {
   if (!confirm("¿Seguro que querés eliminar esta factura?")) return;
 
   try {
-    const res = await fetch(`http://localhost:3000/api/invoices/${id}`, {
+    const res = await fetch(`${HOST}/api/invoices/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`
