@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OCR Facturas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Gestión de Facturas OCR</h1>
+    <nav>
+      <button id="scanBtn" class="active">Escanear factura</button>
+      <button id="historyBtn">Ver historial</button>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="auth-section">
+      <input type="password" id="tokenInput" placeholder="Token de acceso" />
+    </div>
+
+    <div id="scanSection">
+      <div class="upload-section">
+        <input type="file" id="fileInput" accept="image/*" />
+        <button id="uploadBtn">Procesar imagen</button>
+      </div>
+
+      <div id="loading" class="hidden">Procesando imagen...</div>
+
+      <div id="results" class="hidden">
+        <h2>Factura extraída</h2>
+        <p><strong>Proveedor:</strong> <span id="provider"></span></p>
+        <p><strong>Fecha de emisión:</strong> <span id="issueDate"></span></p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Total</th>
+              <th>Garantía</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="historySection" class="hidden">
+      <h2>Historial de facturas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Proveedor</th>
+            <th>Fecha</th>
+            <th>Ítems</th>
+            <th>Adjunto</th>
+          </tr>
+        </thead>
+        <tbody id="historyTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
