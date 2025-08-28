@@ -19,38 +19,38 @@ model User {
 }
 
 model Invoice {
-  id          String       @id @default(uuid())
+  id          String        @id @default(uuid())
   userId      String
   title       String
   issueDate   DateTime
   expiration  DateTime
   provider    String
-  extracted   Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  extracted   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   attachments Attachment[]
-  user        User         @relation(fields: [userId], references: [id])
+  user        User          @relation(fields: [userId], references: [id])
   items       InvoiceItem[]
 }
 
 model InvoiceItem {
-  id              String   @id @default(cuid())
-  invoiceId       String
-  description     String
-  quantity        Int
-  unitPrice       Float
-  total           Float
+  id          String @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Int
+  unitPrice   Float
+  total       Float
 
-  // Garantía por ítem
-  warrantyDuration Int?
-  warrantyValidUntil  DateTime?
+  // Warranty per item
+  warrantyDuration   Int?
+  warrantyValidUntil DateTime?
 
-  warrantyNotes   String?  // notas adicionales o condiciones
+  warrantyNotes String? // additional notes or conditions
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model Attachment {
