@@ -77,45 +77,37 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   }
 });
 
-function renderResults(data) {
-  document.getElementById("provider").textContent = data.provider || "—";
-  document.getElementById("issueDate").textContent = formatDate(data.issueDate);
-
-  const tbody = document.getElementById("itemsTable");
-  tbody.innerHTML = "";
-
-  (data.items || []).forEach(item => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${item.description}</td>
-      <td>${item.quantity}</td>
-      <td>${item.unitPrice}</td>
-      <td>${item.total}</td>
-      <td>${item.warrantyNotes}</td>
-    `;
-    tbody.appendChild(row);
-  });
-
-  document.getElementById("results").classList.remove("hidden");
-}
-
 function renderHistory(invoices) {
   const tbody = document.getElementById("historyTable");
   tbody.innerHTML = "";
 
   invoices.forEach(inv => {
+    const attachmentUrl = inv.attachments?.[0]?.url || null;
+
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${inv.provider}</td>
       <td>${formatDate(inv.issueDate)}</td>
       <td>${inv.items?.length || 0}</td>
-      <td>${inv.attachments?.[0]?.url
-        ? `<a href="${inv.attachments[0].url}" target="_blank">Ver</a>`
-        : "—"}</td>
-      <td><button onclick="deleteInvoice('${inv.id}')">Eliminar</button></td>
+      <td>
+        ${attachmentUrl
+          ? `<button class="btn btn-sm btn-primary" onclick="showInvoice('${attachmentUrl}')">Ver</button>`
+          : "—"}
+      </td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="deleteInvoice('${inv.id}')">Eliminar</button>
+      </td>
     `;
     tbody.appendChild(row);
   });
+}
+
+function showInvoice(url) {
+  const img = document.getElementById("invoiceImage");
+  img.src = url;
+
+  const modal = new bootstrap.Modal(document.getElementById("invoiceModal"));
+  modal.show();
 }
 
 function formatDate(dateStr) {
