@@ -2,6 +2,8 @@ import { logger } from "@/shared/utils/logging/logger";
 import { OCRFactory } from "./ocr.factory";
 import { preprocessImage } from "./preprocessing";
 import { AppError } from "@/shared";
+// import { extractMetadataFromText } from "./extractors";
+import { validateSemanticMetadata } from "../validateSemanticMetadata";
 
 export const OCRProcessor = async (buffer: Buffer) => {
   const primaryProvider = process.env.OCR_PROVIDER || "gcp";
@@ -12,25 +14,28 @@ export const OCRProcessor = async (buffer: Buffer) => {
   const preprocessed = await preprocessImage(buffer);
 
   try {
-    const result = await primary.extract(preprocessed);
+    let result = await primary.extract(preprocessed);
 
-    if (fallbackEnabled && (result.confidence ?? 1) < confidenceThreshold) {
+    // ① Validación semántica primaria
+    if (!validateSemanticMetadata(result) ||
+        (fallbackEnabled && (result.confidence ?? 1) < confidenceThreshold)) {
       logger.warn({
         layer: "middleware",
         module: "ocr",
-        action: "OCR_CONFIDENCE_LOW",
+        action: "OCR_VALIDATION_OR_CONFIDENCE_LOW",
         provider: primaryProvider,
         confidence: result.confidence,
         threshold: confidenceThreshold,
       });
 
-      // fallback
+      // Fallback: reprocesar imagen con parámetros más agresivos
+      const altPreprocessed = await preprocessImage(buffer, { enhanceContrast: true, upscale: true });
       const fallback = OCRFactory.create(primaryProvider === "gcp" ? "tesseract" : "gcp");
-      const fallbackResult = await fallback.extract(preprocessed);
+      const fallbackResult = await fallback.extract(altPreprocessed);
 
-      // devuelve el que tenga mejor confianza
-      return (fallbackResult.confidence ?? 0) > (result.confidence ?? 0) 
-        ? fallbackResult 
+      // Escoge el mejor por confianza
+      result = (fallbackResult.confidence ?? 0) > (result.confidence ?? 0)
+        ? fallbackResult
         : result;
     }
 
