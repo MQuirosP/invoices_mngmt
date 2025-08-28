@@ -1,13 +1,14 @@
 import { matchWarrantyDuration } from "../patterns";
+import { normalizeTextLine } from "../patterns";
 
 export function extractWarranty(
   text: string,
   issueDate: Date
-): { duration?: number; validUntil?: Date } {
+): { duration?: number; validUntil?: Date; notes?: string } {
   const match = matchWarrantyDuration(text);
   if (!match) return {};
 
-  const { quantity, unit } = match;
+  const { quantity, unit, raw } = match;
 
   const duration =
     unit.startsWith("mes") ? quantity * 30 :
@@ -15,5 +16,7 @@ export function extractWarranty(
     quantity;
 
   const validUntil = new Date(issueDate.getTime() + duration * 86400000);
-  return { duration, validUntil };
+  const notes = normalizeTextLine(raw ?? text);
+
+  return { duration, validUntil, notes };
 }

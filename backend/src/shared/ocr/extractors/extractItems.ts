@@ -6,7 +6,7 @@ import {
   matchStructuredItem,
   normalizeNumericLine,
   regexPatterns,
-} from '@/shared/ocr/patterns/matchers';
+} from "@/shared/ocr/patterns/matchers";
 import { InvoiceItemInput } from "../core/ocr.types";
 
 export function extractItems(
@@ -18,7 +18,7 @@ export function extractItems(
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Classic item line case
+    // Classic item line
     if (isItemLine(line)) {
       const match = line.match(regexPatterns.itemLine)!;
       const [_, priceStr, qtyStr, totalStr] = match;
@@ -26,29 +26,30 @@ export function extractItems(
 
       const nextLines = lines.slice(i + 1, i + 4);
       const warrantyLine = nextLines.find(isWarrantyLine);
-      const { duration, validUntil } = warrantyLine
+      const { duration, validUntil, notes } = warrantyLine
         ? extractWarranty(warrantyLine, issueDate)
         : {};
 
       items.push({
         description,
-        quantity: parseInt(qtyStr),
+        quantity: parseInt(qtyStr, 10),
         unitPrice: parseFloat(priceStr.replace(",", "")),
         total: parseFloat(totalStr.replace(",", "")),
         warrantyDuration: duration ?? 0,
         warrantyValidUntil: validUntil ?? issueDate,
-        warrantyNotes: warrantyLine ?? "No warranty",
+        warrantyNotes: notes ?? "No warranty",
       });
 
       continue;
     }
 
+    // Structured item line
     const normalized = normalizeNumericLine(line);
     const structured = matchStructuredItem(normalized);
     if (structured) {
       const nextLines = lines.slice(i + 1, i + 3);
       const warrantyLine = nextLines.find(isWarrantyLine);
-      const { duration, validUntil } = warrantyLine
+      const { duration, validUntil, notes } = warrantyLine
         ? extractWarranty(warrantyLine, issueDate)
         : {};
 
@@ -61,17 +62,20 @@ export function extractItems(
         warrantyValidUntil: warrantyLine
           ? validUntil ?? new Date(issueDate.getTime() + 180 * 864e5)
           : issueDate,
-        warrantyNotes: warrantyLine ?? "No warranty",
+        warrantyNotes: notes ?? "No warranty",
       });
 
       continue;
     }
 
-    // Fallback descriptivo con garantía
+    // Descriptive fallback with warranty
     const nextLines = lines.slice(i + 1, i + 3);
     const warrantyLine = nextLines.find(isWarrantyLine);
     if (isDescriptiveLine(line) && warrantyLine) {
-      const { duration, validUntil } = extractWarranty(warrantyLine, issueDate);
+      const { duration, validUntil, notes } = extractWarranty(
+        warrantyLine,
+        issueDate
+      );
 
       items.push({
         description: line.trim(),
@@ -81,7 +85,7 @@ export function extractItems(
         warrantyDuration: duration ?? 180,
         warrantyValidUntil:
           validUntil ?? new Date(issueDate.getTime() + 180 * 864e5),
-        warrantyNotes: warrantyLine,
+        warrantyNotes: notes ?? "No warranty",
       });
     }
   }
