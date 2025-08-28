@@ -8,9 +8,9 @@ import path from "path";
 export function setupApp(): express.Express {
   const app = express();
 
-  app.use(express.static(path.join(__dirname, "../../frontend")));
+  app.use(express.static(path.join(__dirname, "../frontend")));
   app.get("/", (_req, res) => {
-    res.sendFile(path.join(__dirname, "../../frontend/index.html"));
+    res.sendFile(path.join(__dirname, "../frontend/index.html"));
   });
 
   // Setup global middleware
@@ -18,7 +18,6 @@ export function setupApp(): express.Express {
 
   // Main routes
   app.use("/api", routes);
-  
 
   // Error handler
   app.use(errorHandler);
