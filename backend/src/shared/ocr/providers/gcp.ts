@@ -17,7 +17,7 @@ export class GcpOCRProvider implements OCRProvider {
     const [result] = await client.documentTextDetection({ image: { content: buffer } });
     const annotation = result.fullTextAnnotation;
     if (!annotation) throw new Error("No fullTextAnnotation found");
-
+    const pageConfidence = annotation.pages?.[0]?.confidence ?? 1;
     const words = extractWordsFromAnnotation(annotation);
     const lines = reconstructLinesFromWords(words);
 
@@ -27,6 +27,6 @@ export class GcpOCRProvider implements OCRProvider {
       lineCount: lines.length,
     });
 
-    return extractMetadataFromText(lines.join("\n"));
+    return extractMetadataFromText(lines.join("\n"), pageConfidence);
   }
 }

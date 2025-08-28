@@ -10,7 +10,8 @@ import { logger } from "@/shared/utils/logging/logger";
 import { calculateExpirationFromItems } from "./extractExpirationFromItems";
 
 export function extractMetadataFromText(
-  text: string
+  text: string,
+  pageConfidence: number
 ): ExtractedInvoiceMetadata {
   const lines = text
     .split("\n")
@@ -44,6 +45,6 @@ export function extractMetadataFromText(
     duration,
     validUntil,
     items,
-    confidence: 1,
+    confidence: pageConfidence,
   };
 }

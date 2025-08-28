@@ -10,21 +10,33 @@ export class TesseractOCRProvider implements OCRProvider {
       context: "TESSERACT_OCR_PROVIDER",
       msg: "Using Tesseract.js",
     });
+
     const worker = await Tesseract.createWorker(["spa"]);
     await worker.reinitialize("spa");
     await worker.setParameters({
       tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK,
     });
-    const {
-      data: { text },
-    } = await worker.recognize(buffer);
+
+    const result = await worker.recognize(buffer);
     await worker.terminate();
+
+    const text = result.data.text;
+    const words = (result.data as any).words ?? [];
+
     if (!text) throw new Error("No text was extracted");
+
+    const avgConfidence =
+      words.length > 0
+        ? words.reduce((sum: number, word: { confidence: number }) => sum + word.confidence, 0) / words.length
+        : 1;
+
     logger.info({
       action: "OCR_TEXT_EXTRACTED",
       context: "TESSERACT_OCR_PROVIDER",
       length: text.length,
+      confidence: avgConfidence,
     });
-    return extractMetadataFromText(text);
+
+    return extractMetadataFromText(text, avgConfidence);
   }
 }
