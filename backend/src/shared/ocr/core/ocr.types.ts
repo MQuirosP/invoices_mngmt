@@ -10,6 +10,7 @@ export interface InvoiceItemInput {
 }
 
 export interface ExtractedInvoiceMetadata {
+  confidence?: number;
   expiration: Date;
   title: string;
   provider: string;

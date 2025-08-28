@@ -44,5 +44,6 @@ export function extractMetadataFromText(
     duration,
     validUntil,
     items,
+    confidence: 1,
   };
 }
