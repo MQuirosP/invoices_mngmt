@@ -22,9 +22,10 @@ export class GcpOCRProvider implements OCRProvider {
     const lines = reconstructLinesFromWords(words);
 
     logger.info({
-      action: "OCR_TEXT_RECONSTRUCTED",
+      action: "OCR_TEXT_EXTRACTED",
       context: "GCP_OCR_PROVIDER",
       lineCount: lines.length,
+      confidence: pageConfidence,
     });
 
     return extractMetadataFromText(lines.join("\n"), pageConfidence);
