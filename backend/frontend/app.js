@@ -20,17 +20,43 @@ loginBtn.addEventListener("click", () => {
   new bootstrap.Modal(document.getElementById("loginModal")).show();
 });
 
-confirmLoginBtn.addEventListener("click", () => {
-  token = tokenInput.value.trim();
-  if (!token) return showError("Token vacío");
+confirmLoginBtn.addEventListener("click", async () => {
+  const inputToken = tokenInput.value.trim();
+  if (!inputToken) return showError("Token vacío");
 
-  localStorage.setItem("authToken", token);
-  loginBtn.classList.add("d-none");
-  logoutBtn.classList.remove("d-none");
-  bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+  try {
+    const res = await fetch(`${HOST}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${inputToken}`
+      }
+    });
+
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || "Login fallido");
+
+    token = inputToken;
+    localStorage.setItem("authToken", token);
+    loginBtn.classList.add("d-none");
+    logoutBtn.classList.remove("d-none");
+    bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+  } catch (err) {
+    showError("Error al iniciar sesión: " + err.message);
+  }
 });
 
-logoutBtn.addEventListener("click", () => {
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await fetch(`${HOST}/api/auth/logout`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  } catch (err) {
+    console.warn("Error al cerrar sesión:", err.message);
+  }
+
   localStorage.removeItem("authToken");
   token = "";
   loginBtn.classList.remove("d-none");
@@ -50,7 +76,7 @@ historyBtn.addEventListener("click", async () => {
   scanSection.classList.add("hidden");
   historySection.classList.remove("hidden");
 
-  const token = tokenInput.value.trim();
+  const token = localStorage.getItem("authToken") || "";
   if (!token) return showError("Proporciona el token");
 
   try {
