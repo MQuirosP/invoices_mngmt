@@ -20,7 +20,7 @@ export function matchStructuredItem(line: string): {
 } | null {
   const match = line.match(regexPatterns.structuredItemLine);
   if (!match) return null;
-  const [, qtyStr, desc, priceStr, totalStr] = match;
+  const [qtyStr, desc, priceStr, totalStr] = match;
 
   return {
     quantity: parseFloat(qtyStr.replace(",", ".")),
@@ -62,7 +62,7 @@ export function matchWarrantyDuration(
   const start = cleanedLower.indexOf(match[0]);
   const raw =
     start >= 0
-      ? cleanedOriginal.substr(start, match[0].length)
+      ? cleanedOriginal.slice(start, start + match[0].length)
       : match[0];
   return { quantity, unit, raw };
 }
