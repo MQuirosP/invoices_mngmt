@@ -7,7 +7,7 @@
     "test": "jest",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --project tsconfig.dev.json --respawn --transpile-only --require tsconfig-paths/register src/server.ts",
-    "build": "tsc --project tsconfig.build.json && tsc-alias",
+    "build": "tsc --project tsconfig.build.json && tsc-alias && cp -r frontend dist/frontend",
     "prisma": "prisma"
   },
   "keywords": [],
