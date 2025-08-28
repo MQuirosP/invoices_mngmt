@@ -1,4 +1,3 @@
-// reconstructLinesFromAnnotation.ts
 type Word = {
   text: string;
   x: number;

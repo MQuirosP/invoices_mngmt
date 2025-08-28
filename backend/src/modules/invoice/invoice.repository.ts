@@ -1,5 +1,5 @@
 import { prisma } from "@/config/prisma";
-import { Attachment, Invoice, InvoiceItem, User } from "@prisma/client";
+import { Attachment, Invoice, InvoiceItem, Prisma, User } from "@prisma/client";
 
 export type FullInvoice = Invoice & {
   items: InvoiceItem[];
@@ -37,15 +37,18 @@ export const InvoiceRepository = {
     });
   },
 
-  create: async (data: {
-    userId: string;
-    title: string;
-    issueDate: Date;
-    expiration: Date;
-    provider: string;
-    extracted?: boolean;
-  }): Promise<Invoice> => {
-    return prisma.invoice.create({
+  create: async (
+    tx: Prisma.TransactionClient,
+    data: {
+      userId: string;
+      title: string;
+      issueDate: Date;
+      expiration: Date;
+      provider: string;
+      extracted?: boolean;
+    }
+  ): Promise<Invoice> => {
+    return tx.invoice.create({
       data,
       include: {
         items: true,

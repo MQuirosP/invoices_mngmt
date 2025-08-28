@@ -5,6 +5,8 @@ export const regexPatterns = {
   
   itemLine: /([\d.,]+)\s+(\d+)\s+([\d.,]+)$/, // clásico
   warrantyKeywords: /(garant[ií]a|vigencia|válida|cubre)/i,
+  warrantyDuration: /(?:garant[ií]a|vigencia|válida|cubre)\s*(?:por\s*)?(\d+)\s*(d[ií]as?|mes(?:es)?|a(?:ños?)?)/i,
+  fallbackDuration: /(\d+)\s*(d[ií]as?|mes(?:es)?|a(?:ños?)?)/i,
   descriptiveKeywords:
     /\b(pantalla|batería|estuche|tub|mini|argom|hp|orange|producto|servicio)\b/i,
 

@@ -16,7 +16,7 @@ export const InvoiceService = {
     file?: Express.Multer.File
   ): Promise<{ invoiceId: string }> => {
     const invoice = await prisma.$transaction(async (tx) => {
-      const created = await invoiceRepo.create({
+      const created = await invoiceRepo.create(tx, {
         userId,
         title: metadata.title,
         issueDate: metadata.issueDate,
@@ -63,8 +63,6 @@ export const InvoiceService = {
     return invoices;
   },
 
-  
-
   deleteInvoiceById: async (
     invoiceId: string,
     userId: string,
@@ -79,7 +77,7 @@ export const InvoiceService = {
     });
 
     const invoice = await getInvoiceById(invoiceId, userId);
-    
+
     if (!invoice) {
       logger.warn({
         layer: "service",
