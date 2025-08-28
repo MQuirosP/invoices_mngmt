@@ -19,6 +19,21 @@
         <button id="historyBtn">Ver historial</button>
       </nav>
     </header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+      <a class="navbar-brand" href="#">OCR Facturas</a>
+      <div class="navbar-nav">
+        <button id="scanBtn" class="btn btn-outline-light me-2">
+          Escanear
+        </button>
+        <button id="historyBtn" class="btn btn-outline-light me-2">
+          Historial
+        </button>
+      </div>
+      <div class="ms-auto">
+        <button id="loginBtn" class="btn btn-success me-2">Login</button>
+        <button id="logoutBtn" class="btn btn-danger d-none">Logout</button>
+      </div>
+    </nav>
 
     <div class="container">
       <div class="auth-section">
@@ -27,8 +42,15 @@
 
       <div id="scanSection">
         <div class="upload-section">
-          <input type="file" id="fileInput" accept="image/*" />
-          <button id="uploadBtn">Procesar imagen</button>
+          <input
+            type="file"
+            id="fileInput"
+            class="form-control mb-2"
+            accept="image/*"
+          />
+          <button id="uploadBtn" class="btn btn-success">
+            Procesar imagen
+          </button>
         </div>
 
         <div id="loading" class="hidden">Procesando imagen...</div>
@@ -90,6 +112,57 @@
           <div class="modal-body text-center">
             <img id="invoiceImage" src="" alt="Factura" class="img-fluid" />
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="loginModal"
+      tabindex="-1"
+      aria-labelledby="loginModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Autenticación</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <input
+              type="password"
+              id="tokenInput"
+              class="form-control"
+              placeholder="Token de acceso"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="confirmLoginBtn" class="btn btn-primary">
+              Ingresar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-danger text-white">
+          <div class="modal-header">
+            <h5 class="modal-title">Error</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body" id="errorMessage"></div>
         </div>
       </div>
     </div>

@@ -3,7 +3,39 @@ const scanBtn = document.getElementById("scanBtn");
 const historyBtn = document.getElementById("historyBtn");
 const scanSection = document.getElementById("scanSection");
 const historySection = document.getElementById("historySection");
+
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const confirmLoginBtn = document.getElementById("confirmLoginBtn");
+
 const HOST = 'https://invoices-mngmt.onrender.com';
+let token = localStorage.getItem("authToken") || "";
+
+if (token) {
+  loginBtn.classList.add("d-none");
+  logoutBtn.classList.remove("d-none");
+}
+
+loginBtn.addEventListener("click", () => {
+  new bootstrap.Modal(document.getElementById("loginModal")).show();
+});
+
+confirmLoginBtn.addEventListener("click", () => {
+  token = tokenInput.value.trim();
+  if (!token) return showError("Token vacío");
+
+  localStorage.setItem("authToken", token);
+  loginBtn.classList.add("d-none");
+  logoutBtn.classList.remove("d-none");
+  bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+});
+
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("authToken");
+  token = "";
+  loginBtn.classList.remove("d-none");
+  logoutBtn.classList.add("d-none");
+});
 
 scanBtn.addEventListener("click", () => {
   scanBtn.classList.add("active");
@@ -19,7 +51,7 @@ historyBtn.addEventListener("click", async () => {
   historySection.classList.remove("hidden");
 
   const token = tokenInput.value.trim();
-  if (!token) return alert("Proporciona el token");
+  if (!token) return showError("Proporciona el token");
 
   try {
     const res = await fetch(`${HOST}/api/invoices`, {
@@ -32,7 +64,7 @@ historyBtn.addEventListener("click", async () => {
     const json = await res.json();
     renderHistory(json.data || []);
   } catch (err) {
-    alert("Error al cargar historial: " + err.message);
+    showError("Error al cargar historial: " + err.message);
   }
 });
 
@@ -42,7 +74,7 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   const token = tokenInput.value.trim();
 
   if (!file || !token) {
-    alert("Selecciona una imagen y proporciona el token");
+    showError("Selecciona una imagen y proporciona el token");
     return;
   }
 
@@ -65,13 +97,13 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
     const invoice = json.data;
 
     if (!invoice || !invoice.items) {
-      alert("No se pudo extraer la factura");
+      showError("No se pudo extraer la factura");
       return;
     }
 
     renderResults(invoice);
   } catch (err) {
-    alert("Error al procesar la imagen: " + err.message);
+    showError("Error al procesar la imagen: " + err.message);
   } finally {
     document.getElementById("loading").classList.add("hidden");
   }
@@ -117,7 +149,7 @@ function formatDate(dateStr) {
 
 async function deleteInvoice(id) {
   const token = tokenInput.value.trim();
-  if (!token) return alert("Token requerido para eliminar");
+  if (!token) return showError("Token requerido para eliminar");
 
   if (!confirm("¿Seguro que querés eliminar esta factura?")) return;
 
@@ -131,9 +163,36 @@ async function deleteInvoice(id) {
 
     if (!res.ok) throw new Error("No se pudo eliminar");
 
-    alert("Factura eliminada");
+    showError("Factura eliminada");
     historyBtn.click(); // Recarga historial
   } catch (err) {
-    alert("Error al eliminar: " + err.message);
+    showError("Error al eliminar: " + err.message);
   }
+}
+
+function renderResults(data) {
+  document.getElementById("provider").textContent = data.provider || "—";
+  document.getElementById("issueDate").textContent = formatDate(data.issueDate);
+
+  const tbody = document.getElementById("itemsTable");
+  tbody.innerHTML = "";
+
+  (data.items || []).forEach(item => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.description}</td>
+      <td>${item.quantity}</td>
+      <td>${item.unitPrice}</td>
+      <td>${item.total}</td>
+      <td>${item.warrantyNotes}</td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  document.getElementById("results").classList.remove("hidden");
+}
+
+function showError(msg) {
+  document.getElementById("errorMessage").textContent = msg;
+  new bootstrap.Modal(document.getElementById("errorModal")).show();
 }
