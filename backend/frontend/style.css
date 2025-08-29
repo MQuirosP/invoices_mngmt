@@ -46,6 +46,30 @@ h1, h2, h3 {
   margin-top: 2rem;
 }
 
+.file-chip {
+  background-color: #d4edda; /* verde pastel */
+  color: #155724; /* texto verde oscuro */
+  border: 1px solid #c3e6cb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.file-chip .btn-close {
+  filter: none;
+  color: #e4081b; /* rojo pastel */
+  border-radius: 50%;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.file-chip .btn-close:hover {
+  background-color: #f5c6cb;
+}
+
 /* Results and history tables */
 table {
   margin-top: 1rem;
@@ -178,7 +202,7 @@ footer {
 }
 
 #fileChipContainer {
-  min-height: 60px;
+  min-height: 80px;
   max-width: 80%;
 }
 .btn-close {

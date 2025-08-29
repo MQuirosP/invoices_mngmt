@@ -488,8 +488,7 @@ function renderFileChips() {
 
   Array.from(fileBuffer.files).forEach((file, index) => {
     const chip = document.createElement("span");
-    chip.className =
-      "badge bg-light text-dark border me-2 mb-1 d-flex align-items-center";
+    chip.className = "file-chip";
     chip.style.padding = "0.5rem 0.75rem";
 
     chip.innerHTML = `
