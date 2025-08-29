@@ -48,7 +48,7 @@ model InvoiceItem {
   warrantyNotes String? // additional notes or conditions
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @defsult(now())
+  updatedAt DateTime @default(now())
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
