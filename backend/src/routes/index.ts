@@ -5,6 +5,7 @@ import { redis } from "../lib/redis";
 import { prisma } from "../config/prisma";
 import authRouter from "./auth.routes";
 import viewImageRouter from "./view-image";
+import { authenticate } from "../modules/auth";
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.use("/auth", authRouter);
 // Invoice module
 router.use("/invoices", invoiceRouter);
 
-router.use("/view-image", viewImageRouter);
+router.use("/view-image", authenticate, viewImageRouter);
 
 // Keep-alive ping endpoint
 router.get("/ping", async (req, res) => {
