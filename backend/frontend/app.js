@@ -180,9 +180,9 @@ function renderHistory(invoices) {
              onclick='showInvoiceDetails(${JSON.stringify(inv)})'></i>
 
           ${
-            inv.attachments?.[0]?.url
-              ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
-                 onclick="window.open('${inv.attachments[0].url}', '_blank')"></i>`
+            inv.attachments?.[0]?.id
+              ? `<i class="fas fa-image text-secondary" role="button" title="View image"
+       onclick="window.open('/view-image/${inv.id}', '_blank')"></i>`
               : ""
           }
 
