@@ -52,7 +52,8 @@ logoutBtn.addEventListener("click", async () => {
   document.getElementById("welcomeSection").classList.remove("hidden");
   document.getElementById("provider").textContent = "";
   document.getElementById("issueDate").textContent = "";
-  document.getElementById("itemsTable").innerHTML = "";
+  const itemsList = document.getElementById("itemsList");
+  if (itemsList) itemsList.innerHTML = "";
   document.getElementById("results").classList.add("hidden");
 
   // Limpiar sesión
@@ -72,7 +73,8 @@ scanBtn.addEventListener("click", () => {
   document.getElementById("results").classList.add("hidden");
   document.getElementById("provider").textContent = "";
   document.getElementById("issueDate").textContent = "";
-  document.getElementById("itemsTable").innerHTML = "";
+  const itemsList = document.getElementById("itemsList");
+  if (itemsList) itemsList.innerHTML = "";
   document.getElementById("fileInput").value = "";
   document.getElementById("clearFileBtn")?.classList.add("d-none");
 });
@@ -97,7 +99,8 @@ historyBtn.addEventListener("click", async () => {
     document.getElementById("results").classList.add("hidden");
     document.getElementById("provider").textContent = "";
     document.getElementById("issueDate").textContent = "";
-    document.getElementById("itemsTable").innerHTML = "";
+    const itemsList = document.getElementById("itemsList");
+    if (itemsList) itemsList.innerHTML = "";
     document.getElementById("fileInput").value = "";
     document.getElementById("clearFileBtn")?.classList.add("d-none");
 
@@ -421,7 +424,8 @@ function updateUIBasedOnAuth() {
     .classList.toggle("hidden", !isLoggedIn);
   document.getElementById("provider").textContent = "";
   document.getElementById("issueDate").textContent = "";
-  document.getElementById("itemsTable").innerHTML = "";
+  const itemsList = document.getElementById("itemsList");
+  if (itemsList) itemsList.innerHTML = "";
 
   const name = localStorage.getItem("userFullname");
   const greeting = document.getElementById("userGreeting");
