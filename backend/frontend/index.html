@@ -19,7 +19,7 @@
   <body>
     <header>
       <!-- 🧭 Navbar principal -->
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 mb-4">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">OCR Facturas</a>
 
@@ -136,9 +136,10 @@
                     <span id="issueDate"></span>
                   </p>
 
-                  <div id="itemsList" class="invoice-items"></div>
+                  <div id="itemsList" class="invoice-items mb-3"></div>
                 </div>
               </section>
+
               <!-- 📜 Sección de historial -->
               <section id="historySection" class="hidden">
                 <h2>Historial de facturas</h2>
@@ -147,6 +148,7 @@
             </main>
           </div>
         </div>
+
         <!-- 🧾 Modal: Ver desglose -->
         <div
           class="modal fade"
@@ -181,6 +183,7 @@
             </div>
           </div>
         </div>
+
         <!-- 🧑 Modal: Registro -->
         <div
           class="modal fade"
@@ -238,6 +241,7 @@
             </div>
           </div>
         </div>
+
         <!-- 🔐 Modal: Login -->
         <div
           class="modal fade"
@@ -283,6 +287,7 @@
             </div>
           </div>
         </div>
+
         <!-- ⚠️ Modal: Error -->
         <div
           class="modal fade"
@@ -304,6 +309,7 @@
             </div>
           </div>
         </div>
+
         <!-- ✅ Modal: Éxito -->
         <div
           class="modal fade"
@@ -325,6 +331,7 @@
             </div>
           </div>
         </div>
+
         <!-- 🗑️ Modal: Confirmar eliminación -->
         <div
           class="modal fade"
@@ -367,7 +374,7 @@
       </main>
     </div>
 
-    <footer class="footer-custom text-center py-3 mt-5">
+    <footer class="footer-custom text-center py-3">
       <small><i class="fas fa-file-invoice text-light me-1"></i> OCR Facturas © 2025 — Gestión inteligente de documentos</small>
     </footer>
 

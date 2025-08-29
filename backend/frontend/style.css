@@ -279,7 +279,7 @@ footer {
     flex-direction: column;
     height: calc(100vh - 120px); /* navbar + footer */
     /* margin-top: 56px; */
-    margin-bottom: 40px;
+    /* margin-bottom: 40px; */
   }
 
   aside {
