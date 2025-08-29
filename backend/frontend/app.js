@@ -9,6 +9,7 @@ const logoutBtn = document.getElementById("logoutBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
 
 const fileInput = document.getElementById("fileInput");
+const fileList = document.getElementById("fileList");
 const clearFileBtn = document.getElementById("clearFileBtn");
 if (clearFileBtn) {
   clearFileBtn.classList.add("d-none");
@@ -429,8 +430,32 @@ function showSuccess(msg) {
 }
 
 fileInput.addEventListener("change", () => {
-  clearFileBtn.classList.toggle("d-none", !fileInput.files.length);
+  fileList.innerHTML = "";
+
+  Array.from(fileInput.files).forEach((file, index) => {
+    const fileItem = document.createElement("div");
+    fileItem.className = "d-flex align-items-center justify-content-between bg-light border rounded px-2 py-1 mb-1";
+
+    fileItem.innerHTML = `
+      <span class="text-truncate me-2" style="max-width: 80%;">${file.name}</span>
+      <button class="btn btn-sm btn-outline-danger" aria-label="Eliminar archivo">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+
+    fileItem.querySelector("button").addEventListener("click", () => {
+      const dt = new DataTransfer();
+      Array.from(fileInput.files).forEach((f, i) => {
+        if (i !== index) dt.items.add(f);
+      });
+      fileInput.files = dt.files;
+      fileInput.dispatchEvent(new Event("change")); // Re-render
+    });
+
+    fileList.appendChild(fileItem);
+  });
 });
+
 
 clearFileBtn.addEventListener("click", () => {
   fileInput.value = "";

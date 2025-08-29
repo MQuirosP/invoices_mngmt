@@ -87,15 +87,25 @@
               <div id="uploadControls" class="upload-section mb-4">
                 <div id="fileWrapper" class="position-relative">
                   <input
-                  type="file"
-                  id="fileInput"
-                  class="form-control mb-2"
-                  accept="image/*"
+                    type="file"
+                    id="fileInput"
+                    class="form-control"
+                    accept="image/*"
+                    multiple
                   />
-                  <button id="uploadBtn" class="btn btn-success mt-2" aria-label="Procesar imagen">Procesar imagen</button>
+                  <div id="fileList" class="mt-2"></div>
+
+                  <button
+                    id="uploadBtn"
+                    class="btn btn-success mt-2"
+                    aria-label="Procesar imagen"
+                  >
+                    Procesar imagen
+                  </button>
                   <button
                     id="clearFileBtn"
-                    class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 me-2 mt-2 d-none" aria-label="Limpiar archivo"
+                    class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 me-2 mt-2 d-none"
+                    aria-label="Limpiar archivo"
                   >
                     <i class="fas fa-times"></i>
                   </button>
