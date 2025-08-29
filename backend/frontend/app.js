@@ -322,7 +322,7 @@ document
 
       // Mostrar saludo
       const greeting = document.getElementById("userGreeting");
-      greeting.textContent = `Hola, ${user.fullname}`;
+      greeting.textContent = `¡Hola!, ${user.fullname}`;
       greeting.classList.remove("d-none");
 
       loginBtn.classList.add("d-none");
