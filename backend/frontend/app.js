@@ -29,6 +29,10 @@ logoutBtn.addEventListener("click", async () => {
       },
     });
     document.getElementById("userGreeting").classList.add("d-none");
+    document.getElementById("historySection").classList.add("hidden");
+    document.getElementById("scanSection").classList.add("hidden");
+    document.getElementById("welcomeSection").classList.remove("hidden");
+    updateUIBasedOnAuth();
   } catch (err) {
     console.warn("Error al cerrar sesión:", err.message);
   }
@@ -279,11 +283,38 @@ document
       bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
 
       showSuccess(json.message || "Inicio de sesión exitoso");
+      updateUIBasedOnAuth();
     } catch (err) {
       showError("Error al iniciar sesión: " + err.message);
     }
   });
-  
+
+function updateUIBasedOnAuth() {
+  const isLoggedIn = !!localStorage.getItem("authToken");
+
+  document.getElementById("scanBtn").classList.toggle("d-none", !isLoggedIn);
+  document.getElementById("historyBtn").classList.toggle("d-none", !isLoggedIn);
+  document.getElementById("loginBtn").classList.toggle("d-none", isLoggedIn);
+  document.getElementById("logoutBtn").classList.toggle("d-none", !isLoggedIn);
+  document.getElementById("registerBtn").classList.toggle("d-none", isLoggedIn);
+  document
+    .getElementById("welcomeSection")
+    .classList.toggle("hidden", isLoggedIn);
+  document
+    .getElementById("scanSection")
+    .classList.toggle("hidden", !isLoggedIn);
+  document.getElementById("historySection").classList.add("hidden"); // Siempre ocultar al inicio
+
+  const name = localStorage.getItem("userFullname");
+  const greeting = document.getElementById("userGreeting");
+  if (isLoggedIn && name) {
+    greeting.textContent = `Hola, ${name}`;
+    greeting.classList.remove("d-none");
+  } else {
+    greeting.classList.add("d-none");
+  }
+}
+
 function showSuccess(msg) {
   const modalEl = document.getElementById("errorModal");
   const content = modalEl.querySelector(".modal-content");
