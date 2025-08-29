@@ -28,6 +28,7 @@ logoutBtn.addEventListener("click", async () => {
         Authorization: `Bearer ${token}`,
       },
     });
+    document.getElementById("userGreeting").classList.add("d-none");
   } catch (err) {
     console.warn("Error al cerrar sesión:", err.message);
   }
@@ -240,32 +241,49 @@ document
     }
   });
 
-  document.getElementById("confirmLoginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
+document
+  .getElementById("confirmLoginBtn")
+  .addEventListener("click", async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
 
-  if (!email || !password) return showError("Completa los campos");
+    if (!email || !password) return showError("Completa los campos");
 
-  try {
-    const res = await fetch(`${HOST}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const res = await fetch(`${HOST}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const json = await res.json();
-    if (!json.success || !json.token) throw new Error(json.message || "Login fallido");
+      const json = await res.json();
+      const user = json.data;
 
-    token = json.token;
-    localStorage.setItem("authToken", token);
-    loginBtn.classList.add("d-none");
-    logoutBtn.classList.remove("d-none");
-    bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
-  } catch (err) {
-    showError("Error al iniciar sesión: " + err.message);
-  }
-});
+      if (!json.success || !user?.token)
+        throw new Error(json.message || "Login fallido");
 
+      // Guardar token y datos del usuario
+      token = user.token;
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("userFullname", user.fullname);
+      localStorage.setItem("userEmail", user.email);
+      localStorage.setItem("userRole", user.role);
+
+      // Mostrar saludo
+      const greeting = document.getElementById("userGreeting");
+      greeting.textContent = `Hola, ${user.fullname}`;
+      greeting.classList.remove("d-none");
+
+      loginBtn.classList.add("d-none");
+      logoutBtn.classList.remove("d-none");
+      bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+
+      showSuccess(json.message || "Inicio de sesión exitoso");
+    } catch (err) {
+      showError("Error al iniciar sesión: " + err.message);
+    }
+  });
+  
 function showSuccess(msg) {
   const modalEl = document.getElementById("errorModal");
   const content = modalEl.querySelector(".modal-content");

@@ -16,13 +16,27 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 mb-4">
       <a class="navbar-brand" href="#">OCR Facturas</a>
       <div class="navbar-nav">
-        <button id="scanBtn" class="btn btn-outline-light me-2">Escanear</button>
-        <button id="historyBtn" class="btn btn-outline-light me-2">Historial</button>
-        <button id="registerBtn" class="btn btn-outline-info me-2">Registro</button>
+        <button id="scanBtn" class="btn btn-outline-light me-2">
+          Escanear
+        </button>
+        <button id="historyBtn" class="btn btn-outline-light me-2">
+          Historial
+        </button>
       </div>
       <div class="ms-auto">
         <button id="loginBtn" class="btn btn-success me-2">Login</button>
         <button id="logoutBtn" class="btn btn-danger d-none">Logout</button>
+        <button id="registerBtn" class="btn btn-outline-info me-2">
+          Registro
+        </button>
+        <div class="ms-auto d-flex align-items-center">
+          <button id="loginBtn" class="btn btn-success me-2">Login</button>
+          <button id="logoutBtn" class="btn btn-danger d-none">Logout</button>
+          <span
+            id="userGreeting"
+            class="text-light fw-semibold ms-3 d-none"
+          ></span>
+        </div>
       </div>
     </nav>
 
@@ -32,8 +46,15 @@
       <section id="scanSection">
         <h2>Escanear factura</h2>
         <div class="upload-section mb-4">
-          <input type="file" id="fileInput" class="form-control mb-2" accept="image/*" />
-          <button id="uploadBtn" class="btn btn-success">Procesar imagen</button>
+          <input
+            type="file"
+            id="fileInput"
+            class="form-control mb-2"
+            accept="image/*"
+          />
+          <button id="uploadBtn" class="btn btn-success">
+            Procesar imagen
+          </button>
         </div>
         <div id="loading" class="hidden">Procesando imagen...</div>
 
@@ -75,12 +96,23 @@
     </div>
 
     <!-- 🧾 Modal: Ver factura -->
-    <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="invoiceModal"
+      tabindex="-1"
+      aria-labelledby="invoiceModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="invoiceModalLabel">Factura adjunta</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
           </div>
           <div class="modal-body text-center">
             <img id="invoiceImage" src="" alt="Factura" class="img-fluid" />
@@ -90,40 +122,100 @@
     </div>
 
     <!-- 🧑 Modal: Registro -->
-    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="registerModal"
+      tabindex="-1"
+      aria-labelledby="registerModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Registro de usuario</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
           </div>
           <div class="modal-body">
-            <input type="email" id="registerEmail" class="form-control mb-2" placeholder="Correo electrónico" />
-            <input type="text" id="registerFullname" class="form-control mb-2" placeholder="Nombre completo" />
-            <input type="password" id="registerPassword" class="form-control mb-2" placeholder="Contraseña" />
-            <input type="password" id="registerConfirm" class="form-control" placeholder="Confirmar contraseña" />
+            <input
+              type="email"
+              id="registerEmail"
+              class="form-control mb-2"
+              placeholder="Correo electrónico"
+            />
+            <input
+              type="text"
+              id="registerFullname"
+              class="form-control mb-2"
+              placeholder="Nombre completo"
+            />
+            <input
+              type="password"
+              id="registerPassword"
+              class="form-control mb-2"
+              placeholder="Contraseña"
+            />
+            <input
+              type="password"
+              id="registerConfirm"
+              class="form-control"
+              placeholder="Confirmar contraseña"
+            />
           </div>
           <div class="modal-footer">
-            <button type="button" id="confirmRegisterBtn" class="btn btn-primary">Registrarse</button>
+            <button
+              type="button"
+              id="confirmRegisterBtn"
+              class="btn btn-primary"
+            >
+              Registrarse
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 🔐 Modal: Login -->
-    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="loginModal"
+      tabindex="-1"
+      aria-labelledby="loginModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Iniciar sesión</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
           </div>
           <div class="modal-body">
-            <input type="email" id="loginEmail" class="form-control mb-2" placeholder="Correo electrónico" />
-            <input type="password" id="loginPassword" class="form-control" placeholder="Contraseña" />
+            <input
+              type="email"
+              id="loginEmail"
+              class="form-control mb-2"
+              placeholder="Correo electrónico"
+            />
+            <input
+              type="password"
+              id="loginPassword"
+              class="form-control"
+              placeholder="Contraseña"
+            />
           </div>
           <div class="modal-footer">
-            <button type="button" id="confirmLoginBtn" class="btn btn-primary">Ingresar</button>
+            <button type="button" id="confirmLoginBtn" class="btn btn-primary">
+              Ingresar
+            </button>
           </div>
         </div>
       </div>
@@ -135,7 +227,11 @@
         <div class="modal-content bg-danger text-white">
           <div class="modal-header">
             <h5 class="modal-title">Error</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
           </div>
           <div class="modal-body" id="errorMessage"></div>
         </div>
