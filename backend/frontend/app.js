@@ -145,7 +145,11 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   } catch (err) {
     showError("Error al procesar la imagen: " + err.message);
   } finally {
-    fileInput.value = ""; // Limpia el campo
+    fileInput.value = "";
+    fileBuffer.items.clear();
+    fileInput.files = fileBuffer.files;
+    renderFileChips();
+
     document.getElementById("clearFileBtn")?.classList.add("d-none");
     document.getElementById("loading").classList.add("hidden");
   }
@@ -482,6 +486,7 @@ function renderFileChips() {
 function updateUIBasedOnAuth() {
   const isLoggedIn = !!localStorage.getItem("authToken");
 
+  // Secciones
   document
     .getElementById("welcomeSection")
     .classList.toggle("hidden", isLoggedIn);
@@ -489,6 +494,23 @@ function updateUIBasedOnAuth() {
     .getElementById("scanSection")
     .classList.toggle("hidden", !isLoggedIn);
   document.getElementById("historySection").classList.add("hidden");
+
+  // Navbar buttons
+  document.getElementById("scanBtn").classList.toggle("d-none", !isLoggedIn);
+  document.getElementById("historyBtn").classList.toggle("d-none", !isLoggedIn);
+  document.getElementById("logoutBtn").classList.toggle("d-none", !isLoggedIn);
+  document.getElementById("loginBtn").classList.toggle("d-none", isLoggedIn);
+  document.getElementById("registerBtn").classList.toggle("d-none", isLoggedIn);
+
+  // Saludo opcional
+  const greeting = document.getElementById("userGreeting");
+  const username = localStorage.getItem("username"); // si lo guardás en login
+  if (isLoggedIn && username) {
+    greeting.textContent = `Hola, ${username}`;
+    greeting.classList.remove("d-none");
+  } else {
+    greeting.classList.add("d-none");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
