@@ -8,6 +8,9 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
 
+const fileInput = document.getElementById("fileInput");
+const clearFileBtn = document.getElementById("clearFileBtn");
+
 let pendingDeleteId = null;
 
 const HOST = "https://invoices-mngmt.onrender.com";
@@ -53,6 +56,7 @@ logoutBtn.addEventListener("click", async () => {
 });
 
 scanBtn.addEventListener("click", () => {
+  localStorage.setItem("activeView", "scan");
   scanBtn.classList.add("active");
   historyBtn.classList.remove("active");
   scanSection.classList.remove("hidden");
@@ -60,6 +64,7 @@ scanBtn.addEventListener("click", () => {
 });
 
 historyBtn.addEventListener("click", async () => {
+  localStorage.setItem("activeView", "history");
   scanBtn.classList.remove("active");
   historyBtn.classList.add("active");
   scanSection.classList.add("hidden");
@@ -75,6 +80,10 @@ historyBtn.addEventListener("click", async () => {
         Authorization: `Bearer ${token}`,
       },
     });
+    document.getElementById("results").classList.add("hidden");
+    document.getElementById("provider").textContent = "";
+    document.getElementById("issueDate").textContent = "";
+    document.getElementById("itemsTable").innerHTML = "";
 
     const json = await res.json();
     renderHistory(json.data || []);
@@ -120,6 +129,7 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   } catch (err) {
     showError("Error al procesar la imagen: " + err.message);
   } finally {
+    fileInput.value = ""; // Limpia el campo
     document.getElementById("loading").classList.add("hidden");
   }
 });
@@ -406,4 +416,19 @@ function showSuccess(msg) {
   }, 3000);
 }
 
+fileInput.addEventListener("change", () => {
+  clearFileBtn.classList.toggle("d-none", !fileInput.files.length);
+});
+
+clearFileBtn.addEventListener("click", () => {
+  fileInput.value = "";
+  clearFileBtn.classList.add("d-none");
+});
+
 updateUIBasedOnAuth();
+const activeView = localStorage.getItem("activeView");
+if (activeView === "history") {
+  historyBtn.click();
+} else if (activeView === "scan") {
+  scanBtn.click();
+}

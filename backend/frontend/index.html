@@ -85,15 +85,20 @@
             <section id="scanSection" class="hidden">
               <h2>Escanear factura</h2>
               <div id="uploadControls" class="upload-section mb-4">
-                <input
-                  type="file"
-                  id="fileInput"
-                  class="form-control mb-2"
-                  accept="image/*"
-                />
-                <button id="uploadBtn" class="btn btn-success">
-                  Procesar imagen
-                </button>
+                <div id="fileWrapper" class="position-relative">
+                  <input
+                    type="file"
+                    id="fileInput"
+                    class="form-control mb-2"
+                    accept="image/*"
+                  />
+                  <button
+                    id="clearFileBtn"
+                    class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 me-2 mt-2 d-none"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
               </div>
               <div id="loading" class="text-center hidden">
                 <div class="spinner-border text-primary" role="status"></div>
