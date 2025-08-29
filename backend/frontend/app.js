@@ -20,31 +20,6 @@ loginBtn.addEventListener("click", () => {
   new bootstrap.Modal(document.getElementById("loginModal")).show();
 });
 
-confirmLoginBtn.addEventListener("click", async () => {
-  const inputToken = tokenInput.value.trim();
-  if (!inputToken) return showError("Token vacío");
-
-  try {
-    const res = await fetch(`${HOST}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${inputToken}`,
-      },
-    });
-
-    const json = await res.json();
-    if (!json.success) throw new Error(json.message || "Login fallido");
-
-    token = inputToken;
-    localStorage.setItem("authToken", token);
-    loginBtn.classList.add("d-none");
-    logoutBtn.classList.remove("d-none");
-    bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
-  } catch (err) {
-    showError("Error al iniciar sesión: " + err.message);
-  }
-});
-
 logoutBtn.addEventListener("click", async () => {
   try {
     await fetch(`${HOST}/api/auth/logout`, {
@@ -97,7 +72,7 @@ historyBtn.addEventListener("click", async () => {
 document.getElementById("uploadBtn").addEventListener("click", async () => {
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
-  const token = tokenInput.value.trim();
+  const token = localStorage.getItem("authToken") || "";
 
   if (!file || !token) {
     showError("Selecciona una imagen y proporciona el token");
@@ -178,7 +153,7 @@ function formatDate(dateStr) {
 }
 
 async function deleteInvoice(id) {
-  const token = tokenInput.value.trim();
+  const token = localStorage.getItem("authToken") || "";
   if (!token) return showError("Token requerido para eliminar");
 
   if (!confirm("¿Seguro que querés eliminar esta factura?")) return;
@@ -259,7 +234,7 @@ document
       bootstrap.Modal.getInstance(
         document.getElementById("registerModal")
       ).hide();
-      showError("Registro exitoso. Ahora podés iniciar sesión.");
+      showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
     } catch (err) {
       showError("Error al registrar: " + err.message);
     }
@@ -290,3 +265,23 @@ document
     showError("Error al iniciar sesión: " + err.message);
   }
 });
+
+function showSuccess(msg) {
+  const modalEl = document.getElementById("errorModal");
+  const content = modalEl.querySelector(".modal-content");
+  const title = modalEl.querySelector(".modal-title");
+  const body = modalEl.querySelector("#errorMessage");
+
+  content.classList.remove("bg-danger", "text-white");
+  content.classList.add("bg-success", "text-white");
+  title.textContent = "Éxito";
+  body.textContent = msg;
+
+  new bootstrap.Modal(modalEl).show();
+
+  setTimeout(() => {
+    content.classList.remove("bg-success");
+    content.classList.add("bg-danger");
+    title.textContent = "Error";
+  }, 3000);
+}
