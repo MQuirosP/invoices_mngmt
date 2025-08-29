@@ -280,19 +280,30 @@ function renderResults(data) {
   document.getElementById("provider").textContent = data.provider || "—";
   document.getElementById("issueDate").textContent = formatDate(data.issueDate);
 
-  const tbody = document.getElementById("itemsTable");
-  tbody.innerHTML = "";
+  const itemsList = document.getElementById("itemsList");
+  itemsList.innerHTML = "";
 
   (data.items || []).forEach((item) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${item.description}</td>
-      <td>${item.quantity}</td>
-      <td>${item.unitPrice}</td>
-      <td>${item.total}</td>
-      <td>${item.warrantyNotes}</td>
+    const card = document.createElement("div");
+    card.className = "invoice-card";
+
+    card.innerHTML = `
+      <div class="d-flex justify-content-between">
+        <strong>${item.description}</strong>
+        <span class="text-muted">${item.quantity} × ₡${item.unitPrice}</span>
+      </div>
+      <div class="d-flex justify-content-between mt-1">
+        <span>Total:</span>
+        <span class="fw-semibold text-dark">₡${item.total}</span>
+      </div>
+      ${
+        item.warrantyNotes
+          ? `<div class="mt-1"><span class="badge bg-info text-dark">${item.warrantyNotes}</span></div>`
+          : ""
+      }
     `;
-    tbody.appendChild(row);
+
+    itemsList.appendChild(card);
   });
 
   document.getElementById("results").classList.remove("hidden");

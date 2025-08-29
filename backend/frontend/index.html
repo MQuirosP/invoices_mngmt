@@ -94,7 +94,9 @@
                       id="fileChipContainer"
                       class="d-flex align-items-center gap-2 flex-wrap border rounded px-3 py-2 bg-white"
                     >
-                      <span class="text-muted">Ningún archivo seleccionado</span>
+                      <span class="text-muted"
+                        >Ningún archivo seleccionado</span
+                      >
                     </div>
                     <!-- Input oculto -->
                     <input
@@ -133,18 +135,8 @@
                     <strong>Fecha de emisión:</strong>
                     <span id="issueDate"></span>
                   </p>
-                  <table class="table table-bordered table-striped">
-                    <thead>
-                      <tr>
-                        <th>Descripción</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Total</th>
-                        <th>Garantía</th>
-                      </tr>
-                    </thead>
-                    <tbody id="itemsTable"></tbody>
-                  </table>
+
+                  <div id="itemsList" class="invoice-items"></div>
                 </div>
               </section>
               <!-- 📜 Sección de historial -->
@@ -292,7 +284,12 @@
           </div>
         </div>
         <!-- ⚠️ Modal: Error -->
-        <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div
+          class="modal fade"
+          id="errorModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-danger text-white">
               <div class="modal-header">
