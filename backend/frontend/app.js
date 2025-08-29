@@ -8,6 +8,8 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
 
+let pendingDeleteId = null;
+
 const HOST = "https://invoices-mngmt.onrender.com";
 let token = localStorage.getItem("authToken") || "";
 
@@ -133,16 +135,21 @@ function renderHistory(invoices) {
     card.innerHTML = `
       <div class="card-body">
         <h5 class="card-title">${inv.provider}</h5>
-        <p class="card-text mb-1"><strong>Fecha:</strong> ${formatDate(inv.issueDate)}</p>
-        <p class="card-text mb-2"><strong>Ítems:</strong> ${inv.items?.length || 0}</p>
+        <p class="card-text mb-1"><strong>Fecha:</strong> ${formatDate(
+          inv.issueDate
+        )}</p>
+        <p class="card-text mb-2"><strong>Ítems:</strong> ${
+          inv.items?.length || 0
+        }</p>
         <div class="d-flex gap-3">
           <i class="fas fa-file-lines text-primary" role="button" title="Ver desglose"
              onclick='showInvoiceDetails(${JSON.stringify(inv)})'></i>
 
-          ${inv.attachments?.[0]?.url
-            ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
+          ${
+            inv.attachments?.[0]?.url
+              ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
                  onclick="window.open('${inv.attachments[0].url}', '_blank')"></i>`
-            : ""
+              : ""
           }
 
           <i class="fas fa-trash-alt text-danger" role="button" title="Eliminar"
@@ -206,28 +213,40 @@ function formatDate(dateStr) {
   return isNaN(date.getTime()) ? "—" : date.toLocaleDateString("es-CR");
 }
 
-async function deleteInvoice(id) {
+function deleteInvoice(id) {
   const token = localStorage.getItem("authToken") || "";
   if (!token) return showError("Token requerido para eliminar");
 
-  if (!confirm("¿Seguro que querés eliminar esta factura?")) return;
-
-  try {
-    const res = await fetch(`${HOST}/api/invoices/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) throw new Error("No se pudo eliminar");
-
-    showError("Factura eliminada");
-    historyBtn.click(); // Recarga historial
-  } catch (err) {
-    showError("Error al eliminar: " + err.message);
-  }
+  pendingDeleteId = id;
+  new bootstrap.Modal(document.getElementById("confirmDeleteModal")).show();
 }
+
+document
+  .getElementById("confirmDeleteBtn")
+  .addEventListener("click", async () => {
+    if (!pendingDeleteId) return;
+
+    const token = localStorage.getItem("authToken") || "";
+    try {
+      const res = await fetch(`${HOST}/api/invoices/${pendingDeleteId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("No se pudo eliminar");
+
+      showSuccess("Factura eliminada");
+      pendingDeleteId = null;
+      bootstrap.Modal.getInstance(
+        document.getElementById("confirmDeleteModal")
+      ).hide();
+      historyBtn.click(); // Recarga historial
+    } catch (err) {
+      showError("Error al eliminar: " + err.message);
+    }
+  });
 
 function renderResults(data) {
   document.getElementById("provider").textContent = data.provider || "—";
