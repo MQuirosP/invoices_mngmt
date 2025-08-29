@@ -209,6 +209,19 @@ footer {
   padding: 0.4em 0.6em;
 }
 
+.footer-custom {
+  background-color: #212529; /* oscuro elegante */
+  color: #f8f9fa; /* texto claro */
+  border-top: 1px solid #343a40;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.footer-custom small {
+  color: #adb5bd;
+}
+
 #results table {
   width: 100%;
   border-collapse: separate;
