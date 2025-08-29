@@ -35,7 +35,9 @@ router.get("/:id", async (req: AuthRequest, res: Response) => {
       timestamp: new Date().toISOString(),
     });
 
-    const imageResponse = await axios.get(attachmentUrl, { responseType: "stream" });
+    const imageResponse = await axios.get(attachmentUrl, {
+      responseType: "stream",
+    });
     res.setHeader("Content-Type", imageResponse.headers["content-type"]);
     imageResponse.data.pipe(res);
   } catch (err: unknown) {
