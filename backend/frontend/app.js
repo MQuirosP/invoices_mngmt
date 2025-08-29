@@ -182,7 +182,7 @@ function renderHistory(invoices) {
           ${
             inv.attachments?.[0]?.id
               ? `<i class="fas fa-image text-secondary" role="button" title="View image"
-       onclick="window.open('/view-image/${inv.id}', '_blank')"></i>`
+       onclick="window.open('${HOST}/api/view-image/${inv.id}', '_blank')"></i>`
               : ""
           }
 
