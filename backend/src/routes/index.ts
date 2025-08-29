@@ -4,7 +4,7 @@ import { logger } from "../shared/utils/logging/logger";
 import { redis } from "../lib/redis";
 import { prisma } from "../config/prisma";
 import authRouter from "./auth.routes";
-import handleViewImage from "./view-image";
+import viewImageRouter from "./view-image";
 
 const router = Router();
 
@@ -19,7 +19,7 @@ router.use("/auth", authRouter);
 // Invoice module
 router.use("/invoices", invoiceRouter);
 
-router.use("/view-image", handleViewImage);
+router.use("/view-image", viewImageRouter);
 
 // Keep-alive ping endpoint
 router.get("/ping", async (req, res) => {
