@@ -6,6 +6,17 @@ export const loginRateLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
   max: 5, // max 5 requests per windowMs
 
+  keyGenerator: (req) => {
+    const ip = req.ip;
+    const email = req.body?.email ?? "unknown";
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(" ")[1];
+    const decoded = token ? jwt.decode(token) : null;
+    const jti = typeof decoded === "object" ? decoded?.jti : undefined;
+
+    return `${ip}|${email}|${jti ?? "no-jti"}`;
+  },
+  
   handler: (req, res) => {
     const ip = req.ip;
     const email = req.body?.email ?? "unknown";

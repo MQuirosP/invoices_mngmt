@@ -8,6 +8,7 @@ import fs from "fs";
 
 export function setupApp(): express.Express {
   const app = express();
+  app.set('trust proxy', true);
 
   const credsPath = path.join(__dirname, "gcp-creds.json");
   if (process.env.GCP_CREDENTIALS_JSON) {
