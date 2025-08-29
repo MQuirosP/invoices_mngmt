@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OCR Facturas</title>
+    <title>Gestión de facturas OCR</title>
     <link rel="stylesheet" href="style.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -12,25 +12,13 @@
     />
   </head>
   <body>
-    <header>
-      <h1>Gestión de Facturas OCR</h1>
-      <nav>
-        <button id="scanBtn" class="active">Escanear factura</button>
-        <button id="historyBtn">Ver historial</button>
-        <button id="registerBtn" class="btn btn-outline-info me-2">
-          Registro
-        </button>
-      </nav>
-    </header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+    <!-- 🧭 Navbar principal -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 mb-4">
       <a class="navbar-brand" href="#">OCR Facturas</a>
       <div class="navbar-nav">
-        <button id="scanBtn" class="btn btn-outline-light me-2">
-          Escanear
-        </button>
-        <button id="historyBtn" class="btn btn-outline-light me-2">
-          Historial
-        </button>
+        <button id="scanBtn" class="btn btn-outline-light me-2">Escanear</button>
+        <button id="historyBtn" class="btn btn-outline-light me-2">Historial</button>
+        <button id="registerBtn" class="btn btn-outline-info me-2">Registro</button>
       </div>
       <div class="ms-auto">
         <button id="loginBtn" class="btn btn-success me-2">Login</button>
@@ -38,32 +26,22 @@
       </div>
     </nav>
 
+    <!-- 📦 Contenedor principal -->
     <div class="container">
-      <div class="auth-section">
-        <input type="password" id="tokenInput" placeholder="Token de acceso" />
-      </div>
-
-      <div id="scanSection">
-        <div class="upload-section">
-          <input
-            type="file"
-            id="fileInput"
-            class="form-control mb-2"
-            accept="image/*"
-          />
-          <button id="uploadBtn" class="btn btn-success">
-            Procesar imagen
-          </button>
+      <!-- 🔍 Sección de escaneo -->
+      <section id="scanSection">
+        <h2>Escanear factura</h2>
+        <div class="upload-section mb-4">
+          <input type="file" id="fileInput" class="form-control mb-2" accept="image/*" />
+          <button id="uploadBtn" class="btn btn-success">Procesar imagen</button>
         </div>
-
         <div id="loading" class="hidden">Procesando imagen...</div>
 
         <div id="results" class="hidden">
-          <h2>Factura extraída</h2>
+          <h3>Factura extraída</h3>
           <p><strong>Proveedor:</strong> <span id="provider"></span></p>
           <p><strong>Fecha de emisión:</strong> <span id="issueDate"></span></p>
-
-          <table>
+          <table class="table table-bordered table-striped">
             <thead>
               <tr>
                 <th>Descripción</th>
@@ -76,41 +54,33 @@
             <tbody id="itemsTable"></tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <div id="historySection" class="hidden">
+      <!-- 📜 Sección de historial -->
+      <section id="historySection" class="hidden">
         <h2>Historial de facturas</h2>
-        <table>
+        <table class="table table-bordered table-hover">
           <thead>
             <tr>
               <th>Proveedor</th>
               <th>Fecha</th>
               <th>Ítems</th>
               <th>Adjunto</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="historyTable"></tbody>
         </table>
-      </div>
+      </section>
     </div>
-    <!-- Modal para ver factura -->
-    <div
-      class="modal fade"
-      id="invoiceModal"
-      tabindex="-1"
-      aria-labelledby="invoiceModalLabel"
-      aria-hidden="true"
-    >
+
+    <!-- 🧾 Modal: Ver factura -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="invoiceModalLabel">Factura adjunta</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Cerrar"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body text-center">
             <img id="invoiceImage" src="" alt="Factura" class="img-fluid" />
@@ -119,122 +89,60 @@
       </div>
     </div>
 
-    <!-- Modal de registro -->
-    <div
-      class="modal fade"
-      id="registerModal"
-      tabindex="-1"
-      aria-labelledby="registerModalLabel"
-      aria-hidden="true"
-    >
+    <!-- 🧑 Modal: Registro -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Registro de usuario</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Cerrar"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
-            <input
-              type="email"
-              id="registerEmail"
-              class="form-control mb-2"
-              placeholder="Correo electrónico"
-            />
-            <input
-              type="text"
-              id="registerFullname"
-              class="form-control mb-2"
-              placeholder="Nombre completo"
-            />
-            <input
-              type="password"
-              id="registerPassword"
-              class="form-control mb-2"
-              placeholder="Contraseña"
-            />
-            <input
-              type="password"
-              id="registerConfirm"
-              class="form-control"
-              placeholder="Confirmar contraseña"
-            />
+            <input type="email" id="registerEmail" class="form-control mb-2" placeholder="Correo electrónico" />
+            <input type="text" id="registerFullname" class="form-control mb-2" placeholder="Nombre completo" />
+            <input type="password" id="registerPassword" class="form-control mb-2" placeholder="Contraseña" />
+            <input type="password" id="registerConfirm" class="form-control" placeholder="Confirmar contraseña" />
           </div>
           <div class="modal-footer">
-            <button
-              type="button"
-              id="confirmRegisterBtn"
-              class="btn btn-primary"
-            >
-              Registrarse
-            </button>
+            <button type="button" id="confirmRegisterBtn" class="btn btn-primary">Registrarse</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal de login -->
-    <div
-      class="modal fade"
-      id="loginModal"
-      tabindex="-1"
-      aria-labelledby="loginModalLabel"
-      aria-hidden="true"
-    >
+    <!-- 🔐 Modal: Login -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Iniciar sesión</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Cerrar"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
-            <input
-              type="email"
-              id="loginEmail"
-              class="form-control mb-2"
-              placeholder="Correo electrónico"
-            />
-            <input
-              type="password"
-              id="loginPassword"
-              class="form-control"
-              placeholder="Contraseña"
-            />
+            <input type="email" id="loginEmail" class="form-control mb-2" placeholder="Correo electrónico" />
+            <input type="password" id="loginPassword" class="form-control" placeholder="Contraseña" />
           </div>
           <div class="modal-footer">
-            <button type="button" id="confirmLoginBtn" class="btn btn-primary">
-              Ingresar
-            </button>
+            <button type="button" id="confirmLoginBtn" class="btn btn-primary">Ingresar</button>
           </div>
         </div>
       </div>
     </div>
-    <!-- Modal de error -->
+
+    <!-- ⚠️ Modal: Error -->
     <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-danger text-white">
           <div class="modal-header">
             <h5 class="modal-title">Error</h5>
-            <button
-              type="button"
-              class="btn-close btn-close-white"
-              data-bs-dismiss="modal"
-            ></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body" id="errorMessage"></div>
         </div>
       </div>
     </div>
 
+    <!-- 📦 Scripts -->
     <script src="app.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
