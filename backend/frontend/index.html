@@ -12,118 +12,133 @@
     />
   </head>
   <body>
-    <!-- 🧭 Navbar principal -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 mb-4">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">OCR Facturas</a>
+    <header>
+      <!-- 🧭 Navbar principal -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 mb-4">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">OCR Facturas</a>
 
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarOptions"
-          aria-controls="navbarOptions"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarOptions"
+            aria-controls="navbarOptions"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
 
-        <div
-          class="collapse navbar-collapse justify-content-end"
-          id="navbarOptions"
-        >
-          <span
-            id="userGreeting"
-            class="text-light fw-semibold me-3 d-none"
-          ></span>
-          <div class="navbar-nav">
-            <button id="scanBtn" class="btn btn-outline-light me-2 d-none">
-              Escanear
-            </button>
-            <button id="historyBtn" class="btn btn-outline-light me-2 d-none">
-              Historial
-            </button>
-            <button id="loginBtn" class="btn btn-success me-2">Login</button>
-            <button id="logoutBtn" class="btn btn-danger me-2 d-none">
-              Logout
-            </button>
-            <button id="registerBtn" class="btn btn-outline-info me-2">
-              Registro
-            </button>
+          <div
+            class="collapse navbar-collapse justify-content-end"
+            id="navbarOptions"
+          >
+            <span
+              id="userGreeting"
+              class="text-light fw-semibold me-3 d-none"
+            ></span>
+            <div class="navbar-nav">
+              <button id="scanBtn" class="btn btn-outline-light me-2 d-none">
+                Escanear
+              </button>
+              <button id="historyBtn" class="btn btn-outline-light me-2 d-none">
+                Historial
+              </button>
+              <button id="loginBtn" class="btn btn-success me-2">Login</button>
+              <button id="logoutBtn" class="btn btn-danger me-2 d-none">
+                Logout
+              </button>
+              <button id="registerBtn" class="btn btn-outline-info me-2">
+                Registro
+              </button>
+            </div>
           </div>
         </div>
+      </nav>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <!-- 📎 Aside lateral -->
+        <aside class="col-md-3 col-lg-2 border-end py-3">
+          <p class="text-muted text-center">Panel lateral</p>
+          <!-- Aquí podés agregar filtros, navegación secundaria, etc. -->
+        </aside>
+
+        <!-- 📦 Contenido principal -->
+        <main class="col-md-9 col-lg-10 px-4">
+          <!-- 👋 Sección de bienvenida -->
+          <section id="welcomeSection" class="text-center py-5">
+            <h2>Bienvenido a la gestión de facturas OCR</h2>
+            <p class="lead">
+              Iniciá sesión o registrate para escanear facturas, consultar
+              historial y administrar tus documentos.
+            </p>
+          </section>
+
+          <!-- 🔍 Sección de escaneo -->
+          <section id="scanSection" class="hidden">
+            <h2>Escanear factura</h2>
+            <div id="uploadControls" class="upload-section mb-4">
+              <input
+                type="file"
+                id="fileInput"
+                class="form-control mb-2"
+                accept="image/*"
+              />
+              <button id="uploadBtn" class="btn btn-success">
+                Procesar imagen
+              </button>
+            </div>
+            <div id="loading" class="text-center hidden">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2">Procesando imagen...</p>
+            </div>
+
+            <div id="results" class="hidden">
+              <h3>Factura extraída</h3>
+              <p><strong>Proveedor:</strong> <span id="provider"></span></p>
+              <p>
+                <strong>Fecha de emisión:</strong> <span id="issueDate"></span>
+              </p>
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Total</th>
+                    <th>Garantía</th>
+                  </tr>
+                </thead>
+                <tbody id="itemsTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- 📜 Sección de historial -->
+          <section id="historySection" class="hidden">
+            <h2>Historial de facturas</h2>
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>Proveedor</th>
+                  <th>Fecha</th>
+                  <th>Ítems</th>
+                  <th>Desglose</th>
+                  <th>Imagen</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="historyTable"></tbody>
+            </table>
+          </section>
+        </main>
       </div>
-    </nav>
-
-    <!-- 👋 Sección de bienvenida -->
-    <section id="welcomeSection" class="text-center py-5">
-      <h2>Bienvenido a la gestión de facturas OCR</h2>
-      <p class="lead">
-        Iniciá sesión o registrate para escanear facturas, consultar historial y
-        administrar tus documentos.
-      </p>
-    </section>
-
-    <!-- 📦 Contenedor principal -->
-    <div class="container">
-      <!-- 🔍 Sección de escaneo -->
-      <section id="scanSection">
-        <h2>Escanear factura</h2>
-        <div id="uploadControls" class="upload-section mb-4">
-          <input
-            type="file"
-            id="fileInput"
-            class="form-control mb-2"
-            accept="image/*"
-          />
-          <button id="uploadBtn" class="btn btn-success">
-            Procesar imagen
-          </button>
-        </div>
-        <div id="loading" class="text-center hidden">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p class="mt-2">Procesando imagen...</p>
-        </div>
-
-        <div id="results" class="hidden">
-          <h3>Factura extraída</h3>
-          <p><strong>Proveedor:</strong> <span id="provider"></span></p>
-          <p><strong>Fecha de emisión:</strong> <span id="issueDate"></span></p>
-          <table class="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>Descripción</th>
-                <th>Cantidad</th>
-                <th>Precio</th>
-                <th>Total</th>
-                <th>Garantía</th>
-              </tr>
-            </thead>
-            <tbody id="itemsTable"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- 📜 Sección de historial -->
-      <section id="historySection" class="hidden">
-        <h2>Historial de facturas</h2>
-        <table class="table table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>Proveedor</th>
-              <th>Fecha</th>
-              <th>Ítems</th>
-              <th>Adjunto</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="historyTable"></tbody>
-        </table>
-      </section>
     </div>
 
-    <!-- 🧾 Modal: Ver factura -->
+    <!-- 🧾 Modal: Ver desglose -->
     <div
       class="modal fade"
       id="invoiceModal"
@@ -134,7 +149,9 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="invoiceModalLabel">Factura adjunta</h5>
+            <h5 class="modal-title" id="invoiceModalLabel">
+              Desglose de factura
+            </h5>
             <button
               type="button"
               class="btn-close"
@@ -142,8 +159,15 @@
               aria-label="Cerrar"
             ></button>
           </div>
-          <div class="modal-body text-center">
-            <img id="invoiceImage" src="" alt="Factura" class="img-fluid" />
+          <div class="modal-body">
+            <div id="modalInvoiceDetails" class="mb-3"></div>
+            <button
+              id="viewImageBtn"
+              class="btn btn-outline-primary d-none"
+              target="_blank"
+            >
+              Ver imagen adjunta
+            </button>
           </div>
         </div>
       </div>
@@ -265,6 +289,12 @@
         </div>
       </div>
     </div>
+
+    <footer class="bg-light text-center py-3 mt-5 border-top">
+      <small class="text-muted"
+        >OCR Facturas © 2025 – Gestión inteligente de documentos</small
+      >
+    </footer>
 
     <!-- 📦 Scripts -->
     <script src="app.js"></script>

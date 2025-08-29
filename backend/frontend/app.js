@@ -137,7 +137,9 @@ function renderHistory(invoices) {
       <td>
         ${
           attachmentUrl
-            ? `<button class="btn btn-sm btn-primary" onclick="showInvoice('${attachmentUrl}')">Ver</button>`
+            ? `<button class="btn btn-sm btn-primary" onclick='showInvoiceDetails(${JSON.stringify(
+                inv
+              )})'>Ver desglose</button>`
             : "—"
         }
       </td>
@@ -151,12 +153,50 @@ function renderHistory(invoices) {
   });
 }
 
-function showInvoice(url) {
-  const img = document.getElementById("invoiceImage");
-  img.src = url;
+function showInvoiceDetails(invoice) {
+  const modalDetails = document.getElementById("modalInvoiceDetails");
+  const viewImageBtn = document.getElementById("viewImageBtn");
 
-  const modal = new bootstrap.Modal(document.getElementById("invoiceModal"));
-  modal.show();
+  modalDetails.innerHTML = `
+    <p><strong>Proveedor:</strong> ${invoice.provider}</p>
+    <p><strong>Fecha de emisión:</strong> ${formatDate(invoice.issueDate)}</p>
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th>Descripción</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Total</th>
+          <th>Garantía</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${invoice.items
+          .map(
+            (item) => `
+          <tr>
+            <td>${item.description}</td>
+            <td>${item.quantity}</td>
+            <td>${item.unitPrice}</td>
+            <td>${item.total}</td>
+            <td>${item.warrantyNotes}</td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+
+  if (invoice.attachments?.[0]?.url) {
+    viewImageBtn.classList.remove("d-none");
+    viewImageBtn.onclick = () =>
+      window.open(invoice.attachments[0].url, "_blank");
+  } else {
+    viewImageBtn.classList.add("d-none");
+  }
+
+  new bootstrap.Modal(document.getElementById("invoiceModal")).show();
 }
 
 function formatDate(dateStr) {
