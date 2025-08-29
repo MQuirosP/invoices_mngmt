@@ -85,29 +85,44 @@
             <section id="scanSection" class="hidden">
               <h2>Escanear factura</h2>
               <div id="uploadControls" class="upload-section mb-4">
-                <div id="fileWrapper" class="position-relative">
+                <div id="fileWrapper" class="mb-3">
+                  <label for="fileInput" class="form-label"
+                    >Seleccioná archivos</label
+                  >
+
+                  <!-- Contenedor visual de chips -->
+                  <div
+                    id="fileChipContainer"
+                    class="d-flex align-items-center gap-2 flex-wrap border rounded px-3 py-2 bg-white"
+                  >
+                    <span class="text-muted">Ningún archivo seleccionado</span>
+                  </div>
+
+                  <!-- Input oculto -->
                   <input
                     type="file"
                     id="fileInput"
-                    class="form-control"
+                    class="form-control d-none"
                     accept="image/*"
                     multiple
                   />
-                  <div id="fileList" class="mt-2"></div>
 
+                  <!-- Botón para abrir el selector -->
+                  <button
+                    id="selectFileBtn"
+                    class="btn btn-outline-primary mt-2"
+                    aria-label="Seleccionar archivo"
+                  >
+                    Seleccionar archivo
+                  </button>
+
+                  <!-- Botón para procesar -->
                   <button
                     id="uploadBtn"
-                    class="btn btn-success mt-2"
+                    class="btn btn-success mt-2 ms-2"
                     aria-label="Procesar imagen"
                   >
                     Procesar imagen
-                  </button>
-                  <button
-                    id="clearFileBtn"
-                    class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 me-2 mt-2 d-none"
-                    aria-label="Limpiar archivo"
-                  >
-                    <i class="fas fa-times"></i>
                   </button>
                 </div>
               </div>

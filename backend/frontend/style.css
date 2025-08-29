@@ -152,6 +152,13 @@ footer {
   cursor: pointer;
 }
 
+#fileChipContainer {
+  min-height: 48px;
+}
+.btn-close {
+  font-size: 0.7rem;
+}
+
 @media (max-width: 768px) {
   #historySection table {
     display: block;

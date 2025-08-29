@@ -9,7 +9,9 @@ const logoutBtn = document.getElementById("logoutBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
 
 const fileInput = document.getElementById("fileInput");
-const fileList = document.getElementById("fileList");
+const fileChipContainer = document.getElementById("fileChipContainer");
+const selectFileBtn = document.getElementById("selectFileBtn");
+
 const clearFileBtn = document.getElementById("clearFileBtn");
 if (clearFileBtn) {
   clearFileBtn.classList.add("d-none");
@@ -429,33 +431,40 @@ function showSuccess(msg) {
   }, 3000);
 }
 
+selectFileBtn.addEventListener("click", () => fileInput.click());
+
 fileInput.addEventListener("change", () => {
-  fileList.innerHTML = "";
+  const files = Array.from(fileInput.files);
+  fileChipContainer.innerHTML = "";
 
-  Array.from(fileInput.files).forEach((file, index) => {
-    const fileItem = document.createElement("div");
-    fileItem.className = "d-flex align-items-center justify-content-between bg-light border rounded px-2 py-1 mb-1";
+  if (files.length === 0) {
+    fileChipContainer.innerHTML = `<span class="text-muted">Ningún archivo seleccionado</span>`;
+    return;
+  }
 
-    fileItem.innerHTML = `
-      <span class="text-truncate me-2" style="max-width: 80%;">${file.name}</span>
-      <button class="btn btn-sm btn-outline-danger" aria-label="Eliminar archivo">
-        <i class="fas fa-times"></i>
-      </button>
+  files.forEach((file, index) => {
+    const chip = document.createElement("span");
+    chip.className =
+      "badge bg-light text-dark border me-2 mb-2 d-flex align-items-center";
+    chip.style.padding = "0.5rem 0.75rem";
+
+    chip.innerHTML = `
+      ${file.name}
+      <button type="button" class="btn-close ms-2" aria-label="Eliminar"></button>
     `;
 
-    fileItem.querySelector("button").addEventListener("click", () => {
+    chip.querySelector("button").addEventListener("click", () => {
       const dt = new DataTransfer();
-      Array.from(fileInput.files).forEach((f, i) => {
+      files.forEach((f, i) => {
         if (i !== index) dt.items.add(f);
       });
       fileInput.files = dt.files;
-      fileInput.dispatchEvent(new Event("change")); // Re-render
+      fileInput.dispatchEvent(new Event("change")); // Re-render chips
     });
 
-    fileList.appendChild(fileItem);
+    fileChipContainer.appendChild(chip);
   });
 });
-
 
 clearFileBtn.addEventListener("click", () => {
   fileInput.value = "";
