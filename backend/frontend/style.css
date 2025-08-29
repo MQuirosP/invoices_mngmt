@@ -1,6 +1,6 @@
 /* General layout */
 html, body {
-  height: 1dvh;
+  height: 100vh;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -23,6 +23,15 @@ h1, h2, h3 {
 }
 
 /* Navbar */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
 .navbar-brand {
   font-weight: bold;
   font-size: 1.25rem;
@@ -90,6 +99,9 @@ button:focus {
 
 /* Aside panel */
 aside {
+  width: 250px;
+  flex-shrink: 0;
+  overflow-y: auto;
   background-color: #ffffff;
   border-right: 1px solid #dee2e6;
   min-height: 100%;
@@ -106,6 +118,8 @@ footer {
   position: fixed;
   bottom: 0;
   left: 0;
+  right: 0;
+  z-index: 1000;
   width: 100%;
   background-color: #f1f1f1;
   border-top: 1px solid #dee2e6;
@@ -127,11 +141,25 @@ footer {
   table {
     font-size: 0.9rem;
   }
-
-  aside {
-    display: none;
-  }
 }
+
+#layoutWrapper {
+  flex: 1;
+  display: flex;
+  margin-top: auto; /* altura del navbar */
+  margin-bottom: 64px; /* altura del footer */
+  height: calc(100vh - 120px); /* navbar + footer */
+  overflow: hidden;
+}
+
+
+
+#mainContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
 
 #historyCards .card i {
   font-size: 1.2rem;

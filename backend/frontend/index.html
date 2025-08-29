@@ -62,320 +62,313 @@
         </div>
       </nav>
     </header>
-
-    <main class="col-md-9 col-lg-10 px-4">
-      <div class="container-fluid">
-        <div class="row">
-          <!-- 📎 Aside lateral -->
-          <aside class="col-md-3 col-lg-2 border-end py-3">
-            <p class="text-muted text-center">Panel lateral</p>
-            <!-- Aquí podés agregar filtros, navegación secundaria, etc. -->
-          </aside>
-          <!-- 📦 Contenido principal -->
-          <main class="col-md-9 col-lg-10 px-4">
-            <!-- 👋 Sección de bienvenida -->
-            <section id="welcomeSection" class="text-center py-5">
-              <h2>Bienvenido a la gestión de facturas OCR</h2>
-              <p class="lead">
-                Iniciá sesión o registrate para escanear facturas, consultar
-                historial y administrar tus documentos.
-              </p>
-            </section>
-
-            <!-- 🔍 Sección de escaneo -->
-            <section id="scanSection" class="hidden">
-              <h2 >Escanear factura</h2>
-              <div id="uploadControls" class="upload-section mb-4">
-                <div id="fileWrapper" class="mb-3">
-                  <label for="fileInput" class="form-label"
-                    >Seleccioná archivos</label
-                  >
-
-                  <!-- Contenedor visual de chips -->
-                  <div
-                    id="fileChipContainer"
-                    class="d-flex align-items-center gap-2 flex-wrap border rounded px-3 py-2 bg-white"
-                  >
-                    <span class="text-muted">Ningún archivo seleccionado</span>
-                  </div>
-
-                  <!-- Input oculto -->
-                  <input
-                    type="file"
-                    id="fileInput"
-                    class="form-control d-none"
-                    accept="image/*"
-                    multiple
-                  />
-
-                  <!-- Botón para abrir el selector -->
-                  <button
-                    id="selectFileBtn"
-                    class="btn btn-outline-primary mt-2"
-                    aria-label="Seleccionar archivo"
-                  >
-                    Seleccionar archivo
-                  </button>
-
-                  <!-- Botón para procesar -->
-                  <button
-                    id="uploadBtn"
-                    class="btn btn-success mt-2 ms-2"
-                    aria-label="Procesar imagen"
-                  >
-                    Procesar imagen
-                  </button>
-                </div>
-              </div>
-              <div id="loading" class="text-center hidden">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2">Procesando imagen...</p>
-              </div>
-              <div id="results" class="hidden" aria-live="polite">
-                <h3>Factura extraída</h3>
-                <p><strong>Proveedor:</strong> <span id="provider"></span></p>
-                <p>
-                  <strong>Fecha de emisión:</strong>
-                  <span id="issueDate"></span>
+    <div id="layoutWrapper" class="d-flex">
+      <aside class="col-md-3 col-lg-2 border-end py-3">
+        <p class="text-muted text-center">Panel lateral</p>
+        <!-- Aquí podés agregar filtros, navegación secundaria, etc. -->
+      </aside>
+      <main id="mainContent" class="col-md-9 col-lg-10 px-4">
+        <div class="container-fluid">
+          <div class="row">
+            <!-- 📎 Aside lateral -->
+            <!-- 📦 Contenido principal -->
+            <main class="col-md-9 col-lg-10 px-4">
+              <!-- 👋 Sección de bienvenida -->
+              <section id="welcomeSection" class="text-center py-5">
+                <h2>Bienvenido a la gestión de facturas OCR</h2>
+                <p class="lead">
+                  Iniciá sesión o registrate para escanear facturas, consultar
+                  historial y administrar tus documentos.
                 </p>
-                <table class="table table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>Descripción</th>
-                      <th>Cantidad</th>
-                      <th>Precio</th>
-                      <th>Total</th>
-                      <th>Garantía</th>
-                    </tr>
-                  </thead>
-                  <tbody id="itemsTable"></tbody>
-                </table>
+              </section>
+              <!-- 🔍 Sección de escaneo -->
+              <section id="scanSection" class="hidden">
+                <h2>Escanear factura</h2>
+                <div id="uploadControls" class="upload-section mb-4">
+                  <div id="fileWrapper" class="mb-3">
+                    <label for="fileInput" class="form-label"
+                      >Seleccioná archivos</label
+                    >
+                    <!-- Contenedor visual de chips -->
+                    <div
+                      id="fileChipContainer"
+                      class="d-flex align-items-center gap-2 flex-wrap border rounded px-3 py-2 bg-white"
+                    >
+                      <span class="text-muted">Ningún archivo seleccionado</span>
+                    </div>
+                    <!-- Input oculto -->
+                    <input
+                      type="file"
+                      id="fileInput"
+                      class="form-control d-none"
+                      accept="image/*"
+                      multiple
+                    />
+                    <!-- Botón para abrir el selector -->
+                    <button
+                      id="selectFileBtn"
+                      class="btn btn-outline-primary mt-2"
+                      aria-label="Seleccionar archivo"
+                    >
+                      Seleccionar archivo
+                    </button>
+                    <!-- Botón para procesar -->
+                    <button
+                      id="uploadBtn"
+                      class="btn btn-success mt-2 ms-2"
+                      aria-label="Procesar imagen"
+                    >
+                      Procesar imagen
+                    </button>
+                  </div>
+                </div>
+                <div id="loading" class="text-center hidden">
+                  <div class="spinner-border text-primary" role="status"></div>
+                  <p class="mt-2">Procesando imagen...</p>
+                </div>
+                <div id="results" class="hidden" aria-live="polite">
+                  <h3>Factura extraída</h3>
+                  <p><strong>Proveedor:</strong> <span id="provider"></span></p>
+                  <p>
+                    <strong>Fecha de emisión:</strong>
+                    <span id="issueDate"></span>
+                  </p>
+                  <table class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Total</th>
+                        <th>Garantía</th>
+                      </tr>
+                    </thead>
+                    <tbody id="itemsTable"></tbody>
+                  </table>
+                </div>
+              </section>
+              <!-- 📜 Sección de historial -->
+              <section id="historySection" class="hidden">
+                <h2>Historial de facturas</h2>
+                <div id="historyCards" class="row gy-3"></div>
+              </section>
+            </main>
+          </div>
+        </div>
+        <!-- 🧾 Modal: Ver desglose -->
+        <div
+          class="modal fade"
+          id="invoiceModal"
+          tabindex="-1"
+          aria-labelledby="invoiceModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="invoiceModalLabel">
+                  Desglose de factura
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar"
+                ></button>
               </div>
-            </section>
-            
-            <!-- 📜 Sección de historial -->
-            <section id="historySection" class="hidden">
-              <h2>Historial de facturas</h2>
-              <div id="historyCards" class="row gy-3"></div>
-            </section>
-          </main>
-        </div>
-      </div>
-      <!-- 🧾 Modal: Ver desglose -->
-      <div
-        class="modal fade"
-        id="invoiceModal"
-        tabindex="-1"
-        aria-labelledby="invoiceModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="invoiceModalLabel">
-                Desglose de factura
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Cerrar"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <div id="modalInvoiceDetails" class="mb-3"></div>
-              <button
-                id="viewImageBtn"
-                class="btn btn-outline-primary d-none"
-                target="_blank"
-              >
-                Ver imagen adjunta
-              </button>
+              <div class="modal-body">
+                <div id="modalInvoiceDetails" class="mb-3"></div>
+                <button
+                  id="viewImageBtn"
+                  class="btn btn-outline-primary d-none"
+                  target="_blank"
+                >
+                  Ver imagen adjunta
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <!-- 🧑 Modal: Registro -->
-      <div
-        class="modal fade"
-        id="registerModal"
-        tabindex="-1"
-        aria-labelledby="registerModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Registro de usuario</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Cerrar"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <input
-                type="email"
-                id="registerEmail"
-                class="form-control mb-2"
-                placeholder="Correo electrónico"
-              />
-              <input
-                type="text"
-                id="registerFullname"
-                class="form-control mb-2"
-                placeholder="Nombre completo"
-              />
-              <input
-                type="password"
-                id="registerPassword"
-                class="form-control mb-2"
-                placeholder="Contraseña"
-              />
-              <input
-                type="password"
-                id="registerConfirm"
-                class="form-control"
-                placeholder="Confirmar contraseña"
-              />
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                id="confirmRegisterBtn"
-                class="btn btn-primary"
-              >
-                Registrarse
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- 🔐 Modal: Login -->
-      <div
-        class="modal fade"
-        id="loginModal"
-        tabindex="-1"
-        aria-labelledby="loginModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Iniciar sesión</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Cerrar"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <input
-                type="email"
-                id="loginEmail"
-                class="form-control mb-2"
-                placeholder="Correo electrónico"
-              />
-              <input
-                type="password"
-                id="loginPassword"
-                class="form-control"
-                placeholder="Contraseña"
-              />
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                id="confirmLoginBtn"
-                class="btn btn-primary"
-              >
-                Ingresar
-              </button>
+        <!-- 🧑 Modal: Registro -->
+        <div
+          class="modal fade"
+          id="registerModal"
+          tabindex="-1"
+          aria-labelledby="registerModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Registro de usuario</h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <input
+                  type="email"
+                  id="registerEmail"
+                  class="form-control mb-2"
+                  placeholder="Correo electrónico"
+                />
+                <input
+                  type="text"
+                  id="registerFullname"
+                  class="form-control mb-2"
+                  placeholder="Nombre completo"
+                />
+                <input
+                  type="password"
+                  id="registerPassword"
+                  class="form-control mb-2"
+                  placeholder="Contraseña"
+                />
+                <input
+                  type="password"
+                  id="registerConfirm"
+                  class="form-control"
+                  placeholder="Confirmar contraseña"
+                />
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  id="confirmRegisterBtn"
+                  class="btn btn-primary"
+                >
+                  Registrarse
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <!-- ⚠️ Modal: Error -->
-      <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content bg-danger text-white">
-            <div class="modal-header">
-              <h5 class="modal-title">Error</h5>
-              <button
-                type="button"
-                class="btn-close btn-close-white"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div class="modal-body" id="errorMessage"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ✅ Modal: Éxito -->
-      <div
-        class="modal fade"
-        id="successModal"
-        tabindex="-1"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content bg-success text-white">
-            <div class="modal-header">
-              <h5 class="modal-title">Éxito</h5>
-              <button
-                type="button"
-                class="btn-close btn-close-white"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div class="modal-body" id="successMessage"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 🗑️ Modal: Confirmar eliminación -->
-      <div
-        class="modal fade"
-        id="confirmDeleteModal"
-        tabindex="-1"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border-danger">
-            <div class="modal-header bg-danger text-white">
-              <h5 class="modal-title">Confirmar eliminación</h5>
-              <button
-                type="button"
-                class="btn-close btn-close-white"
-                data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div class="modal-body">
-              ¿Seguro que querés eliminar esta factura?
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                id="confirmDeleteBtn"
-                class="btn btn-danger"
-              >
-                Eliminar
-              </button>
+        <!-- 🔐 Modal: Login -->
+        <div
+          class="modal fade"
+          id="loginModal"
+          tabindex="-1"
+          aria-labelledby="loginModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Iniciar sesión</h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <input
+                  type="email"
+                  id="loginEmail"
+                  class="form-control mb-2"
+                  placeholder="Correo electrónico"
+                />
+                <input
+                  type="password"
+                  id="loginPassword"
+                  class="form-control"
+                  placeholder="Contraseña"
+                />
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  id="confirmLoginBtn"
+                  class="btn btn-primary"
+                >
+                  Ingresar
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
+        <!-- ⚠️ Modal: Error -->
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-danger text-white">
+              <div class="modal-header">
+                <h5 class="modal-title">Error</h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+              <div class="modal-body" id="errorMessage"></div>
+            </div>
+          </div>
+        </div>
+        <!-- ✅ Modal: Éxito -->
+        <div
+          class="modal fade"
+          id="successModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-success text-white">
+              <div class="modal-header">
+                <h5 class="modal-title">Éxito</h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+              <div class="modal-body" id="successMessage"></div>
+            </div>
+          </div>
+        </div>
+        <!-- 🗑️ Modal: Confirmar eliminación -->
+        <div
+          class="modal fade"
+          id="confirmDeleteModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar eliminación</h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+              <div class="modal-body">
+                ¿Seguro que querés eliminar esta factura?
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  id="confirmDeleteBtn"
+                  class="btn btn-danger"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
 
     <footer class="bg-light text-center py-3 mt-5 border-top">
       <small class="text-muted"
