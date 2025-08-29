@@ -198,36 +198,33 @@ function showInvoiceDetails(invoice) {
   const viewImageBtn = document.getElementById("viewImageBtn");
 
   modalDetails.innerHTML = `
-    <p><strong>Proveedor:</strong> ${invoice.provider}</p>
-    <p><strong>Fecha de emisión:</strong> ${formatDate(invoice.issueDate)}</p>
-    <table class="table table-sm table-bordered">
-      <thead>
-        <tr>
-          <th>Descripción</th>
-          <th>Cantidad</th>
-          <th>Precio</th>
-          <th>Total</th>
-          <th>Garantía</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${invoice.items
-          .map(
-            (item) => `
-          <tr>
-            <td>${item.description}</td>
-            <td>${item.quantity}</td>
-            <td>${item.unitPrice}</td>
-            <td>${item.total}</td>
-            <td>${item.warrantyNotes}</td>
-          </tr>
-        `
-          )
-          .join("")}
-      </tbody>
-    </table>
-  `;
+  <p><strong>Proveedor:</strong> ${invoice.provider}</p>
+  <p><strong>Fecha de emisión:</strong> ${formatDate(invoice.issueDate)}</p>
 
+  <div class="invoice-items">
+    ${invoice.items
+      .map(
+        (item) => `
+      <div class="invoice-card">
+        <div class="d-flex justify-content-between">
+          <strong>${item.description}</strong>
+          <span class="text-muted">${item.quantity} × ₡${item.unitPrice}</span>
+        </div>
+        <div class="d-flex justify-content-between mt-1">
+          <span>Total:</span>
+          <span class="fw-semibold text-dark">₡${item.total}</span>
+        </div>
+        ${
+          item.warrantyNotes
+            ? `<div class="mt-1"><span class="badge bg-info text-dark">${item.warrantyNotes}</span></div>`
+            : ""
+        }
+      </div>
+    `
+      )
+      .join("")}
+  </div>
+`;
   if (invoice.attachments?.[0]?.url) {
     viewImageBtn.classList.remove("d-none");
     viewImageBtn.onclick = () =>
