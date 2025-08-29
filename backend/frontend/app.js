@@ -10,7 +10,9 @@ const confirmLoginBtn = document.getElementById("confirmLoginBtn");
 
 const fileInput = document.getElementById("fileInput");
 const fileChipContainer = document.getElementById("fileChipContainer");
-const selectFileBtn = document.getElementById("selectFileBtn");
+selectFileBtn.addEventListener("click", () => fileInput.click());
+
+const fileBuffer = new DataTransfer();
 
 const clearFileBtn = document.getElementById("clearFileBtn");
 if (clearFileBtn) {
@@ -434,18 +436,28 @@ function showSuccess(msg) {
 selectFileBtn.addEventListener("click", () => fileInput.click());
 
 fileInput.addEventListener("change", () => {
-  const files = Array.from(fileInput.files);
+  Array.from(fileInput.files).forEach((file) => {
+    // Evitar duplicados por nombre
+    if (![...fileBuffer.files].some((f) => f.name === file.name)) {
+      fileBuffer.items.add(file);
+    }
+  });
+
+  fileInput.files = fileBuffer.files;
+  renderFileChips();
+});
+
+function renderFileChips() {
   fileChipContainer.innerHTML = "";
 
-  if (files.length === 0) {
+  if (fileBuffer.files.length === 0) {
     fileChipContainer.innerHTML = `<span class="text-muted">Ningún archivo seleccionado</span>`;
     return;
   }
 
-  files.forEach((file, index) => {
+  Array.from(fileBuffer.files).forEach((file, index) => {
     const chip = document.createElement("span");
-    chip.className =
-      "badge bg-light text-dark border me-2 mb-2 d-flex align-items-center";
+    chip.className = "badge bg-light text-dark border me-2 mb-2 d-flex align-items-center";
     chip.style.padding = "0.5rem 0.75rem";
 
     chip.innerHTML = `
@@ -454,22 +466,19 @@ fileInput.addEventListener("change", () => {
     `;
 
     chip.querySelector("button").addEventListener("click", () => {
-      const dt = new DataTransfer();
-      files.forEach((f, i) => {
-        if (i !== index) dt.items.add(f);
+      const newBuffer = new DataTransfer();
+      Array.from(fileBuffer.files).forEach((f, i) => {
+        if (i !== index) newBuffer.items.add(f);
       });
-      fileInput.files = dt.files;
-      fileInput.dispatchEvent(new Event("change")); // Re-render chips
+      fileBuffer.items.clear();
+      Array.from(newBuffer.files).forEach((f) => fileBuffer.items.add(f));
+      fileInput.files = fileBuffer.files;
+      renderFileChips();
     });
 
     fileChipContainer.appendChild(chip);
   });
-});
-
-clearFileBtn.addEventListener("click", () => {
-  fileInput.value = "";
-  clearFileBtn.classList.add("d-none");
-});
+}
 
 updateUIBasedOnAuth();
 const activeView = localStorage.getItem("activeView");
