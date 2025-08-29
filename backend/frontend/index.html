@@ -17,11 +17,6 @@
       <div class="container-fluid">
         <a class="navbar-brand" href="#">OCR Facturas</a>
 
-        <span
-          id="userGreeting"
-          class="text-light fw-semibold me-3 d-none"
-        ></span>
-
         <button
           class="navbar-toggler"
           type="button"
@@ -34,7 +29,14 @@
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarOptions">
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarOptions"
+        >
+          <span
+            id="userGreeting"
+            class="text-light fw-semibold me-3 d-none"
+          ></span>
           <div class="navbar-nav">
             <button id="scanBtn" class="btn btn-outline-light me-2 d-none">
               Escanear
@@ -53,6 +55,8 @@
         </div>
       </div>
     </nav>
+
+    <!-- 👋 Sección de bienvenida -->
     <section id="welcomeSection" class="text-center py-5">
       <h2>Bienvenido a la gestión de facturas OCR</h2>
       <p class="lead">
@@ -66,7 +70,7 @@
       <!-- 🔍 Sección de escaneo -->
       <section id="scanSection">
         <h2>Escanear factura</h2>
-        <div class="upload-section mb-4">
+        <div id="uploadControls" class="upload-section mb-4">
           <input
             type="file"
             id="fileInput"
@@ -78,9 +82,9 @@
           </button>
         </div>
         <div id="loading" class="text-center hidden">
-  <div class="spinner-border text-primary" role="status"></div>
-  <p class="mt-2">Procesando imagen...</p>
-</div>
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2">Procesando imagen...</p>
+        </div>
 
         <div id="results" class="hidden">
           <h3>Factura extraída</h3>

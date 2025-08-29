@@ -28,19 +28,26 @@ logoutBtn.addEventListener("click", async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    document.getElementById("userGreeting").classList.add("d-none");
-    document.getElementById("historySection").classList.add("hidden");
-    document.getElementById("scanSection").classList.add("hidden");
-    document.getElementById("welcomeSection").classList.remove("hidden");
-    updateUIBasedOnAuth();
   } catch (err) {
     console.warn("Error al cerrar sesión:", err.message);
   }
 
+  // Limpiar estado visual
+  document.getElementById("userGreeting").classList.add("d-none");
+  document.getElementById("historySection").classList.add("hidden");
+  document.getElementById("scanSection").classList.add("hidden");
+  document.getElementById("welcomeSection").classList.remove("hidden");
+  document.getElementById("provider").textContent = "";
+  document.getElementById("issueDate").textContent = "";
+  document.getElementById("itemsTable").innerHTML = "";
+  document.getElementById("results").classList.add("hidden");
+
+  // Limpiar sesión
   localStorage.removeItem("authToken");
   token = "";
-  loginBtn.classList.remove("d-none");
-  logoutBtn.classList.add("d-none");
+
+  // Actualizar UI
+  updateUIBasedOnAuth();
 });
 
 scanBtn.addEventListener("click", () => {
@@ -304,6 +311,12 @@ function updateUIBasedOnAuth() {
     .getElementById("scanSection")
     .classList.toggle("hidden", !isLoggedIn);
   document.getElementById("historySection").classList.add("hidden"); // Siempre ocultar al inicio
+  document
+    .getElementById("uploadControls")
+    .classList.toggle("hidden", !isLoggedIn);
+  document.getElementById("provider").textContent = "";
+  document.getElementById("issueDate").textContent = "";
+  document.getElementById("itemsTable").innerHTML = "";
 
   const name = localStorage.getItem("userFullname");
   const greeting = document.getElementById("userGreeting");
