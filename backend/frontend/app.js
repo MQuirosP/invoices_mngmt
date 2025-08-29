@@ -387,3 +387,5 @@ function showSuccess(msg) {
     title.textContent = "Error";
   }, 3000);
 }
+
+updateUIBasedOnAuth();
