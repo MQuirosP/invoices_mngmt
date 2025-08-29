@@ -10,7 +10,7 @@ import axios from "axios";
 
 const router = express.Router();
 
-router.get("/:invoiceId", async (req: AuthRequest, res: Response) => {
+router.get("/:id", async (req: AuthRequest, res: Response) => {
   const { invoiceId } = req.params;
   const userId = requireUserId(req);
 
