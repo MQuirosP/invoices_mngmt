@@ -123,18 +123,19 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
 });
 
 function renderHistory(invoices) {
-  const tbody = document.getElementById("historyTable");
-  tbody.innerHTML = "";
+  const container = document.getElementById("historyCards");
+  container.innerHTML = "";
 
   invoices.forEach((inv) => {
-    const row = document.createElement("tr");
+    const card = document.createElement("div");
+    card.className = "card mb-3 shadow-sm";
 
-    row.innerHTML = `
-      <td>${inv.provider}</td>
-      <td>${formatDate(inv.issueDate)}</td>
-      <td>${inv.items?.length || 0}</td>
-      <td>
-        <div class="d-flex gap-3 justify-content-center">
+    card.innerHTML = `
+      <div class="card-body">
+        <h5 class="card-title">${inv.provider}</h5>
+        <p class="card-text mb-1"><strong>Fecha:</strong> ${formatDate(inv.issueDate)}</p>
+        <p class="card-text mb-2"><strong>Ítems:</strong> ${inv.items?.length || 0}</p>
+        <div class="d-flex gap-3">
           <i class="fas fa-file-lines text-primary" role="button" title="Ver desglose"
              onclick='showInvoiceDetails(${JSON.stringify(inv)})'></i>
 
@@ -147,10 +148,10 @@ function renderHistory(invoices) {
           <i class="fas fa-trash-alt text-danger" role="button" title="Eliminar"
              onclick="deleteInvoice('${inv.id}')"></i>
         </div>
-      </td>
+      </div>
     `;
 
-    tbody.appendChild(row);
+    container.appendChild(card);
   });
 }
 

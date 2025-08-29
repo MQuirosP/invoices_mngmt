@@ -133,6 +133,25 @@ footer {
   }
 }
 
+#historyCards .card i {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+#historyCards .card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+#historyCards .card-body {
+  padding: 1rem;
+}
+
+#historyCards .card i {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   #historySection table {
     display: block;
