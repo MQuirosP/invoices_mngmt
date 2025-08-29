@@ -229,16 +229,18 @@ footer {
     white-space: nowrap;
   }
 
+  #loginBtn  {
+    margin-top: 10px;
+  }
+
   #historySection th, #historySection td {
     min-width: 100px;
   }
-}
 
-@media (max-width: 768px) {
   #layoutWrapper {
     flex-direction: column;
     height: calc(100vh - 120px); /* navbar + footer */
-    margin-top: 56px;
+    /* margin-top: 56px; */
     margin-bottom: 64px;
   }
 

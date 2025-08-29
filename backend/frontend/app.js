@@ -504,9 +504,10 @@ function updateUIBasedOnAuth() {
 
   // Saludo opcional
   const greeting = document.getElementById("userGreeting");
-  const username = localStorage.getItem("username"); // si lo guardás en login
+  const username = localStorage.getItem("userFullname"); // si lo guardás en login
   if (isLoggedIn && username) {
-    greeting.textContent = `Hola, ${username}`;
+    const firstName = username?.split(" ")[0];
+    greeting.textContent = `¡Hola!, ${firstName}`;
     greeting.classList.remove("d-none");
   } else {
     greeting.classList.add("d-none");
