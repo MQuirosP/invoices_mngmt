@@ -455,7 +455,8 @@ function renderFileChips() {
 
   Array.from(fileBuffer.files).forEach((file, index) => {
     const chip = document.createElement("span");
-    chip.className = "badge bg-light text-dark border me-2 mb-2 d-flex align-items-center";
+    chip.className =
+      "badge bg-light text-dark border me-2 mb-2 d-flex align-items-center";
     chip.style.padding = "0.5rem 0.75rem";
 
     chip.innerHTML = `
@@ -478,10 +479,26 @@ function renderFileChips() {
   });
 }
 
-updateUIBasedOnAuth();
-const activeView = localStorage.getItem("activeView");
-if (activeView === "history") {
-  historyBtn.click();
-} else if (activeView === "scan") {
-  scanBtn.click();
+function updateUIBasedOnAuth() {
+  const isLoggedIn = !!localStorage.getItem("authToken");
+
+  document
+    .getElementById("welcomeSection")
+    .classList.toggle("hidden", isLoggedIn);
+  document
+    .getElementById("scanSection")
+    .classList.toggle("hidden", !isLoggedIn);
+  document.getElementById("historySection").classList.add("hidden");
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateUIBasedOnAuth();
+
+  const isLoggedIn = !!localStorage.getItem("authToken");
+  const activeView = localStorage.getItem("activeView");
+
+  if (!isLoggedIn) return; // Evita mostrar secciones si no hay sesión
+
+  if (activeView === "scan") scanBtn.click();
+  else if (activeView === "history") historyBtn.click();
+});
