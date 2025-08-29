@@ -51,4 +51,4 @@ async function handleViewImage(req: AuthRequest, res: Response): Promise<void> {
 
 router.get("/view-image/:invoiceId", handleViewImage);
 
-export default router;
+export default handleViewImage;
