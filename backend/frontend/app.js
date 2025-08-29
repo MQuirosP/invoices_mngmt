@@ -169,20 +169,16 @@ function renderHistory(invoices) {
     card.innerHTML = `
       <div class="card-body">
         <h5 class="card-title">${inv.provider}</h5>
-        <p class="card-text mb-1"><strong>Fecha:</strong> ${formatDate(
-          inv.issueDate
-        )}</p>
-        <p class="card-text mb-2"><strong>Ítems:</strong> ${
-          inv.items?.length || 0
-        }</p>
+        <p class="card-text mb-1"><strong>Fecha:</strong> ${formatDate(inv.issueDate)}</p>
+        <p class="card-text mb-2"><strong>Ítems:</strong> ${inv.items?.length || 0}</p>
         <div class="d-flex gap-3">
           <i class="fas fa-file-lines text-primary" role="button" title="Ver desglose"
              onclick='showInvoiceDetails(${JSON.stringify(inv)})'></i>
 
           ${
             inv.attachments?.[0]?.id
-              ? `<i class="fas fa-image text-secondary" role="button" title="View image"
-       onclick="window.open('${HOST}/api/view-image/${inv.id}', '_blank')"></i>`
+              ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
+                   onclick="openProtectedImage('${inv.id}')"></i>`
               : ""
           }
 
@@ -194,6 +190,26 @@ function renderHistory(invoices) {
 
     container.appendChild(card);
   });
+}
+
+function openProtectedImage(invoiceId) {
+  fetch(`${HOST}/api/view-image/${invoiceId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("No se pudo cargar la imagen");
+      return res.blob();
+    })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    })
+    .catch((err) => {
+      console.error("Error al abrir imagen:", err);
+      alert("No se pudo abrir la imagen.");
+    });
 }
 
 function showInvoiceDetails(invoice) {
