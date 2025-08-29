@@ -60,7 +60,7 @@ model Attachment {
   fileName  String
   invoiceId String
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@unique([invoiceId, fileName])
