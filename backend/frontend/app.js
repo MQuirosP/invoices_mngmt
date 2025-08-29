@@ -519,11 +519,15 @@ function updateUIBasedOnAuth() {
   const username = localStorage.getItem("userFullname"); // si lo guardás en login
   if (isLoggedIn && username) {
     const firstName = username?.split(" ")[0];
-    greeting.textContent = `¡Hola!, ${firstName}`;
+    greeting.textContent = `¡Hola!, ${capitalizeFirstLetter(firstName)}`;
     greeting.classList.remove("d-none");
   } else {
     greeting.classList.add("d-none");
   }
+}
+
+function capitalizeFirstLetter(name) {
+  return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
