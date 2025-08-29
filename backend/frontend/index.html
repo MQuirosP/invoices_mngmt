@@ -82,14 +82,19 @@
                 </p>
               </section>
               <!-- 🔍 Sección de escaneo -->
-              <section id="scanSection" class="hidden">
-                <h2>Escanear factura</h2>
+              <section
+                id="scanSection"
+                class="hidden bg-light p-4 rounded shadow-sm"
+              >
+                <h2 class="mb-4">📄 Escanear factura</h2>
+
                 <div id="uploadControls" class="upload-section mb-4">
                   <div id="fileWrapper" class="mb-3">
-                    <label for="fileInput" class="form-label"
+                    <label for="fileInput" class="form-label fw-semibold"
                       >Seleccioná archivos</label
                     >
-                    <!-- Contenedor visual de chips -->
+
+                    <!-- Chips visuales -->
                     <div
                       id="fileChipContainer"
                       class="d-flex align-items-center gap-2 flex-wrap border rounded px-3 py-2 bg-white"
@@ -98,6 +103,7 @@
                         >Ningún archivo seleccionado</span
                       >
                     </div>
+
                     <!-- Input oculto -->
                     <input
                       type="file"
@@ -106,28 +112,31 @@
                       accept="image/*"
                       multiple
                     />
-                    <!-- Botón para abrir el selector -->
-                    <button
-                      id="selectFileBtn"
-                      class="btn btn-outline-primary mt-2"
-                      aria-label="Seleccionar archivo"
-                    >
-                      Seleccionar archivo
-                    </button>
-                    <!-- Botón para procesar -->
-                    <button
-                      id="uploadBtn"
-                      class="btn btn-success mt-2 ms-2"
-                      aria-label="Procesar imagen"
-                    >
-                      Procesar imagen
-                    </button>
+
+                    <!-- Botones -->
+                    <div class="mt-3 d-flex gap-2">
+                      <button
+                        id="selectFileBtn"
+                        class="btn btn-outline-primary d-flex align-items-center gap-2"
+                      >
+                        <i class="fas fa-folder-open"></i> Seleccionar archivo
+                      </button>
+
+                      <button
+                        id="uploadBtn"
+                        class="btn btn-success d-flex align-items-center gap-2"
+                      >
+                        <i class="fas fa-upload"></i> Procesar imagen
+                      </button>
+                    </div>
                   </div>
                 </div>
+
                 <div id="loading" class="text-center hidden">
                   <div class="spinner-border text-primary" role="status"></div>
                   <p class="mt-2">Procesando imagen...</p>
                 </div>
+
                 <div id="results" class="hidden" aria-live="polite">
                   <h3>Factura extraída</h3>
                   <p><strong>Proveedor:</strong> <span id="provider"></span></p>
@@ -135,7 +144,6 @@
                     <strong>Fecha de emisión:</strong>
                     <span id="issueDate"></span>
                   </p>
-
                   <div id="itemsList" class="invoice-items mb-3"></div>
                 </div>
               </section>
@@ -375,7 +383,10 @@
     </div>
 
     <footer class="footer-custom text-center py-3">
-      <small><i class="fas fa-file-invoice text-light me-1"></i> OCR Facturas © 2025 — Gestión inteligente de documentos</small>
+      <small
+        ><i class="fas fa-file-invoice text-light me-1"></i> OCR Facturas © 2025
+        — Gestión inteligente de documentos</small
+      >
     </footer>
 
     <!-- 📦 Scripts -->

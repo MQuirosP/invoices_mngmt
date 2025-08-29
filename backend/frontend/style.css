@@ -178,10 +178,20 @@ footer {
 }
 
 #fileChipContainer {
-  min-height: 48px;
+  min-height: 60px;
+  max-width: 80%;
 }
 .btn-close {
   font-size: 0.7rem;
+}
+
+.btn {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* sombra suave */
+  transform: translateY(-1px); /* levanta apenas el botón */
 }
 
 .invoice-items {

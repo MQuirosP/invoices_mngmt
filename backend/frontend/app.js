@@ -164,7 +164,8 @@ function renderHistory(invoices) {
 
   invoices.forEach((inv) => {
     const card = document.createElement("div");
-    card.className = "card mb-3 shadow-sm";
+    card.className = "card mb-3 shadow-sm me-4";
+    card.style.maxWidth = "400px";
 
     card.innerHTML = `
       <div class="card-body">
@@ -488,7 +489,7 @@ function renderFileChips() {
   Array.from(fileBuffer.files).forEach((file, index) => {
     const chip = document.createElement("span");
     chip.className =
-      "badge bg-light text-dark border me-2 mb-2 d-flex align-items-center";
+      "badge bg-light text-dark border me-2 mb-1 d-flex align-items-center";
     chip.style.padding = "0.5rem 0.75rem";
 
     chip.innerHTML = `
