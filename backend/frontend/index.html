@@ -280,25 +280,68 @@
           </div>
         </div>
       </div>
-      
+
+      <!-- ✅ Modal: Éxito -->
+      <div
+        class="modal fade"
+        id="successModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content bg-success text-white">
+            <div class="modal-header">
+              <h5 class="modal-title">Éxito</h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body" id="successMessage"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- 🗑️ Modal: Confirmar eliminación -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-danger">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Confirmar eliminación</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      <div
+        class="modal fade"
+        id="confirmDeleteModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title">Confirmar eliminación</h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              ¿Seguro que querés eliminar esta factura?
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                id="confirmDeleteBtn"
+                class="btn btn-danger"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="modal-body">
-        ¿Seguro que querés eliminar esta factura?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Eliminar</button>
-      </div>
-    </div>
-  </div>
-</div>
     </main>
 
     <footer class="bg-light text-center py-3 mt-5 border-top">

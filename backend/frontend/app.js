@@ -271,8 +271,13 @@ function renderResults(data) {
 }
 
 function showError(msg) {
+  const modalEl = document.getElementById("errorModal");
   document.getElementById("errorMessage").textContent = msg;
-  new bootstrap.Modal(document.getElementById("errorModal")).show();
+  new bootstrap.Modal(modalEl).show();
+
+  setTimeout(() => {
+    bootstrap.Modal.getInstance(modalEl).hide();
+  }, 4000);
 }
 
 document.getElementById("registerBtn").addEventListener("click", () => {
@@ -390,22 +395,14 @@ function updateUIBasedOnAuth() {
 }
 
 function showSuccess(msg) {
-  const modalEl = document.getElementById("errorModal");
-  const content = modalEl.querySelector(".modal-content");
-  const title = modalEl.querySelector(".modal-title");
-  const body = modalEl.querySelector("#errorMessage");
+  const modalEl = document.getElementById("successModal");
+  const body = document.getElementById("successMessage");
 
-  content.classList.remove("bg-danger", "text-white");
-  content.classList.add("bg-success", "text-white");
-  title.textContent = "Éxito";
   body.textContent = msg;
-
   new bootstrap.Modal(modalEl).show();
 
   setTimeout(() => {
-    content.classList.remove("bg-success");
-    content.classList.add("bg-danger");
-    title.textContent = "Error";
+    bootstrap.Modal.getInstance(modalEl).hide();
   }, 3000);
 }
 
