@@ -127,28 +127,29 @@ function renderHistory(invoices) {
   tbody.innerHTML = "";
 
   invoices.forEach((inv) => {
-    const attachmentUrl = inv.attachments?.[0]?.url || null;
-
     const row = document.createElement("tr");
+
     row.innerHTML = `
       <td>${inv.provider}</td>
       <td>${formatDate(inv.issueDate)}</td>
       <td>${inv.items?.length || 0}</td>
       <td>
-        ${
-          attachmentUrl
-            ? `<button class="btn btn-sm btn-primary" onclick='showInvoiceDetails(${JSON.stringify(
-                inv
-              )})'>Ver desglose</button>`
-            : "—"
-        }
-      </td>
-      <td>
-        <button class="btn btn-sm btn-danger" onclick="deleteInvoice('${
-          inv.id
-        }')">Eliminar</button>
+        <div class="d-flex gap-3 justify-content-center">
+          <i class="fas fa-file-lines text-primary" role="button" title="Ver desglose"
+             onclick='showInvoiceDetails(${JSON.stringify(inv)})'></i>
+
+          ${inv.attachments?.[0]?.url
+            ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
+                 onclick="window.open('${inv.attachments[0].url}', '_blank')"></i>`
+            : ""
+          }
+
+          <i class="fas fa-trash-alt text-danger" role="button" title="Eliminar"
+             onclick="deleteInvoice('${inv.id}')"></i>
+        </div>
       </td>
     `;
+
     tbody.appendChild(row);
   });
 }

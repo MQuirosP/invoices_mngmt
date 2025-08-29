@@ -132,3 +132,15 @@ footer {
     display: none;
   }
 }
+
+@media (max-width: 768px) {
+  #historySection table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  #historySection th, #historySection td {
+    min-width: 100px;
+  }
+}
