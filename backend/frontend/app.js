@@ -8,7 +8,7 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
 
-const HOST = 'https://invoices-mngmt.onrender.com';
+const HOST = "https://invoices-mngmt.onrender.com";
 let token = localStorage.getItem("authToken") || "";
 
 if (token) {
@@ -28,8 +28,8 @@ confirmLoginBtn.addEventListener("click", async () => {
     const res = await fetch(`${HOST}/api/auth/login`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${inputToken}`
-      }
+        Authorization: `Bearer ${inputToken}`,
+      },
     });
 
     const json = await res.json();
@@ -50,8 +50,8 @@ logoutBtn.addEventListener("click", async () => {
     await fetch(`${HOST}/api/auth/logout`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
   } catch (err) {
     console.warn("Error al cerrar sesión:", err.message);
@@ -83,8 +83,8 @@ historyBtn.addEventListener("click", async () => {
     const res = await fetch(`${HOST}/api/invoices`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     const json = await res.json();
@@ -114,9 +114,9 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
     const res = await fetch(`${HOST}/api/invoices/ocrscan`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: formData
+      body: formData,
     });
 
     const json = await res.json();
@@ -139,7 +139,7 @@ function renderHistory(invoices) {
   const tbody = document.getElementById("historyTable");
   tbody.innerHTML = "";
 
-  invoices.forEach(inv => {
+  invoices.forEach((inv) => {
     const attachmentUrl = inv.attachments?.[0]?.url || null;
 
     const row = document.createElement("tr");
@@ -148,12 +148,16 @@ function renderHistory(invoices) {
       <td>${formatDate(inv.issueDate)}</td>
       <td>${inv.items?.length || 0}</td>
       <td>
-        ${attachmentUrl
-          ? `<button class="btn btn-sm btn-primary" onclick="showInvoice('${attachmentUrl}')">Ver</button>`
-          : "—"}
+        ${
+          attachmentUrl
+            ? `<button class="btn btn-sm btn-primary" onclick="showInvoice('${attachmentUrl}')">Ver</button>`
+            : "—"
+        }
       </td>
       <td>
-        <button class="btn btn-sm btn-danger" onclick="deleteInvoice('${inv.id}')">Eliminar</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteInvoice('${
+          inv.id
+        }')">Eliminar</button>
       </td>
     `;
     tbody.appendChild(row);
@@ -183,8 +187,8 @@ async function deleteInvoice(id) {
     const res = await fetch(`${HOST}/api/invoices/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!res.ok) throw new Error("No se pudo eliminar");
@@ -203,7 +207,7 @@ function renderResults(data) {
   const tbody = document.getElementById("itemsTable");
   tbody.innerHTML = "";
 
-  (data.items || []).forEach(item => {
+  (data.items || []).forEach((item) => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${item.description}</td>
@@ -222,3 +226,67 @@ function showError(msg) {
   document.getElementById("errorMessage").textContent = msg;
   new bootstrap.Modal(document.getElementById("errorModal")).show();
 }
+
+document.getElementById("registerBtn").addEventListener("click", () => {
+  new bootstrap.Modal(document.getElementById("registerModal")).show();
+});
+
+document
+  .getElementById("confirmRegisterBtn")
+  .addEventListener("click", async () => {
+    const email = document.getElementById("registerEmail").value.trim();
+    const fullname = document
+      .getElementById("registerFullname")
+      .value.trim()
+      .toLowerCase();
+    const password = document.getElementById("registerPassword").value;
+    const confirm = document.getElementById("registerConfirm").value;
+
+    if (!email || !fullname || !password || !confirm)
+      return showError("Completa todos los campos");
+    if (password !== confirm) return showError("Las contraseñas no coinciden");
+
+    try {
+      const res = await fetch(`${HOST}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, fullname, password }),
+      });
+
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || "Registro fallido");
+
+      bootstrap.Modal.getInstance(
+        document.getElementById("registerModal")
+      ).hide();
+      showError("Registro exitoso. Ahora podés iniciar sesión.");
+    } catch (err) {
+      showError("Error al registrar: " + err.message);
+    }
+  });
+
+  document.getElementById("confirmLoginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!email || !password) return showError("Completa los campos");
+
+  try {
+    const res = await fetch(`${HOST}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const json = await res.json();
+    if (!json.success || !json.token) throw new Error(json.message || "Login fallido");
+
+    token = json.token;
+    localStorage.setItem("authToken", token);
+    loginBtn.classList.add("d-none");
+    logoutBtn.classList.remove("d-none");
+    bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+  } catch (err) {
+    showError("Error al iniciar sesión: " + err.message);
+  }
+});

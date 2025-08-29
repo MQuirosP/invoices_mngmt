@@ -17,6 +17,9 @@
       <nav>
         <button id="scanBtn" class="active">Escanear factura</button>
         <button id="historyBtn">Ver historial</button>
+        <button id="registerBtn" class="btn btn-outline-info me-2">
+          Registro
+        </button>
       </nav>
     </header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
@@ -116,6 +119,65 @@
       </div>
     </div>
 
+    <!-- Modal de registro -->
+    <div
+      class="modal fade"
+      id="registerModal"
+      tabindex="-1"
+      aria-labelledby="registerModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Registro de usuario</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <input
+              type="email"
+              id="registerEmail"
+              class="form-control mb-2"
+              placeholder="Correo electrónico"
+            />
+            <input
+              type="text"
+              id="registerFullname"
+              class="form-control mb-2"
+              placeholder="Nombre completo"
+            />
+            <input
+              type="password"
+              id="registerPassword"
+              class="form-control mb-2"
+              placeholder="Contraseña"
+            />
+            <input
+              type="password"
+              id="registerConfirm"
+              class="form-control"
+              placeholder="Confirmar contraseña"
+            />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              id="confirmRegisterBtn"
+              class="btn btn-primary"
+            >
+              Registrarse
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de login -->
     <div
       class="modal fade"
       id="loginModal"
@@ -126,7 +188,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Autenticación</h5>
+            <h5 class="modal-title">Iniciar sesión</h5>
             <button
               type="button"
               class="btn-close"
@@ -136,10 +198,16 @@
           </div>
           <div class="modal-body">
             <input
+              type="email"
+              id="loginEmail"
+              class="form-control mb-2"
+              placeholder="Correo electrónico"
+            />
+            <input
               type="password"
-              id="tokenInput"
+              id="loginPassword"
               class="form-control"
-              placeholder="Token de acceso"
+              placeholder="Contraseña"
             />
           </div>
           <div class="modal-footer">
@@ -150,7 +218,7 @@
         </div>
       </div>
     </div>
-
+    <!-- Modal de error -->
     <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-danger text-white">
