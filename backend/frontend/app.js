@@ -61,6 +61,12 @@ scanBtn.addEventListener("click", () => {
   historyBtn.classList.remove("active");
   scanSection.classList.remove("hidden");
   historySection.classList.add("hidden");
+  document.getElementById("results").classList.add("hidden");
+document.getElementById("provider").textContent = "";
+document.getElementById("issueDate").textContent = "";
+document.getElementById("itemsTable").innerHTML = "";
+document.getElementById("fileInput").value = "";
+document.getElementById("clearFileBtn")?.classList.add("d-none");
 });
 
 historyBtn.addEventListener("click", async () => {
@@ -130,6 +136,7 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
     showError("Error al procesar la imagen: " + err.message);
   } finally {
     fileInput.value = ""; // Limpia el campo
+    document.getElementById("clearFileBtn")?.classList.add("d-none");
     document.getElementById("loading").classList.add("hidden");
   }
 });
