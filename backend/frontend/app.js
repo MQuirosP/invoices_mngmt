@@ -433,8 +433,6 @@ function showSuccess(msg) {
   }, 3000);
 }
 
-selectFileBtn.addEventListener("click", () => fileInput.click());
-
 fileInput.addEventListener("change", () => {
   Array.from(fileInput.files).forEach((file) => {
     // Evitar duplicados por nombre
