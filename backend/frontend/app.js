@@ -209,7 +209,11 @@ function openProtectedImage(invoiceId) {
     })
     .then((blob) => {
       const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      const modalImg = document.getElementById("modalImage");
+      modalImg.src = url;
+
+      const modal = new bootstrap.Modal(document.getElementById("imageModal"));
+      modal.show();
     })
     .catch((err) => {
       console.error("Error al abrir imagen:", err);
@@ -309,7 +313,7 @@ function renderResults(data) {
 
   (data.items || []).forEach((item) => {
     const card = document.createElement("div");
-    card.className = "invoice-card";
+    card.className = "invoice-card fade-in";
 
     card.innerHTML = `
       <div class="d-flex justify-content-between">

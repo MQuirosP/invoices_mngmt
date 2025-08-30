@@ -74,7 +74,7 @@
             <!-- 📦 Contenido principal -->
             <main class="col-md-9 col-lg-10 px-4">
               <!-- 👋 Sección de bienvenida -->
-              <section id="welcomeSection" class="text-center py-5">
+              <section id="welcomeSection" class="text-center py-5 fade-in">
                 <h2>Bienvenido a la gestión de facturas OCR</h2>
                 <p class="lead">
                   Iniciá sesión o registrate para escanear facturas, consultar
@@ -84,7 +84,7 @@
               <!-- 🔍 Sección de escaneo -->
               <section
                 id="scanSection"
-                class="hidden bg-light p-4 rounded shadow-sm"
+                class="hidden bg-light p-4 rounded shadow-sm fade-in"
               >
                 <h2 class="mb-4">📄 Escanear factura</h2>
 
@@ -151,7 +151,7 @@
                   </div>
                 </div>
 
-                <div id="results" class="hidden" aria-live="polite">
+                <div id="results" class="hidden fade-in" aria-live="polite">
                   <h3>Factura extraída</h3>
                   <p><strong>Proveedor:</strong> <span id="provider"></span></p>
                   <p>
@@ -163,11 +163,40 @@
               </section>
 
               <!-- 📜 Sección de historial -->
-              <section id="historySection" class="hidden">
-                <h2>Historial de facturas</h2>
+              <section id="historySection" class="hidden fade-in">
+                <h2 class="mt-4">Historial de facturas</h2>
                 <div id="historyCards" class="row gy-3"></div>
               </section>
             </main>
+          </div>
+        </div>
+        <!-- 🖼️ Modal: Ver imagen -->
+        <div
+          id="imageModal"
+          class="modal fade"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Imagen de factura</h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar"
+                ></button>
+              </div>
+              <div class="modal-body text-center">
+                <img
+                  id="modalImage"
+                  src=""
+                  alt="Factura"
+                  class="img-fluid rounded shadow-sm"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
