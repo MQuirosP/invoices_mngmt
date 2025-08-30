@@ -99,8 +99,10 @@
                       id="fileChipContainer"
                       class="d-flex align-items-center gap-2 flex-wrap border rounded px-3 py-2 bg-white"
                     >
-                      <span class="text-muted"
-                         onclick="document.getElementById('fileInput').click()">Ningún archivo seleccionado</span
+                      <span
+                        class="text-muted"
+                        onclick="document.getElementById('fileInput').click()"
+                        >Ningún archivo seleccionado</span
                       >
                     </div>
 
@@ -196,6 +198,26 @@
                   alt="Factura"
                   class="img-fluid rounded shadow-sm"
                 />
+              </div>
+              <div class="modal-footer bg-dark d-flex justify-content-center gap-3 mt-3">
+                <button
+                  id="downloadImageBtn"
+                  class="btn btn-outline-success rounded-circle"
+                  aria-label="Descargar imagen"
+                >
+                  <i class="fas fa-download"></i>
+                </button>
+
+                <button
+                  id="shareImageBtn"
+                  class="btn btn-outline-primary rounded-circle"
+                  aria-label="Compartir imagen"
+                >
+                  <i class="fas fa-share-alt"></i>
+                </button>
+              </div>
+
+              <!-- <div class="modal-footer bg-dark text-center">
                 <button
                   id="downloadImageBtn"
                   class="btn btn-outline-success"
@@ -203,7 +225,7 @@
                 >
                   <i class="fas fa-download download-icon"></i>
                 </button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>

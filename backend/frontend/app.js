@@ -198,6 +198,10 @@ function renderHistory(invoices) {
 }
 
 function openProtectedImage(invoiceId, attachmentId) {
+  // Cierra el modal de detalles antes de continuar
+  const invoiceModal = bootstrap.Modal.getInstance(document.getElementById("invoiceModal"));
+  if (invoiceModal) invoiceModal.hide();
+
   fetch(`${HOST}/api/view-image/${invoiceId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -258,6 +262,30 @@ icon.classList.remove("download-icon");
 void icon.offsetWidth; // fuerza reflow
 icon.classList.add("download-icon");
 
+document.getElementById("shareImageBtn").addEventListener("click", () => {
+  const img = document.getElementById("modalImage");
+  if (!img.src) return;
+
+  fetch(img.src)
+    .then(res => res.blob())
+    .then(blob => {
+      const file = new File([blob], "factura.jpg", { type: blob.type });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          title: "Factura",
+          text: "Compartiendo imagen de factura",
+          files: [file],
+        }).catch(err => {
+          console.error("Error al compartir:", err);
+          showError("No se pudo compartir la imagen.");
+        });
+      } else {
+        showError("Compartir no está disponible en este dispositivo.");
+      }
+    });
+});
+
 function showInvoiceDetails(invoice) {
   const modalDetails = document.getElementById("modalInvoiceDetails");
   const viewImageBtn = document.getElementById("viewImageBtn");
@@ -293,7 +321,7 @@ function showInvoiceDetails(invoice) {
   if (invoice.attachments?.[0]?.url) {
     viewImageBtn.classList.remove("d-none");
     viewImageBtn.onclick = () =>
-      window.open(invoice.attachments[0].url, "_blank");
+      openProtectedImage(invoice.id, invoice.attachments[0].id);
   } else {
     viewImageBtn.classList.add("d-none");
   }
