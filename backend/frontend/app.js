@@ -180,10 +180,12 @@ function renderHistory(invoices) {
           <i class="fas fa-file-lines text-primary" role="button" title="Ver desglose"
              onclick='showInvoiceDetails(${JSON.stringify(inv)})'></i>
 
-          ${inv.attachments?.[0]?.id
-  ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
+          ${
+            inv.attachments?.[0]?.id
+              ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
        onclick="openProtectedImage('${inv.id}', '${inv.attachments[0].id}')"></i>`
-  : ""}
+              : ""
+          }
 
           <i class="fas fa-trash-alt text-danger" role="button" title="Eliminar"
    onclick="deleteInvoice('${inv.id}')"></i>
@@ -223,11 +225,14 @@ function openProtectedImage(invoiceId, attachmentId) {
 }
 
 function downloadProtectedImage(invoiceId, attachmentId) {
-  fetch(`${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}/download`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
+  fetch(
+    `${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}/download`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
     .then((res) => {
       if (!res.ok) throw new Error("No se pudo descargar la imagen");
       return res.blob();
@@ -247,6 +252,11 @@ function downloadProtectedImage(invoiceId, attachmentId) {
       showError("No se pudo descargar la imagen.");
     });
 }
+
+const icon = document.querySelector("#downloadImageBtn i");
+icon.classList.remove("download-icon");
+void icon.offsetWidth; // fuerza reflow
+icon.classList.add("download-icon");
 
 function showInvoiceDetails(invoice) {
   const modalDetails = document.getElementById("modalInvoiceDetails");
