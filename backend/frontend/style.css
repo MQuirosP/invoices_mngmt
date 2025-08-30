@@ -224,6 +224,19 @@ footer {
   margin-top: 1rem;
 }
 
+.card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+  border-radius: 0.5rem;
+  background-color: #ffffff; /* fondo base blanco */
+}
+
+.card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  background-color: #d4edda; /* verde pastel suave */
+}
+
 .invoice-card {
   background-color: #ffffff;
   border: 1px solid #dee2e6;
