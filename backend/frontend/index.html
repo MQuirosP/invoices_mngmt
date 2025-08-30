@@ -133,8 +133,22 @@
                 </div>
 
                 <div id="loading" class="text-center hidden">
-                  <div class="spinner-border text-primary" role="status"></div>
-                  <p class="mt-2">Procesando imagen...</p>
+                  <div class="d-flex flex-column align-items-center gap-3">
+                    <div
+                      class="spinner-border text-success"
+                      role="status"
+                      style="width: 3rem; height: 3rem"
+                    ></div>
+                    <p class="mt-2 fw-semibold text-success">
+                      Procesando imagen...
+                    </p>
+                    <div class="progress w-50" style="height: 6px">
+                      <div
+                        class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                        style="width: 100%"
+                      ></div>
+                    </div>
+                  </div>
                 </div>
 
                 <div id="results" class="hidden" aria-live="polite">

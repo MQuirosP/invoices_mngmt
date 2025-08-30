@@ -1,5 +1,6 @@
 /* General layout */
-html, body {
+html,
+body {
   height: 100vh;
   margin: 0;
   display: flex;
@@ -12,7 +13,9 @@ main {
   flex: 1;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: 600;
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -117,8 +120,14 @@ button:focus {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Aside panel */
@@ -217,6 +226,24 @@ footer {
   transform: translateY(-1px); /* levanta apenas el botón */
 }
 
+#loading .spinner-border {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+#loading p {
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+
 .invoice-items {
   display: flex;
   flex-direction: column;
@@ -226,7 +253,8 @@ footer {
 
 .card {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease,
+    background-color 0.2s ease;
   border-radius: 0.5rem;
   background-color: #ffffff; /* fondo base blanco */
 }
@@ -243,7 +271,8 @@ footer {
   border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 1rem;
-  transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease,
+    background-color 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   font-size: 0.95rem;
 }
@@ -321,11 +350,12 @@ footer {
     white-space: nowrap;
   }
 
-  #loginBtn  {
+  #loginBtn {
     margin-top: 10px;
   }
 
-  #historySection th, #historySection td {
+  #historySection th,
+  #historySection td {
     min-width: 100px;
   }
 
