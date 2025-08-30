@@ -492,7 +492,7 @@ function renderFileChips() {
 
   Array.from(fileBuffer.files).forEach((file, index) => {
     const chip = document.createElement("span");
-    chip.className = "file-chip";
+    chip.className = "file-chip fade-in";
     chip.style.padding = "0.5rem 0.75rem";
 
     chip.innerHTML = `
