@@ -170,8 +170,12 @@ function renderHistory(invoices) {
     card.innerHTML = `
       <div class="card-body">
         <h5 class="card-title">${inv.provider}</h5>
-        <p class="card-text mb-1"><strong>Fecha:</strong> ${formatDate(inv.issueDate)}</p>
-        <p class="card-text mb-2"><strong>Ítems:</strong> ${inv.items?.length || 0}</p>
+        <p class="card-text mb-1"><strong>Fecha:</strong> ${formatDate(
+          inv.issueDate
+        )}</p>
+        <p class="card-text mb-2"><strong>Ítems:</strong> ${
+          inv.items?.length || 0
+        }</p>
         <div class="d-flex gap-3">
           <i class="fas fa-file-lines text-primary" role="button" title="Ver desglose"
              onclick='showInvoiceDetails(${JSON.stringify(inv)})'></i>
@@ -492,9 +496,9 @@ function renderFileChips() {
     chip.style.padding = "0.5rem 0.75rem";
 
     chip.innerHTML = `
-      ${file.name}
-      <button type="button" class="btn-close ms-2" aria-label="Eliminar"></button>
-    `;
+  <span>${file.name}</span>
+  <button type="button" class="btn-close ms-2" aria-label="Eliminar"></button>
+`;
 
     chip.querySelector("button").addEventListener("click", () => {
       const newBuffer = new DataTransfer();

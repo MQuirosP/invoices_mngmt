@@ -59,6 +59,18 @@ h3 {
   align-items: center;
   margin-right: 0.5rem;
   margin-bottom: 0.5rem;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-chip > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px; /* ajustable según tu layout */
+  display: inline-block;
 }
 
 .file-chip .btn-close {
@@ -67,6 +79,7 @@ h3 {
   border-radius: 50%;
   padding: 0.25rem;
   margin-left: 0.5rem;
+  flex-shrink: 0;
 }
 
 .file-chip .btn-close:hover {
