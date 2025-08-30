@@ -351,6 +351,13 @@ document.getElementById("registerBtn").addEventListener("click", () => {
   new bootstrap.Modal(document.getElementById("registerModal")).show();
 });
 
+document.getElementById("registerModal").addEventListener("hidden.bs.modal", () => {
+  document.getElementById("registerEmail").value = "";
+  document.getElementById("registerFullname").value = "";
+  document.getElementById("registerPassword").value = "";
+  document.getElementById("registerConfirm").value = "";
+});
+
 document
   .getElementById("confirmRegisterBtn")
   .addEventListener("click", async () => {
