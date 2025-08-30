@@ -180,15 +180,13 @@ function renderHistory(invoices) {
           <i class="fas fa-file-lines text-primary" role="button" title="Ver desglose"
              onclick='showInvoiceDetails(${JSON.stringify(inv)})'></i>
 
-          ${
-            inv.attachments?.[0]?.id
-              ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
-                   onclick="openProtectedImage('${inv.id}')"></i>`
-              : ""
-          }
+          ${inv.attachments?.[0]?.id
+  ? `<i class="fas fa-image text-secondary" role="button" title="Ver imagen"
+       onclick="openProtectedImage('${inv.id}', '${inv.attachments[0].id}')"></i>`
+  : ""}
 
           <i class="fas fa-trash-alt text-danger" role="button" title="Eliminar"
-             onclick="deleteInvoice('${inv.id}')"></i>
+   onclick="deleteInvoice('${inv.id}')"></i>
         </div>
       </div>
     `;
@@ -225,7 +223,7 @@ function openProtectedImage(invoiceId, attachmentId) {
 }
 
 function downloadProtectedImage(invoiceId, attachmentId) {
-  fetch(`${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}`, {
+  fetch(`${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}/download`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -235,17 +233,18 @@ function downloadProtectedImage(invoiceId, attachmentId) {
       return res.blob();
     })
     .then((blob) => {
+      if (blob.size === 0) throw new Error("Archivo vacío");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `factura-${invoiceId}.jpg`; // podés ajustar la extensión si es PNG o PDF
+      a.download = `factura-${invoiceId}.jpg`;
       document.body.appendChild(a);
       a.click();
       a.remove();
     })
     .catch((err) => {
       console.error("Error al descargar imagen:", err);
-      alert("No se pudo descargar la imagen.");
+      showError("No se pudo descargar la imagen.");
     });
 }
 
