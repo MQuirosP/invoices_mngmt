@@ -234,7 +234,8 @@ footer {
 .card:hover {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
-  background-color: #d4edda; /* verde pastel suave */
+  background-color: #d4edda;
+  cursor: pointer;
 }
 
 .invoice-card {
@@ -242,8 +243,15 @@ footer {
   border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 1rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   font-size: 0.95rem;
+}
+
+.invoice-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  background-color: #d4edda; /* verde pastel suave */
 }
 
 .invoice-card strong {
