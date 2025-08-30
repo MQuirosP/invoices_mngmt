@@ -536,7 +536,7 @@ function renderFileChips() {
   fileChipContainer.innerHTML = "";
 
   if (fileBuffer.files.length === 0) {
-    fileChipContainer.innerHTML = `<span class="text-muted fade-in">Ningún archivo seleccionado</span>`;
+    fileChipContainer.innerHTML = `<span class="text-muted fade-in" onclick="document.getElementById('fileInput').click()">Ningún archivo seleccionado</span>`;
     return;
   }
 
