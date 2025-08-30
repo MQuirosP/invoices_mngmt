@@ -313,6 +313,23 @@ footer {
   color: #adb5bd;
 }
 
+#downloadImageBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+#downloadImageBtn:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
 #results table {
   width: 100%;
   border-collapse: separate;

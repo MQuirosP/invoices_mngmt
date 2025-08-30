@@ -197,7 +197,7 @@ function renderHistory(invoices) {
   });
 }
 
-function openProtectedImage(invoiceId) {
+function openProtectedImage(invoiceId, attachmentId) {
   fetch(`${HOST}/api/view-image/${invoiceId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -209,8 +209,11 @@ function openProtectedImage(invoiceId) {
     })
     .then((blob) => {
       const url = URL.createObjectURL(blob);
-      const modalImg = document.getElementById("modalImage");
-      modalImg.src = url;
+      document.getElementById("modalImage").src = url;
+
+      const downloadBtn = document.getElementById("downloadImageBtn");
+      downloadBtn.onclick = () =>
+        downloadProtectedImage(invoiceId, attachmentId);
 
       const modal = new bootstrap.Modal(document.getElementById("imageModal"));
       modal.show();
@@ -218,6 +221,31 @@ function openProtectedImage(invoiceId) {
     .catch((err) => {
       console.error("Error al abrir imagen:", err);
       alert("No se pudo abrir la imagen.");
+    });
+}
+
+function downloadProtectedImage(invoiceId, attachmentId) {
+  fetch(`${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("No se pudo descargar la imagen");
+      return res.blob();
+    })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `factura-${invoiceId}.jpg`; // podés ajustar la extensión si es PNG o PDF
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    })
+    .catch((err) => {
+      console.error("Error al descargar imagen:", err);
+      alert("No se pudo descargar la imagen.");
     });
 }
 
@@ -351,12 +379,14 @@ document.getElementById("registerBtn").addEventListener("click", () => {
   new bootstrap.Modal(document.getElementById("registerModal")).show();
 });
 
-document.getElementById("registerModal").addEventListener("hidden.bs.modal", () => {
-  document.getElementById("registerEmail").value = "";
-  document.getElementById("registerFullname").value = "";
-  document.getElementById("registerPassword").value = "";
-  document.getElementById("registerConfirm").value = "";
-});
+document
+  .getElementById("registerModal")
+  .addEventListener("hidden.bs.modal", () => {
+    document.getElementById("registerEmail").value = "";
+    document.getElementById("registerFullname").value = "";
+    document.getElementById("registerPassword").value = "";
+    document.getElementById("registerConfirm").value = "";
+  });
 
 document
   .getElementById("confirmRegisterBtn")
