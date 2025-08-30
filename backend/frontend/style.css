@@ -255,6 +255,10 @@ footer {
   margin-top: 1rem;
 }
 
+.modal-header .btn-close {
+  filter: invert(1) brightness(1.2); /* invierte el ícono oscuro a claro */
+}
+
 .card {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.2s ease, transform 0.2s ease,
