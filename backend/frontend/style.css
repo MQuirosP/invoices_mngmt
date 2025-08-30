@@ -209,18 +209,8 @@ footer {
   cursor: pointer;
 }
 
-#historyCards .card {
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-}
-
 #historyCards .card-body {
   padding: 1rem;
-}
-
-#historyCards .card i {
-  font-size: 1.2rem;
-  cursor: pointer;
 }
 
 #fileChipContainer {
@@ -270,7 +260,7 @@ footer {
   transition: box-shadow 0.2s ease, transform 0.2s ease,
     background-color 0.2s ease;
   border-radius: 0.5rem;
-  background-color: #ffffff; /* fondo base blanco */
+  background-color: #fff9db;
 }
 
 .card:hover {
@@ -281,7 +271,7 @@ footer {
 }
 
 .invoice-card {
-  background-color: #ffffff;
+  background-color: #fff9db;
   border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 1rem;
@@ -371,13 +361,6 @@ footer {
   #historySection th,
   #historySection td {
     min-width: 100px;
-  }
-
-  #layoutWrapper {
-    flex-direction: column;
-    height: calc(100vh - 120px); /* navbar + footer */
-    /* margin-top: 56px; */
-    /* margin-bottom: 40px; */
   }
 
   aside {
