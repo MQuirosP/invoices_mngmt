@@ -10,7 +10,6 @@ const confirmLoginBtn = document.getElementById("confirmLoginBtn");
 
 const fileInput = document.getElementById("fileInput");
 const fileChipContainer = document.getElementById("fileChipContainer");
-selectFileBtn.addEventListener("click", () => fileInput.click());
 
 const fileBuffer = new DataTransfer();
 
