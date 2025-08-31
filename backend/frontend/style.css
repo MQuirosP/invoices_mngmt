@@ -95,6 +95,10 @@ h1, h2, h3 {
   border-color: var(--color-primary);
 }
 
+#fileWrapper {
+  height: 180px;
+}
+
 #fileChipContainer {
   flex: 1 1 100%;
   min-width: 100%;
