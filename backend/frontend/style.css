@@ -219,7 +219,9 @@ h1, h2, h3 {
 }
 
 #historyCards .card {
-  flex: 1 1 280px;
+  margin-left: 15px;
+  margin-right: 15px;
+  flex: 1 1 250px;
   max-width:fit-content;
 }
 
