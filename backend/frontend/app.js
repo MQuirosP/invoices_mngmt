@@ -50,10 +50,10 @@ fileInput.addEventListener("change", () => {
 });
 
 // 🖱️ Botón para abrir input
-selectFileBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  fileInput.click();
-});
+// selectFileBtn.addEventListener("click", (e) => {
+//   e.stopPropagation();
+//   fileInput.click();
+// });
 
 dropZone.addEventListener("click", (e) => {
   e.stopPropagation();
