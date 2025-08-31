@@ -230,8 +230,7 @@ function renderHistory(invoices) {
 
   invoices.forEach((inv) => {
     const card = document.createElement("div");
-    card.className = "card mb-3 shadow-sm me-4";
-    card.style.maxWidth = "400px";
+    card.className = "card shadow-sm";
 
     card.innerHTML = `
       <div class="card-body">
