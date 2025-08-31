@@ -18,6 +18,73 @@ if (clearFileBtn) {
   clearFileBtn.classList.add("d-none");
 }
 
+// 🧹 Elimina archivo del buffer
+fileChipContainer.addEventListener("click", (e) => {
+  if (e.target.classList.contains("btn-close")) {
+    const nameToRemove = e.target.parentElement.textContent.trim();
+    const newBuffer = new DataTransfer();
+
+    [...fileBuffer.files].forEach((file) => {
+      if (file.name !== nameToRemove) {
+        newBuffer.items.add(file);
+      }
+    });
+
+    fileBuffer.items.clear();
+    [...newBuffer.files].forEach((f) => fileBuffer.items.add(f));
+    fileInput.files = fileBuffer.files;
+    renderFileChips();
+  }
+});
+
+// 📂 Input manual
+fileInput.addEventListener("change", () => {
+  [...fileInput.files].forEach((file) => {
+    if (![...fileBuffer.files].some((f) => f.name === file.name)) {
+      fileBuffer.items.add(file);
+    }
+  });
+
+  fileInput.files = fileBuffer.files;
+  renderFileChips();
+});
+
+// 🖱️ Botón para abrir input
+selectFileBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  fileInput.click();
+});
+
+dropZone.addEventListener("click", (e) => {
+  e.stopPropagation();
+  fileInput.click();
+});
+
+// 🪄 Drag & Drop
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("drag-over");
+});
+
+dropZone.addEventListener("dragleave", () => {
+  dropZone.classList.remove("drag-over");
+});
+
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("drag-over");
+
+  const files = Array.from(e.dataTransfer.files);
+  files.forEach((file) => {
+    if (![...fileBuffer.files].some((f) => f.name === file.name)) {
+      fileBuffer.items.add(file);
+    }
+  });
+
+  fileInput.files = fileBuffer.files;
+  renderFileChips();
+});
+
 let pendingDeleteId = null;
 
 const HOST = "https://invoices-mngmt.onrender.com";
@@ -198,7 +265,9 @@ function renderHistory(invoices) {
 
 function openProtectedImage(invoiceId, attachmentId) {
   // Cierra el modal de detalles antes de continuar
-  const invoiceModal = bootstrap.Modal.getInstance(document.getElementById("invoiceModal"));
+  const invoiceModal = bootstrap.Modal.getInstance(
+    document.getElementById("invoiceModal")
+  );
   if (invoiceModal) invoiceModal.hide();
 
   fetch(`${HOST}/api/view-image/${invoiceId}`, {
@@ -266,19 +335,21 @@ document.getElementById("shareImageBtn").addEventListener("click", () => {
   if (!img.src) return;
 
   fetch(img.src)
-    .then(res => res.blob())
-    .then(blob => {
+    .then((res) => res.blob())
+    .then((blob) => {
       const file = new File([blob], "factura.jpg", { type: blob.type });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({
-          title: "Factura",
-          text: "Compartiendo imagen de factura",
-          files: [file],
-        }).catch(err => {
-          console.error("Error al compartir:", err);
-          showError("No se pudo compartir la imagen.");
-        });
+        navigator
+          .share({
+            title: "Factura",
+            text: "Compartiendo imagen de factura",
+            files: [file],
+          })
+          .catch((err) => {
+            console.error("Error al compartir:", err);
+            showError("No se pudo compartir la imagen.");
+          });
       } else {
         showError("Compartir no está disponible en este dispositivo.");
       }
@@ -559,32 +630,50 @@ fileInput.addEventListener("change", () => {
   renderFileChips();
 });
 
+
 function renderFileChips() {
   fileChipContainer.innerHTML = "";
 
   if (fileBuffer.files.length === 0) {
-    fileChipContainer.innerHTML = `<span class="text-muted fade-in" onclick="document.getElementById('fileInput').click()">Ningún archivo seleccionado</span>`;
+    const placeholder = document.createElement("div");
+    placeholder.className = "upload-placeholder text-center w-100 fade-in";
+    placeholder.innerHTML = `
+      <div class="d-flex flex-column align-items-center justify-content-center w-100 py-3 px-4">
+        <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+        <strong class="text-primary">Arrastrá tus archivos aquí</strong>
+        <span class="text-muted small">o hacé clic para seleccionarlos</span>
+      </div>
+    `;
+    placeholder.addEventListener("click", (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+    fileChipContainer.appendChild(placeholder);
     return;
   }
 
-  Array.from(fileBuffer.files).forEach((file, index) => {
+  Array.from(fileBuffer.files).forEach((file) => {
     const chip = document.createElement("span");
     chip.className = "file-chip fade-in";
     chip.style.padding = "0.5rem 0.75rem";
 
     chip.innerHTML = `
-  <span>${file.name}</span>
-  <button type="button" class="btn-close ms-2" aria-label="Eliminar"></button>
-`;
+      <span>${file.name}</span>
+      <button type="button" class="btn-close ms-2" aria-label="Eliminar"></button>
+    `;
 
-    chip.querySelector("button").addEventListener("click", () => {
+    chip.querySelector("button").addEventListener("click", (e) => {
+      e.stopPropagation();
       const newBuffer = new DataTransfer();
-      Array.from(fileBuffer.files).forEach((f, i) => {
-        if (i !== index) newBuffer.items.add(f);
+
+      Array.from(fileBuffer.files).forEach((f) => {
+        if (f.name !== file.name) {
+          newBuffer.items.add(f);
+        }
       });
+
       fileBuffer.items.clear();
       Array.from(newBuffer.files).forEach((f) => fileBuffer.items.add(f));
-      fileInput.files = fileBuffer.files;
       renderFileChips();
     });
 

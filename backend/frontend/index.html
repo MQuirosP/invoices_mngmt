@@ -90,20 +90,37 @@
 
                 <div id="uploadControls" class="upload-section mb-4">
                   <div id="fileWrapper" class="mb-3">
-                    <label for="fileInput" class="form-label fw-semibold"
-                      >Seleccioná archivos</label
-                    >
+                    <label for="fileInput" class="form-label fw-semibold">
+                      Seleccioná archivos
+                    </label>
 
-                    <!-- Chips visuales -->
+                    <!-- Zona de arrastre + chips -->
                     <div
-                      id="fileChipContainer"
-                      class="d-flex align-items-center gap-2 flex-wrap border rounded px-3 py-2 bg-white"
+                      id="dropZone"
+                      class="d-flex align-items-center justify-content-center gap-2 flex-wrap border rounded px-3 py-2 bg-white drop-zone"
                     >
-                      <span
-                        class="text-muted"
-                        onclick="document.getElementById('fileInput').click()"
-                        >Ningún archivo seleccionado</span
+                      <div
+                        id="fileChipContainer"
+                        class="d-flex flex-wrap gap-2 align-content-center"
                       >
+                        <div
+                          class="upload-placeholder text-center w-100 fade-in"
+                        >
+                          <div
+                            class="d-flex flex-column align-items-center justify-content-center w-100 py-3 px-4"
+                          >
+                            <i
+                              class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"
+                            ></i>
+                            <strong class="text-primary"
+                              >Arrastrá tus archivos aquí</strong
+                            >
+                            <span class="text-muted small"
+                              >o hacé clic para seleccionarlos</span
+                            >
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <!-- Input oculto -->
@@ -163,7 +180,6 @@
                   <div id="itemsList" class="invoice-items mb-3"></div>
                 </div>
               </section>
-
               <!-- 📜 Sección de historial -->
               <section id="historySection" class="hidden fade-in">
                 <h2 class="mt-4">Historial de facturas</h2>
@@ -199,7 +215,9 @@
                   class="img-fluid rounded shadow-sm"
                 />
               </div>
-              <div class="modal-footer bg-dark d-flex justify-content-center gap-3 mt-3">
+              <div
+                class="modal-footer bg-dark d-flex justify-content-center gap-3 mt-3"
+              >
                 <button
                   id="downloadImageBtn"
                   class="btn btn-outline-success rounded-circle"

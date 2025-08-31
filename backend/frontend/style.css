@@ -59,7 +59,9 @@ h3 {
   align-items: center;
   margin-right: 0.5rem;
   margin-bottom: 0.5rem;
-  max-width: 60%;
+  max-width: 140px;
+  min-width: 80px;
+  max-height: 30px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -84,6 +86,21 @@ h3 {
 
 .file-chip .btn-close:hover {
   background-color: #f5c6cb;
+}
+
+.upload-placeholder {
+  flex: 1 1 100%;
+  min-width: 100%;
+
+  cursor: pointer;
+  border: 2px dashed #0d6efd;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+}
+
+.upload-placeholder:hover {
+  background-color: #e9f5ff;
 }
 
 /* Results and history tables */
@@ -130,6 +147,18 @@ button:focus {
 #loading {
   padding: 2rem;
   animation: fadeIn 0.3s ease-in-out;
+}
+
+#dropZone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  min-height: 140px;
+}
+
+#fileChipContainer {
+  flex: 1 1 100%;
+  min-width: 100%;
 }
 
 @keyframes fadeIn {
@@ -213,9 +242,6 @@ footer {
   padding: 1rem;
 }
 
-#fileChipContainer {
-  min-height: 80px;
-}
 .btn-close {
   font-size: 0.7rem;
 }
@@ -466,4 +492,15 @@ footer {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.drop-zone {
+  min-height: 60px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.drop-zone.drag-over {
+  background-color: #e9f5ff;
+  border-color: #0d6efd;
 }
