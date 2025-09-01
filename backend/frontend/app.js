@@ -37,17 +37,17 @@ fileChipContainer.addEventListener("click", (e) => {
   }
 });
 
-// 📂 Input manual
-fileInput.addEventListener("change", () => {
-  [...fileInput.files].forEach((file) => {
-    if (![...fileBuffer.files].some((f) => f.name === file.name)) {
-      fileBuffer.items.add(file);
-    }
-  });
+// // 📂 Input manual
+// fileInput.addEventListener("change", () => {
+//   [...fileInput.files].forEach((file) => {
+//     if (![...fileBuffer.files].some((f) => f.name === file.name)) {
+//       fileBuffer.items.add(file);
+//     }
+//   });
 
-  fileInput.files = fileBuffer.files;
-  renderFileChips();
-});
+//   fileInput.files = fileBuffer.files;
+//   renderFileChips();
+// });
 
 // 🖱️ Botón para abrir input
 // selectFileBtn.addEventListener("click", (e) => {
@@ -573,38 +573,38 @@ document
     }
   });
 
-function updateUIBasedOnAuth() {
-  const isLoggedIn = !!localStorage.getItem("authToken");
+// function updateUIBasedOnAuth() {
+//   const isLoggedIn = !!localStorage.getItem("authToken");
 
-  document.getElementById("scanBtn").classList.toggle("d-none", !isLoggedIn);
-  document.getElementById("historyBtn").classList.toggle("d-none", !isLoggedIn);
-  document.getElementById("loginBtn").classList.toggle("d-none", isLoggedIn);
-  document.getElementById("logoutBtn").classList.toggle("d-none", !isLoggedIn);
-  document.getElementById("registerBtn").classList.toggle("d-none", isLoggedIn);
-  document
-    .getElementById("welcomeSection")
-    .classList.toggle("hidden", isLoggedIn);
-  document
-    .getElementById("scanSection")
-    .classList.toggle("hidden", !isLoggedIn);
-  document.getElementById("historySection").classList.add("hidden"); // Siempre ocultar al inicio
-  document
-    .getElementById("uploadControls")
-    .classList.toggle("hidden", !isLoggedIn);
-  document.getElementById("provider").textContent = "";
-  document.getElementById("issueDate").textContent = "";
-  const itemsList = document.getElementById("itemsList");
-  if (itemsList) itemsList.innerHTML = "";
+//   document.getElementById("scanBtn").classList.toggle("d-none", !isLoggedIn);
+//   document.getElementById("historyBtn").classList.toggle("d-none", !isLoggedIn);
+//   document.getElementById("loginBtn").classList.toggle("d-none", isLoggedIn);
+//   document.getElementById("logoutBtn").classList.toggle("d-none", !isLoggedIn);
+//   document.getElementById("registerBtn").classList.toggle("d-none", isLoggedIn);
+//   document
+//     .getElementById("welcomeSection")
+//     .classList.toggle("hidden", isLoggedIn);
+//   document
+//     .getElementById("scanSection")
+//     .classList.toggle("hidden", !isLoggedIn);
+//   document.getElementById("historySection").classList.add("hidden"); // Siempre ocultar al inicio
+//   document
+//     .getElementById("uploadControls")
+//     .classList.toggle("hidden", !isLoggedIn);
+//   document.getElementById("provider").textContent = "";
+//   document.getElementById("issueDate").textContent = "";
+//   const itemsList = document.getElementById("itemsList");
+//   if (itemsList) itemsList.innerHTML = "";
 
-  const name = localStorage.getItem("userFullname");
-  const greeting = document.getElementById("userGreeting");
-  if (isLoggedIn && name) {
-    greeting.textContent = `Hola, ${name}`;
-    greeting.classList.remove("d-none");
-  } else {
-    greeting.classList.add("d-none");
-  }
-}
+//   const name = localStorage.getItem("userFullname");
+//   const greeting = document.getElementById("userGreeting");
+//   if (isLoggedIn && name) {
+//     greeting.textContent = `Hola, ${name}`;
+//     greeting.classList.remove("d-none");
+//   } else {
+//     greeting.classList.add("d-none");
+//   }
+// }
 
 function showSuccess(msg) {
   const modalEl = document.getElementById("successModal");
@@ -699,12 +699,21 @@ function updateUIBasedOnAuth() {
   document.getElementById("logoutBtn").classList.toggle("d-none", !isLoggedIn);
   document.getElementById("loginBtn").classList.toggle("d-none", isLoggedIn);
   document.getElementById("registerBtn").classList.toggle("d-none", isLoggedIn);
+  document
+    .getElementById("uploadControls")
+    .classList.toggle("hidden", !isLoggedIn);
 
-  // Saludo opcional
+  // Reset de datos visibles
+  document.getElementById("provider").textContent = "";
+  document.getElementById("issueDate").textContent = "";
+  const itemsList = document.getElementById("itemsList");
+  if (itemsList) itemsList.innerHTML = "";
+
+  // Saludo
   const greeting = document.getElementById("userGreeting");
-  const username = localStorage.getItem("userFullname"); // si lo guardás en login
+  const username = localStorage.getItem("userFullname");
   if (isLoggedIn && username) {
-    const firstName = username?.split(" ")[0];
+    const firstName = username.split(" ")[0];
     greeting.textContent = `¡Hola!, ${capitalizeFirstLetter(firstName)}`;
     greeting.classList.remove("d-none");
   } else {
