@@ -37,24 +37,6 @@ fileChipContainer.addEventListener("click", (e) => {
   }
 });
 
-// // 📂 Input manual
-// fileInput.addEventListener("change", () => {
-//   [...fileInput.files].forEach((file) => {
-//     if (![...fileBuffer.files].some((f) => f.name === file.name)) {
-//       fileBuffer.items.add(file);
-//     }
-//   });
-
-//   fileInput.files = fileBuffer.files;
-//   renderFileChips();
-// });
-
-// 🖱️ Botón para abrir input
-// selectFileBtn.addEventListener("click", (e) => {
-//   e.stopPropagation();
-//   fileInput.click();
-// });
-
 dropZone.addEventListener("click", (e) => {
   e.stopPropagation();
   fileInput.click();
@@ -573,38 +555,6 @@ document
     }
   });
 
-// function updateUIBasedOnAuth() {
-//   const isLoggedIn = !!localStorage.getItem("authToken");
-
-//   document.getElementById("scanBtn").classList.toggle("d-none", !isLoggedIn);
-//   document.getElementById("historyBtn").classList.toggle("d-none", !isLoggedIn);
-//   document.getElementById("loginBtn").classList.toggle("d-none", isLoggedIn);
-//   document.getElementById("logoutBtn").classList.toggle("d-none", !isLoggedIn);
-//   document.getElementById("registerBtn").classList.toggle("d-none", isLoggedIn);
-//   document
-//     .getElementById("welcomeSection")
-//     .classList.toggle("hidden", isLoggedIn);
-//   document
-//     .getElementById("scanSection")
-//     .classList.toggle("hidden", !isLoggedIn);
-//   document.getElementById("historySection").classList.add("hidden"); // Siempre ocultar al inicio
-//   document
-//     .getElementById("uploadControls")
-//     .classList.toggle("hidden", !isLoggedIn);
-//   document.getElementById("provider").textContent = "";
-//   document.getElementById("issueDate").textContent = "";
-//   const itemsList = document.getElementById("itemsList");
-//   if (itemsList) itemsList.innerHTML = "";
-
-//   const name = localStorage.getItem("userFullname");
-//   const greeting = document.getElementById("userGreeting");
-//   if (isLoggedIn && name) {
-//     greeting.textContent = `Hola, ${name}`;
-//     greeting.classList.remove("d-none");
-//   } else {
-//     greeting.classList.add("d-none");
-//   }
-// }
 
 function showSuccess(msg) {
   const modalEl = document.getElementById("successModal");
@@ -629,7 +579,6 @@ fileInput.addEventListener("change", () => {
   fileInput.files = fileBuffer.files;
   renderFileChips();
 });
-
 
 function renderFileChips() {
   fileChipContainer.innerHTML = "";
