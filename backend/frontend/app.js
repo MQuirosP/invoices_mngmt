@@ -87,7 +87,8 @@ dropZone.addEventListener("drop", (e) => {
 
 let pendingDeleteId = null;
 
-const HOST = "https://invoices-mngmt.onrender.com";
+// const HOST = "https://invoices-mngmt.onrender.com";
+const HOST = "http://localhost:3000";
 let token = localStorage.getItem("authToken") || "";
 
 if (token) {
@@ -183,7 +184,7 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   const token = localStorage.getItem("authToken") || "";
 
   if (!file || !token) {
-    showError("Selecciona una imagen y proporciona el token");
+    showError("No se ha cargado ningún archivo, por favor intentá de nuevo.");
     return;
   }
 
@@ -291,7 +292,7 @@ function openProtectedImage(invoiceId, attachmentId) {
     })
     .catch((err) => {
       console.error("Error al abrir imagen:", err);
-      alert("No se pudo abrir la imagen.");
+      showError("No se pudo abrir la imagen.");
     });
 }
 
