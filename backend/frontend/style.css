@@ -85,7 +85,7 @@ h1, h2, h3 {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  min-height: 140px;
+  min-height: 160px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
