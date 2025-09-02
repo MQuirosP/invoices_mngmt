@@ -85,12 +85,12 @@
             <!-- 🔍 Sección de escaneo -->
             <section
               id="scanSection"
-              class="hidden bg-light p-4 rounded shadow-sm fade-in"
+              class="hidden bg-light p-2 rounded shadow-sm fade-in"
             >
-              <h2 class="mb-4">Escanear factura</h2>
+              <h2 class="mb-2">Escanear factura</h2>
 
               <!-- Contenedor de subida -->
-              <div id="uploadControls" class="mb-4">
+              <div id="uploadControls" class="mb-2">
                 <label for="fileInput" class="form-label fw-semibold"
                   >Seleccioná archivos</label
                 >
@@ -145,7 +145,7 @@
                     role="status"
                     style="width: 3rem; height: 3rem"
                   ></div>
-                  <p class="mt-2 fw-semibold text-success">
+                  <p class="fw-semibold text-success">
                     Procesando imagen...
                   </p>
                 </div>
@@ -153,20 +153,20 @@
 
               <!-- Resultados -->
               <div id="results" class="hidden fade-in" aria-live="polite">
-                <h3>Factura extraída</h3>
+                <!-- <h3>Factura extraída</h3>
                 <p><strong>Proveedor:</strong> <span id="provider"></span></p>
                 <p>
                   <strong>Fecha de emisión:</strong>
                   <span id="issueDate"></span>
                 </p>
-                <div id="itemsList" class="invoice-items mb-3"></div>
+                <div id="itemsList" class="invoice-items mb-3"></div> -->
               </div>
             </section>
 
             <!-- 📜 Sección de historial -->
             <section
               id="historySection"
-              class="hidden bg-light p-2 rounded shadow-sm"
+              class="hidden bg-light p-2 rounded shadow-sm fade-in"
             >
               <h2 class="mb-4">Historial de facturas</h2>
               <div id="historyCards" class="row gy-3"></div>

@@ -99,8 +99,8 @@ logoutBtn.addEventListener("click", async () => {
   document.getElementById("historySection").classList.add("hidden");
   document.getElementById("scanSection").classList.add("hidden");
   document.getElementById("welcomeSection").classList.remove("hidden");
-  document.getElementById("provider").textContent = "";
-  document.getElementById("issueDate").textContent = "";
+  // document.getElementById("provider").textContent = "";
+  // document.getElementById("issueDate").textContent = "";
   const itemsList = document.getElementById("itemsList");
   if (itemsList) itemsList.innerHTML = "";
   document.getElementById("results").classList.add("hidden");
@@ -120,8 +120,8 @@ scanBtn.addEventListener("click", () => {
   scanSection.classList.remove("hidden");
   historySection.classList.add("hidden");
   document.getElementById("results").classList.add("hidden");
-  document.getElementById("provider").textContent = "";
-  document.getElementById("issueDate").textContent = "";
+  // document.getElementById("provider").textContent = "";
+  // document.getElementById("issueDate").textContent = "";
   const itemsList = document.getElementById("itemsList");
   if (itemsList) itemsList.innerHTML = "";
   document.getElementById("fileInput").value = "";
@@ -146,8 +146,8 @@ historyBtn.addEventListener("click", async () => {
       },
     });
     document.getElementById("results").classList.add("hidden");
-    document.getElementById("provider").textContent = "";
-    document.getElementById("issueDate").textContent = "";
+    // document.getElementById("provider").textContent = "";
+    // document.getElementById("issueDate").textContent = "";
     const itemsList = document.getElementById("itemsList");
     if (itemsList) itemsList.innerHTML = "";
     document.getElementById("fileInput").value = "";
@@ -707,8 +707,8 @@ function updateUIBasedOnAuth() {
     .classList.toggle("hidden", !isLoggedIn);
 
   // Reset de datos visibles
-  document.getElementById("provider").textContent = "";
-  document.getElementById("issueDate").textContent = "";
+  // document.getElementById("provider").textContent = "";
+  // document.getElementById("issueDate").textContent = "";
   const itemsList = document.getElementById("itemsList");
   if (itemsList) itemsList.innerHTML = "";
 

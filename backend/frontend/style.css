@@ -189,7 +189,7 @@ h1, h2, h3 {
 
 /* Loader */
 #loading {
-  padding: 2rem;
+  padding: 1rem;
   animation: fadeInText 0.3s ease-in-out;
 }
 
