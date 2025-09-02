@@ -13,6 +13,9 @@ const fileChipContainer = document.getElementById("fileChipContainer");
 
 const fileBuffer = new DataTransfer();
 
+const toggleBtn = document.getElementById("toggleAsideBtn");
+const mobileAside = document.getElementById("mobileAside");
+
 const clearFileBtn = document.getElementById("clearFileBtn");
 if (clearFileBtn) {
   clearFileBtn.classList.add("d-none");
@@ -717,10 +720,9 @@ function renderFileChips() {
     `;
 
     chip.querySelector("button").addEventListener("click", (e) => {
-  e.stopPropagation();
-  removeFileFromBuffer(file.name);
-});
-
+      e.stopPropagation();
+      removeFileFromBuffer(file.name);
+    });
 
     fileChipContainer.appendChild(chip);
   });
@@ -783,7 +785,9 @@ function updateUIBasedOnAuth() {
   const greeting = document.getElementById("userGreeting");
   const username = localStorage.getItem("userFullname");
   if (isLoggedIn && username) {
-    greeting.textContent = `¡Hola!, ${capitalizeFirstLetter(username.split(" ")[0])}`;
+    greeting.textContent = `¡Hola!, ${capitalizeFirstLetter(
+      username.split(" ")[0]
+    )}`;
     greeting.classList.remove("d-none");
   } else if (greeting) greeting.classList.add("d-none");
 }
@@ -797,9 +801,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const isLoggedIn = !!localStorage.getItem("authToken");
   const activeView = localStorage.getItem("activeView");
-
-  const toggleBtn = document.getElementById("toggleAsideBtn");
-  const mobileAside = document.getElementById("mobileAside");
 
   if (isLoggedIn && toggleBtn && mobileAside) {
     toggleBtn.addEventListener("click", () => {
