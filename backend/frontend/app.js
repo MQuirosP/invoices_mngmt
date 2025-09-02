@@ -750,41 +750,42 @@ function removeFileFromBuffer(fileName) {
 function updateUIBasedOnAuth() {
   const isLoggedIn = !!localStorage.getItem("authToken");
 
-  // Secciones
-  document
-    .getElementById("welcomeSection")
-    .classList.toggle("hidden", isLoggedIn);
-  document
-    .getElementById("scanSection")
-    .classList.toggle("hidden", !isLoggedIn);
-  document.getElementById("historySection").classList.add("hidden");
+  // Aside desktop y mobile
+  const desktopAside = document.getElementById("desktopAside");
+
+  if (desktopAside) desktopAside.classList.toggle("d-none", !isLoggedIn);
+  if (mobileAside) mobileAside.classList.toggle("d-none", !isLoggedIn);
+  if (toggleBtn) toggleBtn.classList.toggle("d-none", !isLoggedIn);
 
   // Navbar buttons
-  document.getElementById("scanBtn").classList.toggle("d-none", !isLoggedIn);
-  document.getElementById("historyBtn").classList.toggle("d-none", !isLoggedIn);
-  document.getElementById("logoutBtn").classList.toggle("d-none", !isLoggedIn);
-  document.getElementById("loginBtn").classList.toggle("d-none", isLoggedIn);
-  document.getElementById("registerBtn").classList.toggle("d-none", isLoggedIn);
-  document
-    .getElementById("uploadControls")
-    .classList.toggle("hidden", !isLoggedIn);
+  const scanBtn = document.getElementById("scanBtn");
+  const historyBtn = document.getElementById("historyBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const loginBtn = document.getElementById("loginBtn");
+  const registerBtn = document.getElementById("registerBtn");
 
-  // Reset de datos visibles
-  // document.getElementById("provider").textContent = "";
-  // document.getElementById("issueDate").textContent = "";
-  const itemsList = document.getElementById("itemsList");
-  if (itemsList) itemsList.innerHTML = "";
+  if (scanBtn) scanBtn.classList.toggle("d-none", !isLoggedIn);
+  if (historyBtn) historyBtn.classList.toggle("d-none", !isLoggedIn);
+  if (logoutBtn) logoutBtn.classList.toggle("d-none", !isLoggedIn);
+  if (loginBtn) loginBtn.classList.toggle("d-none", isLoggedIn);
+  if (registerBtn) registerBtn.classList.toggle("d-none", isLoggedIn);
+
+  // Secciones
+  const welcomeSection = document.getElementById("welcomeSection");
+  const scanSection = document.getElementById("scanSection");
+  const historySection = document.getElementById("historySection");
+
+  if (welcomeSection) welcomeSection.classList.toggle("hidden", isLoggedIn);
+  if (scanSection) scanSection.classList.toggle("hidden", !isLoggedIn);
+  if (historySection) historySection.classList.add("hidden");
 
   // Saludo
   const greeting = document.getElementById("userGreeting");
   const username = localStorage.getItem("userFullname");
   if (isLoggedIn && username) {
-    const firstName = username.split(" ")[0];
-    greeting.textContent = `¡Hola!, ${capitalizeFirstLetter(firstName)}`;
+    greeting.textContent = `¡Hola!, ${capitalizeFirstLetter(username.split(" ")[0])}`;
     greeting.classList.remove("d-none");
-  } else {
-    greeting.classList.add("d-none");
-  }
+  } else if (greeting) greeting.classList.add("d-none");
 }
 
 function capitalizeFirstLetter(name) {
@@ -796,6 +797,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const isLoggedIn = !!localStorage.getItem("authToken");
   const activeView = localStorage.getItem("activeView");
+
+  const toggleBtn = document.getElementById("toggleAsideBtn");
+  const mobileAside = document.getElementById("mobileAside");
+
+  if (isLoggedIn && toggleBtn && mobileAside) {
+    toggleBtn.addEventListener("click", () => {
+      const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(mobileAside);
+      bsOffcanvas.toggle();
+    });
+  }
 
   if (!isLoggedIn) return; // Evita mostrar secciones si no hay sesión
 

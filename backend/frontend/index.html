@@ -64,10 +64,122 @@
     </header>
 
     <div id="layoutWrapper" class="d-flex">
-      <aside class="bg-dark-subtle col-md-3 col-lg-2 border-end py-3">
-        <p class="text-white text-center">Panel lateral</p>
-        <!-- Aquí podés agregar filtros, navegación secundaria, etc. -->
+      <!-- Aside para desktop -->
+      <aside id="desktopAside"
+        class="aside-desktop bg-dark-subtle col-md-3 col-lg-2 border-end py-3 fade-in"
+      >
+        <div class="p-3 text-dark">
+          <h5>Filtros</h5>
+          <label class="form-label">Proveedor</label>
+          <select class="form-select mb-2">
+            <option value="">Todos</option>
+            <option value="Proveedor1">Proveedor1</option>
+            <option value="Proveedor2">Proveedor2</option>
+          </select>
+
+          <label class="form-label">Estado</label>
+          <select class="form-select mb-2">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="procesada">Procesada</option>
+            <option value="error">Error</option>
+          </select>
+
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-control mb-2" placeholder="Desde" />
+          <input type="date" class="form-control mb-3" placeholder="Hasta" />
+
+          <h5>Accesos rápidos</h5>
+          <div class="d-flex flex-column gap-2 mb-3">
+            <button class="btn btn-outline-primary btn-sm">
+              Escanear factura
+            </button>
+            <button class="btn btn-outline-secondary btn-sm">
+              Historial completo
+            </button>
+            <button class="btn btn-outline-info btn-sm">
+              Facturas pendientes
+            </button>
+          </div>
+
+          <h5>Resumen</h5>
+          <div class="d-flex flex-column gap-2">
+            <div class="bg-light text-dark p-2 rounded">
+              Facturas procesadas: 120
+            </div>
+            <div class="bg-light text-dark p-2 rounded">Pendientes: 15</div>
+            <div class="bg-light text-dark p-2 rounded">Errores: 3</div>
+          </div>
+        </div>
       </aside>
+
+      <!-- Aside offcanvas para mobile -->
+      <div
+        class="offcanvas offcanvas-start"
+        tabindex="-1"
+        id="mobileAside"
+        aria-labelledby="mobileAsideLabel"
+      >
+        <div class="offcanvas-header bg-dark text-light">
+          <h5 class="offcanvas-title" id="mobileAsideLabel">Filtros y panel</h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="offcanvas"
+            aria-label="Cerrar"
+          ></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="p-2 text-dark">
+            <h6>Filtros</h6>
+            <label class="form-label">Proveedor</label>
+            <select class="form-select mb-2">
+              <option value="">Todos</option>
+              <option value="Proveedor1">Proveedor1</option>
+              <option value="Proveedor2">Proveedor2</option>
+            </select>
+
+            <label class="form-label">Estado</label>
+            <select class="form-select mb-2">
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="procesada">Procesada</option>
+              <option value="error">Error</option>
+            </select>
+
+            <label class="form-label">Fecha</label>
+            <input type="date" class="form-control mb-2" placeholder="Desde" />
+            <input type="date" class="form-control mb-3" placeholder="Hasta" />
+
+            <h6>Accesos rápidos</h6>
+            <div class="d-flex flex-column gap-2 mb-3">
+              <button class="btn btn-outline-primary btn-sm">
+                Escanear nueva factura
+              </button>
+              <button class="btn btn-outline-secondary btn-sm">
+                Historial completo
+              </button>
+              <button class="btn btn-outline-info btn-sm">
+                Facturas pendientes
+              </button>
+            </div>
+
+            <h6>Resumen</h6>
+            <div class="d-flex flex-column gap-2">
+              <div class="bg-light text-dark p-2 rounded">
+                Facturas procesadas: 120
+              </div>
+              <div class="bg-light text-dark p-2 rounded">Pendientes: 15</div>
+              <div class="bg-light text-dark p-2 rounded">Errores: 3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestañita sticky solo para mobile -->
+      <button id="toggleAsideBtn" class="aside-toggle d-md-none">
+        <i class="fas fa-angle-right"></i>
+      </button>
 
       <!-- 📦 Contenido principal -->
       <main id="mainContent" class="col-md-9 col-lg-10 px-4">
@@ -220,7 +332,6 @@
             </div>
           </div>
         </div>
-
 
         <!-- 🧑 Modal: Registro -->
         <div
