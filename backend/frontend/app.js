@@ -162,10 +162,10 @@ historyBtn.addEventListener("click", async () => {
 
 document.getElementById("uploadBtn").addEventListener("click", async () => {
   const fileInput = document.getElementById("fileInput");
-  const file = fileInput.files[0];
+  const files = fileInput.files;
   const token = localStorage.getItem("authToken") || "";
 
-  if (!file || !token) {
+  if (!files || files.length === 0 || !token) {
     showError("No se ha cargado ningún archivo, por favor intentá de nuevo.");
     return;
   }
@@ -174,7 +174,9 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   document.getElementById("results").classList.add("hidden");
 
   const formData = new FormData();
-  formData.append("file", file);
+  Array.from(files).forEach((file) => {
+    formData.append("files", file);
+  });
 
   try {
     const res = await fetch(`${HOST}/api/invoices/ocrscan`, {
@@ -186,14 +188,15 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
     });
 
     const json = await res.json();
-    const invoice = json.data;
+    const invoices = json.data;
+    console.log("Invoices extracted:", invoices);
 
-    if (!invoice || !invoice.items) {
-      showError("No se pudo extraer la factura");
+    if (!Array.isArray(invoices) || invoices.length === 0) {
+      showError("No se pudo extraer ninguna factura");
       return;
     }
 
-    renderResults(invoice);
+    renderInvoiceSummaries(invoices);
   } catch (err) {
     showError("Error al procesar la imagen: " + err.message);
   } finally {
@@ -206,6 +209,32 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
     document.getElementById("loading").classList.add("hidden");
   }
 });
+
+function renderInvoiceSummaries(invoices) {
+  const container = document.getElementById("results");
+  container.innerHTML = ""; // limpiar contenido anterior
+
+  invoices.forEach((invoice, index) => {
+    const summary = document.createElement("div");
+    summary.className = "invoice-summary mb-3";
+
+    summary.innerHTML = `
+      <h5>Factura #${index + 1}</h5>
+      <p><strong>Proveedor:</strong> ${invoice.provider || "—"}</p>
+      <p><strong>Fecha de emisión:</strong> ${formatDate(invoice.issueDate)}</p>
+      <button class="btn btn-sm btn-primary" data-invoice-id="${
+        invoice.id
+      }">Ver detalles</button>
+    `;
+
+    container.appendChild(summary);
+
+    // Crear modal dinámico
+    createInvoiceModal(invoice);
+  });
+
+  container.classList.remove("hidden");
+}
 
 function renderHistory(invoices) {
   const container = document.getElementById("historyCards");
@@ -421,37 +450,63 @@ document
     }
   });
 
-function renderResults(data) {
-  document.getElementById("provider").textContent = data.provider || "—";
-  document.getElementById("issueDate").textContent = formatDate(data.issueDate);
-
-  const itemsList = document.getElementById("itemsList");
-  itemsList.innerHTML = "";
-
-  (data.items || []).forEach((item) => {
-    const card = document.createElement("div");
-    card.className = "invoice-card fade-in";
-
-    card.innerHTML = `
-      <div class="d-flex justify-content-between">
-        <strong>${item.description}</strong>
-        <span class="text-muted">${item.quantity} × ₡${item.unitPrice}</span>
+function renderInvoiceItems(items) {
+  return items
+    .map(
+      (item) => `
+      <div class="invoice-card mb-2">
+        <div class="d-flex justify-content-between">
+          <strong>${item.description}</strong>
+          <span class="text-muted">${item.quantity} × ₡${item.unitPrice}</span>
+        </div>
+        <div class="d-flex justify-content-between mt-1">
+          <span>Total:</span>
+          <span class="fw-semibold text-dark">₡${item.total}</span>
+        </div>
+        ${
+          item.warrantyNotes
+            ? `<div class="mt-1"><span class="badge bg-info text-dark">${item.warrantyNotes}</span></div>`
+            : ""
+        }
       </div>
-      <div class="d-flex justify-content-between mt-1">
-        <span>Total:</span>
-        <span class="fw-semibold text-dark">₡${item.total}</span>
+    `
+    )
+    .join("");
+}
+
+function createInvoiceModal(invoice) {
+  const modalId = `modal-${invoice.id}`;
+  if (document.getElementById(modalId)) return; // evitar duplicados
+
+  const modal = document.createElement("div");
+  modal.id = modalId;
+  modal.className = "modal fade";
+  modal.tabIndex = -1;
+  modal.innerHTML = `
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title">${invoice.title || invoice.provider}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          ${renderInvoiceItems(invoice.items)}
+        </div>
       </div>
-      ${
-        item.warrantyNotes
-          ? `<div class="mt-1"><span class="badge bg-info text-dark">${item.warrantyNotes}</span></div>`
-          : ""
-      }
-    `;
+    </div>
+  `;
 
-    itemsList.appendChild(card);
-  });
+  document.body.appendChild(modal);
 
-  document.getElementById("results").classList.remove("hidden");
+  // Activar botón para abrir el modal
+  document
+    .querySelector(`[data-invoice-id="${invoice.id}"]`)
+    .addEventListener("click", () => {
+      const modalInstance = new bootstrap.Modal(
+        document.getElementById(modalId)
+      );
+      modalInstance.show();
+    });
 }
 
 function showError(msg) {
@@ -554,7 +609,6 @@ document
       showError("Error al iniciar sesión: " + err.message);
     }
   });
-
 
 function showSuccess(msg) {
   const modalEl = document.getElementById("successModal");

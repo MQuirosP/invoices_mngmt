@@ -10,14 +10,24 @@ import { InvoiceFileService } from "./services/file.service";
 import { InvoiceOcrService } from "./services/ocr.service";
 import { getInvoiceById } from "./invoice.query";
 
-const invoiceService = InvoiceService
-const invoiceFileService = InvoiceFileService
-const invoiceOcrService = InvoiceOcrService
+const invoiceService = InvoiceService;
+const invoiceFileService = InvoiceFileService;
+const invoiceOcrService = InvoiceOcrService;
 
-type ApiResponse<T> = { success: true; data: T } | { success: false; message: string };
+type ApiResponse<T> =
+  | {
+      success: true;
+      data: T;
+      meta?: { errors?: { fileName: string; error: string }[] };
+    }
+  | { success: false; message: string };
 
-  export const InvoiceController = {
-    create: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+export const InvoiceController = {
+  create: async (
+    req: AuthRequest,
+    res: Response<ApiResponse<Invoice>>,
+    next: NextFunction
+  ) => {
     const startTime = Date.now();
     const userId = requireUserId(req);
     try {
@@ -69,7 +79,11 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
     }
   },
 
-  list: async (req: AuthRequest, res: Response<ApiResponse<Invoice[]>>, next: NextFunction) => {
+  list: async (
+    req: AuthRequest,
+    res: Response<ApiResponse<Invoice[]>>,
+    next: NextFunction
+  ) => {
     const userId = requireUserId(req);
     try {
       logger.info({
@@ -99,7 +113,11 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
     }
   },
 
-  get: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  get: async (
+    req: AuthRequest,
+    res: Response<ApiResponse<Invoice>>,
+    next: NextFunction
+  ) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
     try {
@@ -132,7 +150,11 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
     }
   },
 
-  remove: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  remove: async (
+    req: AuthRequest,
+    res: Response<ApiResponse<Invoice>>,
+    next: NextFunction
+  ) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.id;
     const userRole = req.user?.role as Role;
@@ -152,7 +174,7 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
         userId,
         userRole
       );
-      if(!deletedInvoice) {
+      if (!deletedInvoice) {
         throw new AppError("Invoice not found or not authorized", 404);
       }
 
@@ -181,7 +203,11 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
     }
   },
 
-  download: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  download: async (
+    req: AuthRequest,
+    res: Response<ApiResponse<Invoice>>,
+    next: NextFunction
+  ) => {
     const userId = requireUserId(req);
     const { invoiceId, attachmentId } = req.params;
     try {
@@ -228,47 +254,86 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
     }
   },
 
-  importFromLocal: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  importFromLocal: async (
+    req: AuthRequest,
+    res: Response<ApiResponse<Invoice[]>>,
+    next: NextFunction
+  ) => {
     const userId = requireUserId(req);
-    const file = req.file;
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    if (!files || files.length === 0) {
+      throw new AppError("No files uploaded", 400);
+    }
+
     try {
       logger.info({
         layer: "controller",
         action: "INVOICE_IMPORT_LOCAL_ATTEMPT",
         userId,
-        fileName: file?.originalname,
+        fileCount: files.length,
+        fileNames: files.map((f) => f.originalname),
       });
 
-      if (!file) throw new AppError("No file uploaded", 400);
-
-      const invoice = await invoiceOcrService.createInvoiceFromBuffer(
-        file.buffer,
-        userId,
-        file.originalname,
-        file.mimetype
-      );
-
-      if (!invoice) {
-        logger.error({
-          layer: "controller",
-          action: "INVOICE_IMPORT_LOCAL_ERROR",
-          userId,
-          error: "OCR service returned null invoice",
-        });
-        throw new Error("OCR service returned null invoice");
+      if (files.length === 0) {
+        throw new AppError("No files uploaded", 400);
       }
 
-      logger.info({
-        layer: "controller",
-        action: "INVOICE_IMPORT_LOCAL_SUCCESS",
-        userId,
-        invoiceId: invoice.id,
-      });
+      const results: Invoice[] = [];
+      const errors: { fileName: string; error: string }[] = [];
 
-      res.status(201).json({
+      for (const file of files) {
+        try {
+          const invoice = await invoiceOcrService.createInvoiceFromBuffer(
+            file.buffer,
+            userId,
+            file.originalname,
+            file.mimetype
+          );
+
+          if (!invoice) {
+            throw new Error("OCR service returned null invoice");
+          }
+
+          results.push(invoice);
+
+          logger.info({
+            layer: "controller",
+            action: "INVOICE_IMPORT_LOCAL_SUCCESS",
+            userId,
+            invoiceId: invoice.id,
+            fileName: file.originalname,
+          });
+        } catch (err: any) {
+          logger.error({
+            layer: "controller",
+            action: "INVOICE_IMPORT_LOCAL_FILE_ERROR",
+            userId,
+            fileName: file.originalname,
+            error: err instanceof Error ? err.message : String(err),
+            stack: err?.stack,
+          });
+
+          errors.push({
+            fileName: file.originalname,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+
+      if (errors.length > 0) {
+        logger.warn({
+          layer: "controller",
+          action: "INVOICE_IMPORT_LOCAL_PARTIAL_FAILURE",
+          userId,
+          failedFiles: errors.map((e) => e.fileName),
+        });
+      }
+
+      res.status(207).json({
         success: true,
-        // message: "Invoice imported from local file",
-        data: invoice,
+        data: results,
+        meta: errors.length > 0 ? { errors } : undefined,
       });
     } catch (error: any) {
       logger.error({
@@ -276,13 +341,16 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
         action: "INVOICE_IMPORT_LOCAL_ERROR",
         userId,
         error: error instanceof Error ? error.message : String(error),
-        stack: error?.stack, // Include stack trace for better debugging
+        stack: error?.stack,
       });
       next(error);
     }
   },
-
-  importFromUrl: async (req: AuthRequest, res: Response<ApiResponse<Invoice>>, next: NextFunction) => {
+  importFromUrl: async (
+    req: AuthRequest,
+    res: Response<ApiResponse<Invoice>>,
+    next: NextFunction
+  ) => {
     const userId = requireUserId(req);
     const invoiceId = req.params.invoiceId;
     const { url } = req.body;
@@ -384,7 +452,7 @@ type ApiResponse<T> = { success: true; data: T } | { success: false; message: st
       });
       next(error);
     }
-  }
-}
+  },
+};
 
 export type InvoiceControllerType = typeof InvoiceController;

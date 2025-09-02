@@ -34,7 +34,7 @@ router.get(
 // ====================
 // Import / OCR
 // ====================
-router.post("/ocrscan", authenticate, upload.single("file"), invoiceController.importFromLocal);
+router.post("/ocrscan", authenticate, upload.array("files"), invoiceController.importFromLocal);
 router.patch(
   "/import/:invoiceId",
   authenticate,
