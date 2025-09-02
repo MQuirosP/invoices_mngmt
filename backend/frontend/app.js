@@ -22,18 +22,7 @@ if (clearFileBtn) {
 fileChipContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("btn-close")) {
     const nameToRemove = e.target.parentElement.textContent.trim();
-    const newBuffer = new DataTransfer();
-
-    [...fileBuffer.files].forEach((file) => {
-      if (file.name !== nameToRemove) {
-        newBuffer.items.add(file);
-      }
-    });
-
-    fileBuffer.items.clear();
-    [...newBuffer.files].forEach((f) => fileBuffer.items.add(f));
-    fileInput.files = fileBuffer.files;
-    renderFileChips();
+    removeFileFromBuffer(nameToRemove);
   }
 });
 
@@ -57,11 +46,7 @@ dropZone.addEventListener("drop", (e) => {
   dropZone.classList.remove("drag-over");
 
   const files = Array.from(e.dataTransfer.files);
-  files.forEach((file) => {
-    if (![...fileBuffer.files].some((f) => f.name === file.name)) {
-      fileBuffer.items.add(file);
-    }
-  });
+  addFilesToBuffer(files);
 
   fileInput.files = fileBuffer.files;
   renderFileChips();
@@ -697,15 +682,7 @@ function showSuccess(msg) {
 }
 
 fileInput.addEventListener("change", () => {
-  Array.from(fileInput.files).forEach((file) => {
-    // Evitar duplicados por nombre
-    if (![...fileBuffer.files].some((f) => f.name === file.name)) {
-      fileBuffer.items.add(file);
-    }
-  });
-
-  fileInput.files = fileBuffer.files;
-  renderFileChips();
+  addFilesToBuffer(fileInput.files);
 });
 
 function renderFileChips() {
@@ -740,22 +717,34 @@ function renderFileChips() {
     `;
 
     chip.querySelector("button").addEventListener("click", (e) => {
-      e.stopPropagation();
-      const newBuffer = new DataTransfer();
+  e.stopPropagation();
+  removeFileFromBuffer(file.name);
+});
 
-      Array.from(fileBuffer.files).forEach((f) => {
-        if (f.name !== file.name) {
-          newBuffer.items.add(f);
-        }
-      });
-
-      fileBuffer.items.clear();
-      Array.from(newBuffer.files).forEach((f) => fileBuffer.items.add(f));
-      renderFileChips();
-    });
 
     fileChipContainer.appendChild(chip);
   });
+}
+
+function addFilesToBuffer(files) {
+  Array.from(files).forEach((file) => {
+    if (![...fileBuffer.files].some((f) => f.name === file.name)) {
+      fileBuffer.items.add(file);
+    }
+  });
+  fileInput.files = fileBuffer.files;
+  renderFileChips();
+}
+
+function removeFileFromBuffer(fileName) {
+  const newBuffer = new DataTransfer();
+  Array.from(fileBuffer.files).forEach((f) => {
+    if (f.name !== fileName) newBuffer.items.add(f);
+  });
+  fileBuffer.items.clear();
+  Array.from(newBuffer.files).forEach((f) => fileBuffer.items.add(f));
+  fileInput.files = fileBuffer.files;
+  renderFileChips();
 }
 
 function updateUIBasedOnAuth() {
