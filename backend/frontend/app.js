@@ -73,6 +73,84 @@ const HOST = "https://invoices-mngmt.onrender.com";
 // const HOST = "http://localhost:3000";
 let token = localStorage.getItem("authToken") || "";
 
+// ==== Helpers de red y errores (centrales) ====
+function onUnauthorized() {
+  // Limpia sesión y UI si el token expiró o es inválido
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userFullname");
+  localStorage.removeItem("userEmail");
+  localStorage.removeItem("userRole");
+  token = "";
+  showError("Tu sesión ha expirado. Por favor, iniciá sesión de nuevo.");
+  updateUIBasedOnAuth();
+}
+
+function buildHeaders(options = {}) {
+  const headers = new Headers(options.headers || {});
+  const hasBodyFormData = options.body instanceof FormData;
+
+  // Auth
+  const currentToken = localStorage.getItem("authToken") || "";
+  if (currentToken && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${currentToken}`);
+  }
+
+  // Content-Type solo si NO es FormData
+  if (!hasBodyFormData && !headers.has("Content-Type") && options.method !== "GET") {
+    headers.set("Content-Type", "application/json");
+  }
+
+  return headers;
+}
+
+async function handleResponse(res) {
+  if (res.status === 401 || res.status === 403) {
+    onUnauthorized();
+    throw new Error("No autorizado (token inválido o expirado)");
+  }
+  if (!res.ok) {
+    // Intentamos leer mensaje del backend
+    let serverMsg = "";
+    try {
+      const ct = res.headers.get("content-type") || "";
+      if (ct.includes("application/json")) {
+        const data = await res.json();
+        serverMsg = data?.message || data?.error || JSON.stringify(data);
+        // Sugerencia específica si viene un código Prisma P2003
+        if (data?.code === "P2003") {
+          serverMsg = "No se puede eliminar la factura porque tiene garantías relacionadas.";
+        }
+      } else {
+        serverMsg = await res.text();
+      }
+    } catch {
+      // ignorar parsing errors
+    }
+    const friendly = serverMsg || res.statusText || "Error desconocido";
+    throw new Error(`HTTP ${res.status}: ${friendly}`);
+  }
+}
+
+async function apiFetchJSON(url, options = {}) {
+  const res = await fetch(url, { ...options, headers: buildHeaders(options) });
+  await handleResponse(res);
+
+  const ct = res.headers.get("content-type") || "";
+  if (!ct || res.status === 204) return {};
+  if (ct.includes("application/json")) return await res.json();
+
+  // Fallback: texto crudo (poco común para JSON endpoints)
+  const raw = await res.text();
+  try { return JSON.parse(raw); } catch { return { raw }; }
+}
+
+async function apiFetchBlob(url, options = {}) {
+  const res = await fetch(url, { ...options, headers: buildHeaders(options) });
+  await handleResponse(res);
+  return await res.blob();
+}
+
+
 if (token) {
   loginBtn.classList.add("d-none");
   logoutBtn.classList.remove("d-none");
@@ -84,14 +162,9 @@ loginBtn.addEventListener("click", () => {
 
 logoutBtn.addEventListener("click", async () => {
   try {
-    await fetch(`${HOST}/api/auth/logout`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await apiFetchJSON(`${HOST}/api/auth/logout`, { method: "POST" });
   } catch (err) {
-    console.warn("Error al cerrar sesión:", err.message);
+    showError("No se pudo cerrar sesión en el servidor, pero tu sesión local fue cerrada.");
   }
 
   // Limpiar estado visual
@@ -99,18 +172,16 @@ logoutBtn.addEventListener("click", async () => {
   document.getElementById("historySection").classList.add("hidden");
   document.getElementById("scanSection").classList.add("hidden");
   document.getElementById("welcomeSection").classList.remove("hidden");
-  // document.getElementById("provider").textContent = "";
-  // document.getElementById("issueDate").textContent = "";
   const itemsList = document.getElementById("itemsList");
   if (itemsList) itemsList.innerHTML = "";
   document.getElementById("results").classList.add("hidden");
 
-  // Limpiar sesión
+  // Limpiar sesión local
   localStorage.removeItem("authToken");
   token = "";
 
-  // Actualizar UI
   updateUIBasedOnAuth();
+  showSuccess("Sesión cerrada.");
 });
 
 scanBtn.addEventListener("click", () => {
@@ -139,25 +210,22 @@ historyBtn.addEventListener("click", async () => {
   if (!token) return showError("Proporciona el token");
 
   try {
-    const res = await fetch(`${HOST}/api/invoices`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    document.getElementById("results").classList.add("hidden");
-    // document.getElementById("provider").textContent = "";
-    // document.getElementById("issueDate").textContent = "";
-    const itemsList = document.getElementById("itemsList");
-    if (itemsList) itemsList.innerHTML = "";
-    document.getElementById("fileInput").value = "";
-    document.getElementById("clearFileBtn")?.classList.add("d-none");
+  const json = await apiFetchJSON(`${HOST}/api/invoices`, { method: "GET" });
+  document.getElementById("results").classList.add("hidden");
+  const itemsList = document.getElementById("itemsList");
+  if (itemsList) itemsList.innerHTML = "";
+  document.getElementById("fileInput").value = "";
+  document.getElementById("clearFileBtn")?.classList.add("d-none");
 
-    const json = await res.json();
-    renderHistory(json.data || []);
-  } catch (err) {
-    showError("Error al cargar historial: " + err.message);
+  const list = Array.isArray(json?.data) ? json.data : [];
+  if (list.length === 0) {
+    showError("No se encontraron facturas.");
   }
+  renderHistory(list);
+} catch (err) {
+  showError("Error al cargar historial: " + err.message);
+}
+
 });
 
 document.getElementById("uploadBtn").addEventListener("click", async () => {
@@ -179,35 +247,31 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   });
 
   try {
-    const res = await fetch(`${HOST}/api/invoices/ocrscan`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+  const json = await apiFetchJSON(`${HOST}/api/invoices/ocrscan`, {
+    method: "POST",
+    body: formData, // Content-Type lo maneja buildHeaders (no se fuerza para FormData)
+  });
 
-    const json = await res.json();
-    const invoices = json.data;
-    console.log("Invoices extracted:", invoices);
+  const invoices = Array.isArray(json?.data) ? json.data : [];
 
-    if (!Array.isArray(invoices) || invoices.length === 0) {
-      showError("No se pudo extraer ninguna factura");
-      return;
-    }
-
-    renderInvoiceSummaries(invoices);
-  } catch (err) {
-    showError("Error al procesar la imagen: " + err.message);
-  } finally {
-    fileInput.value = "";
-    fileBuffer.items.clear();
-    fileInput.files = fileBuffer.files;
-    renderFileChips();
-
-    document.getElementById("clearFileBtn")?.classList.add("d-none");
-    document.getElementById("loading").classList.add("hidden");
+  if (invoices.length === 0) {
+    showError("No se pudo extraer ninguna factura");
+    return;
   }
+
+  renderInvoiceSummaries(invoices);
+} catch (err) {
+  showError("Error al procesar la imagen: " + err.message);
+} finally {
+  fileInput.value = "";
+  fileBuffer.items.clear();
+  fileInput.files = fileBuffer.files;
+  renderFileChips();
+
+  document.getElementById("clearFileBtn")?.classList.add("d-none");
+  document.getElementById("loading").classList.add("hidden");
+}
+
 });
 
 function renderInvoiceSummaries(invoices) {
@@ -281,45 +345,26 @@ function openProtectedImage(invoiceId, attachmentId) {
   );
   if (invoiceModal) invoiceModal.hide();
 
-  fetch(`${HOST}/api/view-image/${invoiceId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  apiFetchBlob(`${HOST}/api/view-image/${invoiceId}`)
+  .then((blob) => {
+    const url = URL.createObjectURL(blob);
+    document.getElementById("modalImage").src = url;
+
+    const downloadBtn = document.getElementById("downloadImageBtn");
+    downloadBtn.onclick = () => downloadProtectedImage(invoiceId, attachmentId);
+
+    const modal = new bootstrap.Modal(document.getElementById("imageModal"));
+    modal.show();
   })
-    .then((res) => {
-      if (!res.ok) throw new Error("No se pudo cargar la imagen");
-      return res.blob();
-    })
-    .then((blob) => {
-      const url = URL.createObjectURL(blob);
-      document.getElementById("modalImage").src = url;
+  .catch((err) => {
+    console.error("Error al abrir imagen:", err);
+    showError("No se pudo abrir la imagen: " + err.message);
+  });
 
-      const downloadBtn = document.getElementById("downloadImageBtn");
-      downloadBtn.onclick = () =>
-        downloadProtectedImage(invoiceId, attachmentId);
-
-      const modal = new bootstrap.Modal(document.getElementById("imageModal"));
-      modal.show();
-    })
-    .catch((err) => {
-      console.error("Error al abrir imagen:", err);
-      showError("No se pudo abrir la imagen.");
-    });
 }
 
 function downloadProtectedImage(invoiceId, attachmentId) {
-  fetch(
-    `${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}/download`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  )
-    .then((res) => {
-      if (!res.ok) throw new Error("No se pudo descargar la imagen");
-      return res.blob();
-    })
+  apiFetchBlob(`${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}/download`)
     .then((blob) => {
       if (blob.size === 0) throw new Error("Archivo vacío");
       const url = URL.createObjectURL(blob);
@@ -332,7 +377,7 @@ function downloadProtectedImage(invoiceId, attachmentId) {
     })
     .catch((err) => {
       console.error("Error al descargar imagen:", err);
-      showError("No se pudo descargar la imagen.");
+      showError("No se pudo descargar la imagen: " + err.message);
     });
 }
 
@@ -430,24 +475,21 @@ document
 
     const token = localStorage.getItem("authToken") || "";
     try {
-      const res = await fetch(`${HOST}/api/invoices/${pendingDeleteId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  await apiFetchJSON(`${HOST}/api/invoices/${pendingDeleteId}`, { method: "DELETE" });
 
-      if (!res.ok) throw new Error("No se pudo eliminar");
+  showSuccess("Factura eliminada");
+  pendingDeleteId = null;
+  bootstrap.Modal.getInstance(document.getElementById("confirmDeleteModal")).hide();
+  historyBtn.click(); // Recarga historial
+} catch (err) {
+  // Si el backend devolvió P2003 ya lo mapeamos en handleResponse, pero dejamos fallback:
+  const msg = /P2003/.test(err.message)
+    ? "No se puede eliminar: la factura tiene garantías relacionadas."
+    : err.message;
 
-      showSuccess("Factura eliminada");
-      pendingDeleteId = null;
-      bootstrap.Modal.getInstance(
-        document.getElementById("confirmDeleteModal")
-      ).hide();
-      historyBtn.click(); // Recarga historial
-    } catch (err) {
-      showError("Error al eliminar: " + err.message);
-    }
+  showError("Error al eliminar: " + msg);
+}
+
   });
 
 function renderInvoiceItems(items) {
@@ -510,12 +552,13 @@ function createInvoiceModal(invoice) {
 }
 
 function showError(msg) {
+  console.error("[UI ERROR]", msg);
   const modalEl = document.getElementById("errorModal");
   document.getElementById("errorMessage").textContent = msg;
   new bootstrap.Modal(modalEl).show();
-
   setTimeout(() => {
-    bootstrap.Modal.getInstance(modalEl).hide();
+    const inst = bootstrap.Modal.getInstance(modalEl);
+    inst && inst.hide();
   }, 4000);
 }
 
@@ -548,22 +591,19 @@ document
     if (password !== confirm) return showError("Las contraseñas no coinciden");
 
     try {
-      const res = await fetch(`${HOST}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, fullname, password }),
-      });
+  const json = await apiFetchJSON(`${HOST}/api/auth/register`, {
+    method: "POST",
+    body: JSON.stringify({ email, fullname, password }),
+  });
 
-      const json = await res.json();
-      if (!json.success) throw new Error(json.message || "Registro fallido");
+  if (!json?.success) throw new Error(json?.message || "Registro fallido");
 
-      bootstrap.Modal.getInstance(
-        document.getElementById("registerModal")
-      ).hide();
-      showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
-    } catch (err) {
-      showError("Error al registrar: " + err.message);
-    }
+  bootstrap.Modal.getInstance(document.getElementById("registerModal")).hide();
+  showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
+} catch (err) {
+  showError("Error al registrar: " + err.message);
+}
+
   });
 
 document
@@ -575,50 +615,50 @@ document
     if (!email || !password) return showError("Completa los campos");
 
     try {
-      const res = await fetch(`${HOST}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+  const json = await apiFetchJSON(`${HOST}/api/auth/login`, {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
 
-      const json = await res.json();
-      const user = json.data;
+  const user = json?.data;
+  if (!json?.success || !user?.token) {
+    throw new Error(json?.message || "Login fallido");
+  }
 
-      if (!json.success || !user?.token)
-        throw new Error(json.message || "Login fallido");
+  // Guardar token y datos del usuario
+  token = user.token;
+  localStorage.setItem("authToken", token);
+  localStorage.setItem("userFullname", user.fullname);
+  localStorage.setItem("userEmail", user.email);
+  localStorage.setItem("userRole", user.role);
 
-      // Guardar token y datos del usuario
-      token = user.token;
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("userFullname", user.fullname);
-      localStorage.setItem("userEmail", user.email);
-      localStorage.setItem("userRole", user.role);
+  // Mostrar saludo
+  const greeting = document.getElementById("userGreeting");
+  greeting.textContent = `¡Hola!, ${user.fullname}`;
+  greeting.classList.remove("d-none");
 
-      // Mostrar saludo
-      const greeting = document.getElementById("userGreeting");
-      greeting.textContent = `¡Hola!, ${user.fullname}`;
-      greeting.classList.remove("d-none");
+  loginBtn.classList.add("d-none");
+  logoutBtn.classList.remove("d-none");
+  bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
 
-      loginBtn.classList.add("d-none");
-      logoutBtn.classList.remove("d-none");
-      bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+  showSuccess(json.message || "Inicio de sesión exitoso");
+  updateUIBasedOnAuth();
+} catch (err) {
+  showError("Error al iniciar sesión: " + err.message);
+}
 
-      showSuccess(json.message || "Inicio de sesión exitoso");
-      updateUIBasedOnAuth();
-    } catch (err) {
-      showError("Error al iniciar sesión: " + err.message);
-    }
+
   });
 
 function showSuccess(msg) {
+  console.info("[UI OK]", msg);
   const modalEl = document.getElementById("successModal");
   const body = document.getElementById("successMessage");
-
   body.textContent = msg;
   new bootstrap.Modal(modalEl).show();
-
   setTimeout(() => {
-    bootstrap.Modal.getInstance(modalEl).hide();
+    const inst = bootstrap.Modal.getInstance(modalEl);
+    inst && inst.hide();
   }, 3000);
 }
 
