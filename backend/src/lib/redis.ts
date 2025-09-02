@@ -1,20 +1,27 @@
-import { createClient } from "redis";
+import Redis from "ioredis";
 import { logger } from "@/shared/utils/logging/logger";
 
-const redis = createClient({
-  url: process.env.REDIS_URL,
-  socket: {
-    reconnectStrategy: (retries) => {
-      const delay = Math.min(50 * Math.pow(2, retries), 5000);
-      logger.warn({
-        layer: "infrastructure",
-        action: "REDIS_RETRY",
-        attempt: retries,
-        delay,
-        timestamp: new Date().toISOString(),
-      });
-      return delay;
-    },
+if (!process.env.REDIS_URL) {
+  logger.error({
+    layer: "infrastructure",
+    action: "REDIS_CONFIG_MISSING",
+    message: "Missing REDIS_URL in environment",
+    timestamp: new Date().toISOString(),
+  });
+  throw new Error("Missing REDIS_URL in environment");
+}
+
+const redis = new Redis(process.env.REDIS_URL, {
+  retryStrategy: (times) => {
+    const delay = Math.min(50 * Math.pow(2, times), 5000);
+    logger.warn({
+      layer: "infrastructure",
+      action: "REDIS_RETRY",
+      attempt: times,
+      delay,
+      timestamp: new Date().toISOString(),
+    });
+    return delay;
   },
 });
 
@@ -31,7 +38,7 @@ redis.on("error", (err) => {
   logger.error({
     layer: "infrastructure",
     action: "REDIS_CONNECT_ERROR",
-    error: err instanceof Error ? err.message : String(err),
+    error: err.message,
     timestamp: new Date().toISOString(),
   });
 });
@@ -44,17 +51,35 @@ redis.on("end", () => {
   });
 });
 
-export async function initializeRedis(): Promise<boolean> {
+export async function verifyRedisConnection(): Promise<boolean> {
+  logger.info({
+    layer: "infrastructure",
+    action: "REDIS_PING_ATTEMPT",
+    timestamp: new Date().toISOString(),
+  });
+
   try {
-    await redis.connect();
+    const pong = await redis.ping();
+    if (pong !== "PONG") {
+      throw new Error(`Unexpected Redis ping response: ${pong}`);
+    }
+
+    logger.info({
+      layer: "infrastructure",
+      action: "REDIS_PING_SUCCESS",
+      response: pong,
+      timestamp: new Date().toISOString(),
+    });
+
     return true;
   } catch (err) {
     logger.error({
       layer: "infrastructure",
-      action: "REDIS_CONNECT_ERROR",
+      action: "REDIS_PING_FAILED",
       error: err instanceof Error ? err.message : String(err),
       timestamp: new Date().toISOString(),
     });
+
     return false;
   }
 }

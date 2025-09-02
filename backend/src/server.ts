@@ -1,8 +1,8 @@
 import app from "@/app";
 import { logger } from "@/shared/utils/logging/logger";
 import { connectWithRetry } from "@/shared/utils/retries/connectWithRetry";
+import { verifyRedisConnection } from "./lib/redis";
 import { setupEnv } from "@/config";
-import { initializeRedis } from "./lib/redis";
 
 async function bootstrap() {
   logger.info({ layer: "bootstrap", action: "BOOT_ATTEMPT", timestamp: new Date().toISOString() });
@@ -10,7 +10,7 @@ async function bootstrap() {
   setupEnv();
   await connectWithRetry();
 
-  const redisAvailable = await initializeRedis();
+  const redisAvailable = await verifyRedisConnection();
   if (!redisAvailable) {
     logger.warn({
       layer: "bootstrap",
