@@ -145,9 +145,7 @@
                     role="status"
                     style="width: 3rem; height: 3rem"
                   ></div>
-                  <p class="fw-semibold text-success">
-                    Procesando imagen...
-                  </p>
+                  <p class="fw-semibold text-success">Procesando imagen...</p>
                 </div>
               </div>
 
@@ -402,6 +400,41 @@
                 ></button>
               </div>
               <div class="modal-body" id="successMessage"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🧾 Modal: Ver factura -->
+        <div
+          class="modal fade"
+          id="invoiceModal"
+          tabindex="-1"
+          aria-labelledby="invoiceModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-dark text-light">
+                <h5 class="modal-title" id="invoiceModalLabel">
+                  Desglose de factura
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close text-light"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div id="modalInvoiceDetails" class="mb-3"></div>
+                <button
+                  id="viewImageBtn"
+                  class="btn btn-outline-primary d-none"
+                  target="_blank"
+                >
+                  Ver imagen adjunta
+                </button>
+              </div>
             </div>
           </div>
         </div>

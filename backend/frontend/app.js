@@ -96,7 +96,11 @@ function buildHeaders(options = {}) {
   }
 
   // Content-Type solo si NO es FormData
-  if (!hasBodyFormData && !headers.has("Content-Type") && options.method !== "GET") {
+  if (
+    !hasBodyFormData &&
+    !headers.has("Content-Type") &&
+    options.method !== "GET"
+  ) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -118,7 +122,8 @@ async function handleResponse(res) {
         serverMsg = data?.message || data?.error || JSON.stringify(data);
         // Sugerencia específica si viene un código Prisma P2003
         if (data?.code === "P2003") {
-          serverMsg = "No se puede eliminar la factura porque tiene garantías relacionadas.";
+          serverMsg =
+            "No se puede eliminar la factura porque tiene garantías relacionadas.";
         }
       } else {
         serverMsg = await res.text();
@@ -141,7 +146,11 @@ async function apiFetchJSON(url, options = {}) {
 
   // Fallback: texto crudo (poco común para JSON endpoints)
   const raw = await res.text();
-  try { return JSON.parse(raw); } catch { return { raw }; }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { raw };
+  }
 }
 
 async function apiFetchBlob(url, options = {}) {
@@ -150,21 +159,22 @@ async function apiFetchBlob(url, options = {}) {
   return await res.blob();
 }
 
-
 if (token) {
   loginBtn.classList.add("d-none");
   logoutBtn.classList.remove("d-none");
 }
 
 loginBtn.addEventListener("click", () => {
-  new bootstrap.Modal(document.getElementById("loginModal")).show();
+  openModal("loginModal");
 });
 
 logoutBtn.addEventListener("click", async () => {
   try {
     await apiFetchJSON(`${HOST}/api/auth/logout`, { method: "POST" });
   } catch (err) {
-    showError("No se pudo cerrar sesión en el servidor, pero tu sesión local fue cerrada.");
+    showError(
+      "No se pudo cerrar sesión en el servidor, pero tu sesión local fue cerrada."
+    );
   }
 
   // Limpiar estado visual
@@ -210,22 +220,21 @@ historyBtn.addEventListener("click", async () => {
   if (!token) return showError("Proporciona el token");
 
   try {
-  const json = await apiFetchJSON(`${HOST}/api/invoices`, { method: "GET" });
-  document.getElementById("results").classList.add("hidden");
-  const itemsList = document.getElementById("itemsList");
-  if (itemsList) itemsList.innerHTML = "";
-  document.getElementById("fileInput").value = "";
-  document.getElementById("clearFileBtn")?.classList.add("d-none");
+    const json = await apiFetchJSON(`${HOST}/api/invoices`, { method: "GET" });
+    document.getElementById("results").classList.add("hidden");
+    const itemsList = document.getElementById("itemsList");
+    if (itemsList) itemsList.innerHTML = "";
+    document.getElementById("fileInput").value = "";
+    document.getElementById("clearFileBtn")?.classList.add("d-none");
 
-  const list = Array.isArray(json?.data) ? json.data : [];
-  if (list.length === 0) {
-    showError("No se encontraron facturas.");
+    const list = Array.isArray(json?.data) ? json.data : [];
+    if (list.length === 0) {
+      showError("No se encontraron facturas.");
+    }
+    renderHistory(list);
+  } catch (err) {
+    showError("Error al cargar historial: " + err.message);
   }
-  renderHistory(list);
-} catch (err) {
-  showError("Error al cargar historial: " + err.message);
-}
-
 });
 
 document.getElementById("uploadBtn").addEventListener("click", async () => {
@@ -247,31 +256,30 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   });
 
   try {
-  const json = await apiFetchJSON(`${HOST}/api/invoices/ocrscan`, {
-    method: "POST",
-    body: formData, // Content-Type lo maneja buildHeaders (no se fuerza para FormData)
-  });
+    const json = await apiFetchJSON(`${HOST}/api/invoices/ocrscan`, {
+      method: "POST",
+      body: formData, // Content-Type lo maneja buildHeaders (no se fuerza para FormData)
+    });
 
-  const invoices = Array.isArray(json?.data) ? json.data : [];
+    const invoices = Array.isArray(json?.data) ? json.data : [];
 
-  if (invoices.length === 0) {
-    showError("No se pudo extraer ninguna factura");
-    return;
+    if (invoices.length === 0) {
+      showError("No se pudo extraer ninguna factura");
+      return;
+    }
+
+    renderInvoiceSummaries(invoices);
+  } catch (err) {
+    showError("Error al procesar la imagen: " + err.message);
+  } finally {
+    fileInput.value = "";
+    fileBuffer.items.clear();
+    fileInput.files = fileBuffer.files;
+    renderFileChips();
+
+    document.getElementById("clearFileBtn")?.classList.add("d-none");
+    document.getElementById("loading").classList.add("hidden");
   }
-
-  renderInvoiceSummaries(invoices);
-} catch (err) {
-  showError("Error al procesar la imagen: " + err.message);
-} finally {
-  fileInput.value = "";
-  fileBuffer.items.clear();
-  fileInput.files = fileBuffer.files;
-  renderFileChips();
-
-  document.getElementById("clearFileBtn")?.classList.add("d-none");
-  document.getElementById("loading").classList.add("hidden");
-}
-
 });
 
 function renderInvoiceSummaries(invoices) {
@@ -286,15 +294,15 @@ function renderInvoiceSummaries(invoices) {
       <h5>Factura #${index + 1}</h5>
       <p><strong>Proveedor:</strong> ${invoice.provider || "—"}</p>
       <p><strong>Fecha de emisión:</strong> ${formatDate(invoice.issueDate)}</p>
-      <button class="btn btn-sm btn-primary" data-invoice-id="${
-        invoice.id
-      }">Ver detalles</button>
+      <button class="btn btn-sm btn-primary view-details-btn">Ver detalles</button>
     `;
 
     container.appendChild(summary);
 
-    // Crear modal dinámico
-    createInvoiceModal(invoice);
+    // Asociar click al botón para abrir el modal genérico
+    summary.querySelector(".view-details-btn").addEventListener("click", () => {
+      showInvoiceDetails(invoice);
+    });
   });
 
   container.classList.remove("hidden");
@@ -338,6 +346,42 @@ function renderHistory(invoices) {
   });
 }
 
+function openModal(id, options = {}) {
+  const modalEl = document.getElementById(id);
+  if (!modalEl) return;
+
+  // Cierra todos los modales abiertos
+  document.querySelectorAll(".modal.show").forEach((m) => {
+    const inst = bootstrap.Modal.getInstance(m);
+    if (inst) inst.hide();
+  });
+
+  // Actualizar mensaje si se pasa
+  if (options.message) {
+    const bodyEl = modalEl.querySelector(".modal-body, .modal-message");
+    if (bodyEl) bodyEl.textContent = options.message;
+  }
+
+  // Abrir modal
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+
+  // Auto-hide opcional
+  if (options.autoHide) {
+    setTimeout(() => {
+      const inst = bootstrap.Modal.getInstance(modalEl);
+      inst && inst.hide();
+    }, options.autoHide);
+  }
+}
+
+// document
+//   .querySelector(`[data-invoice-id="${invoice.id}"]`)
+//   .addEventListener("click", () => {
+//     // Antes: const modalInstance = new bootstrap.Modal(...)
+//     openModal(`modal-${invoice.id}`);
+//   });
+
 function openProtectedImage(invoiceId, attachmentId) {
   // Cierra el modal de detalles antes de continuar
   const invoiceModal = bootstrap.Modal.getInstance(
@@ -346,25 +390,26 @@ function openProtectedImage(invoiceId, attachmentId) {
   if (invoiceModal) invoiceModal.hide();
 
   apiFetchBlob(`${HOST}/api/view-image/${invoiceId}`)
-  .then((blob) => {
-    const url = URL.createObjectURL(blob);
-    document.getElementById("modalImage").src = url;
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      document.getElementById("modalImage").src = url;
 
-    const downloadBtn = document.getElementById("downloadImageBtn");
-    downloadBtn.onclick = () => downloadProtectedImage(invoiceId, attachmentId);
+      const downloadBtn = document.getElementById("downloadImageBtn");
+      downloadBtn.onclick = () =>
+        downloadProtectedImage(invoiceId, attachmentId);
 
-    const modal = new bootstrap.Modal(document.getElementById("imageModal"));
-    modal.show();
-  })
-  .catch((err) => {
-    console.error("Error al abrir imagen:", err);
-    showError("No se pudo abrir la imagen: " + err.message);
-  });
-
+      openModal("imageModal");
+    })
+    .catch((err) => {
+      console.error("Error al abrir imagen:", err);
+      showError("No se pudo abrir la imagen: " + err.message);
+    });
 }
 
 function downloadProtectedImage(invoiceId, attachmentId) {
-  apiFetchBlob(`${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}/download`)
+  apiFetchBlob(
+    `${HOST}/api/invoices/${invoiceId}/attachments/${attachmentId}/download`
+  )
     .then((blob) => {
       if (blob.size === 0) throw new Error("Archivo vacío");
       const url = URL.createObjectURL(blob);
@@ -452,7 +497,7 @@ function showInvoiceDetails(invoice) {
     viewImageBtn.classList.add("d-none");
   }
 
-  new bootstrap.Modal(document.getElementById("invoiceModal")).show();
+  openModal("invoiceModal");
 }
 
 function formatDate(dateStr) {
@@ -465,7 +510,7 @@ function deleteInvoice(id) {
   if (!token) return showError("Token requerido para eliminar");
 
   pendingDeleteId = id;
-  new bootstrap.Modal(document.getElementById("confirmDeleteModal")).show();
+  openModal("confirmDeleteModal");
 }
 
 document
@@ -475,21 +520,24 @@ document
 
     const token = localStorage.getItem("authToken") || "";
     try {
-  await apiFetchJSON(`${HOST}/api/invoices/${pendingDeleteId}`, { method: "DELETE" });
+      await apiFetchJSON(`${HOST}/api/invoices/${pendingDeleteId}`, {
+        method: "DELETE",
+      });
 
-  showSuccess("Factura eliminada");
-  pendingDeleteId = null;
-  bootstrap.Modal.getInstance(document.getElementById("confirmDeleteModal")).hide();
-  historyBtn.click(); // Recarga historial
-} catch (err) {
-  // Si el backend devolvió P2003 ya lo mapeamos en handleResponse, pero dejamos fallback:
-  const msg = /P2003/.test(err.message)
-    ? "No se puede eliminar: la factura tiene garantías relacionadas."
-    : err.message;
+      showSuccess("Factura eliminada");
+      pendingDeleteId = null;
+      bootstrap.Modal.getInstance(
+        document.getElementById("confirmDeleteModal")
+      ).hide();
+      historyBtn.click(); // Recarga historial
+    } catch (err) {
+      // Si el backend devolvió P2003 ya lo mapeamos en handleResponse, pero dejamos fallback:
+      const msg = /P2003/.test(err.message)
+        ? "No se puede eliminar: la factura tiene garantías relacionadas."
+        : err.message;
 
-  showError("Error al eliminar: " + msg);
-}
-
+      showError("Error al eliminar: " + msg);
+    }
   });
 
 function renderInvoiceItems(items) {
@@ -553,17 +601,11 @@ function createInvoiceModal(invoice) {
 
 function showError(msg) {
   console.error("[UI ERROR]", msg);
-  const modalEl = document.getElementById("errorModal");
-  document.getElementById("errorMessage").textContent = msg;
-  new bootstrap.Modal(modalEl).show();
-  setTimeout(() => {
-    const inst = bootstrap.Modal.getInstance(modalEl);
-    inst && inst.hide();
-  }, 4000);
+  openModal("errorModal", { message: msg, autoHide: 4000 });
 }
 
 document.getElementById("registerBtn").addEventListener("click", () => {
-  new bootstrap.Modal(document.getElementById("registerModal")).show();
+  openModal("registerModal");
 });
 
 document
@@ -591,19 +633,20 @@ document
     if (password !== confirm) return showError("Las contraseñas no coinciden");
 
     try {
-  const json = await apiFetchJSON(`${HOST}/api/auth/register`, {
-    method: "POST",
-    body: JSON.stringify({ email, fullname, password }),
-  });
+      const json = await apiFetchJSON(`${HOST}/api/auth/register`, {
+        method: "POST",
+        body: JSON.stringify({ email, fullname, password }),
+      });
 
-  if (!json?.success) throw new Error(json?.message || "Registro fallido");
+      if (!json?.success) throw new Error(json?.message || "Registro fallido");
 
-  bootstrap.Modal.getInstance(document.getElementById("registerModal")).hide();
-  showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
-} catch (err) {
-  showError("Error al registrar: " + err.message);
-}
-
+      bootstrap.Modal.getInstance(
+        document.getElementById("registerModal")
+      ).hide();
+      showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
+    } catch (err) {
+      showError("Error al registrar: " + err.message);
+    }
   });
 
 document
@@ -615,51 +658,42 @@ document
     if (!email || !password) return showError("Completa los campos");
 
     try {
-  const json = await apiFetchJSON(`${HOST}/api/auth/login`, {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
+      const json = await apiFetchJSON(`${HOST}/api/auth/login`, {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
 
-  const user = json?.data;
-  if (!json?.success || !user?.token) {
-    throw new Error(json?.message || "Login fallido");
-  }
+      const user = json?.data;
+      if (!json?.success || !user?.token) {
+        throw new Error(json?.message || "Login fallido");
+      }
 
-  // Guardar token y datos del usuario
-  token = user.token;
-  localStorage.setItem("authToken", token);
-  localStorage.setItem("userFullname", user.fullname);
-  localStorage.setItem("userEmail", user.email);
-  localStorage.setItem("userRole", user.role);
+      // Guardar token y datos del usuario
+      token = user.token;
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("userFullname", user.fullname);
+      localStorage.setItem("userEmail", user.email);
+      localStorage.setItem("userRole", user.role);
 
-  // Mostrar saludo
-  const greeting = document.getElementById("userGreeting");
-  greeting.textContent = `¡Hola!, ${user.fullname}`;
-  greeting.classList.remove("d-none");
+      // Mostrar saludo
+      const greeting = document.getElementById("userGreeting");
+      greeting.textContent = `¡Hola!, ${user.fullname}`;
+      greeting.classList.remove("d-none");
 
-  loginBtn.classList.add("d-none");
-  logoutBtn.classList.remove("d-none");
-  bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+      loginBtn.classList.add("d-none");
+      logoutBtn.classList.remove("d-none");
+      bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
 
-  showSuccess(json.message || "Inicio de sesión exitoso");
-  updateUIBasedOnAuth();
-} catch (err) {
-  showError("Error al iniciar sesión: " + err.message);
-}
-
-
+      showSuccess(json.message || "Inicio de sesión exitoso");
+      updateUIBasedOnAuth();
+    } catch (err) {
+      showError("Error al iniciar sesión: " + err.message);
+    }
   });
 
 function showSuccess(msg) {
   console.info("[UI OK]", msg);
-  const modalEl = document.getElementById("successModal");
-  const body = document.getElementById("successMessage");
-  body.textContent = msg;
-  new bootstrap.Modal(modalEl).show();
-  setTimeout(() => {
-    const inst = bootstrap.Modal.getInstance(modalEl);
-    inst && inst.hide();
-  }, 3000);
+  openModal("successModal", { message: msg, autoHide: 3000 });
 }
 
 fileInput.addEventListener("change", () => {
