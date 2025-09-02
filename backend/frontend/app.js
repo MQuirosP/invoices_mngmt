@@ -69,8 +69,8 @@ dropZone.addEventListener("drop", (e) => {
 
 let pendingDeleteId = null;
 
-// const HOST = "https://invoices-mngmt.onrender.com";
-const HOST = "http://localhost:3000";
+const HOST = "https://invoices-mngmt.onrender.com";
+// const HOST = "http://localhost:3000";
 let token = localStorage.getItem("authToken") || "";
 
 if (token) {
