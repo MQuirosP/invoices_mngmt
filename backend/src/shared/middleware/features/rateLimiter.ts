@@ -1,25 +1,24 @@
 import rateLimit from "express-rate-limit";
-import { logger } from "@/shared/utils/logging/logger";
-import jwt from "jsonwebtoken";
 import RedisStore from "rate-limit-redis";
 import { redis } from "../../../lib/redis";
+import { logger } from "@/shared/utils/logging/logger";
+import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-import { Command } from "ioredis";
 
-// ✅ Normaliza IP (IPv4 e IPv6)
+// IP normalizada
 const ipKeyGenerator = (req: Request): string => {
   const ip = req.ip ?? "unknown";
   return ip.startsWith("::ffff:") ? ip.slice(7) : ip;
 };
 
-// ✅ Extrae token del header Authorization
+// Token extractor
 const extractToken = (authHeader: string | undefined): string => {
   if (!authHeader) return "";
   const parts = authHeader.split(" ");
   return parts.length === 2 ? parts[1] : "";
 };
 
-// ✅ Extrae JTI del token decodificado
+// JTI extractor
 const extractJti = (token: string): string => {
   const decoded = jwt.decode(token);
   return typeof decoded === "object" && decoded !== null && "jti" in decoded
@@ -27,21 +26,18 @@ const extractJti = (token: string): string => {
     : "no-jti";
 };
 
-// ✅ Middleware de rate limit con Redis como store
+// Rate limiter con RedisStore
 export const loginRateLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutos
-  max: 5, // máximo 5 intentos por ventana
+  windowMs: 10 * 60 * 1000,
+  max: 5,
 
   store: new RedisStore({
-    sendCommand: (command: string, ...args: (string | number | Buffer)[]) => {
-      return redis.sendCommand(new Command(command, args)) as Promise<any>;
-    },
+    sendCommand: (...args) => redis.sendCommand(args),
   }),
 
   keyGenerator: (req: Request): string => {
     const ip = ipKeyGenerator(req);
-    const email =
-      typeof req.body?.email === "string" ? req.body.email : "unknown";
+    const email = typeof req.body?.email === "string" ? req.body.email : "unknown";
     const token = extractToken(req.headers.authorization);
     const jti = extractJti(token);
     return `${ip}|${email}|${jti}`;
@@ -49,8 +45,7 @@ export const loginRateLimiter = rateLimit({
 
   handler: (req: Request, res: Response): void => {
     const ip = ipKeyGenerator(req);
-    const email =
-      typeof req.body?.email === "string" ? req.body.email : "unknown";
+    const email = typeof req.body?.email === "string" ? req.body.email : "unknown";
     const path = req.originalUrl;
     const method = req.method;
     const userAgent = req.headers["user-agent"] ?? "unknown";
