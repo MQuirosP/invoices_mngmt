@@ -763,6 +763,16 @@ function removeFileFromBuffer(fileName) {
   renderFileChips();
 }
 
+function closeMobileAsideIfDesktop() {
+  const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+  const mobileAsideEl = document.getElementById("mobileAside");
+  const mobileAside = bootstrap.Offcanvas.getInstance(mobileAsideEl);
+
+  if (isDesktop && mobileAside) {
+    mobileAside.hide();
+  }
+}
+
 function updateUIBasedOnAuth() {
   const isLoggedIn = !!localStorage.getItem("authToken");
 
@@ -809,6 +819,9 @@ function updateUIBasedOnAuth() {
 function capitalizeFirstLetter(name) {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
+
+window.addEventListener("resize", closeMobileAsideIfDesktop);
+window.addEventListener("load", closeMobileAsideIfDesktop);
 
 document.addEventListener("DOMContentLoaded", () => {
   updateUIBasedOnAuth();

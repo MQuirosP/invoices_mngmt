@@ -528,7 +528,7 @@ footer {
   left: 0;
   width: 30px;
   height: 50px;
-  background-color: #343a40; /* mismo tono que navbar */
+  background-color: var(--color-text); /* mismo tono que navbar */
   color: #fff;
   border: none;
   border-radius: 0 5px 5px 0;
