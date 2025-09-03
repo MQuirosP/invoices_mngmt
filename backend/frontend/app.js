@@ -806,6 +806,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleBtn.addEventListener("click", () => {
       const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(mobileAside);
       bsOffcanvas.toggle();
+      toggleBtn.classList.toggle("open");
     });
   }
 

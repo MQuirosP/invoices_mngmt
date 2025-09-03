@@ -370,8 +370,10 @@ footer, .footer-custom {
 
 .aside-toggle i {
   pointer-events: none;
+  transition: transform 0.3s ease;
 }
 
 .aside-toggle.open i {
   transform: rotate(180deg);
+  transition: transform 0.3s ease;
 }
