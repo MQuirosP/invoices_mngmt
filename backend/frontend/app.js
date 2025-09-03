@@ -809,9 +809,9 @@ function updateUIBasedOnAuth() {
   const greeting = document.getElementById("userGreeting");
   const username = localStorage.getItem("userFullname");
   if (isLoggedIn && username) {
-    greeting.textContent = `¡Hola!, ${capitalizeFirstLetter(
+    greeting.textContent = `¡Hola ${capitalizeFirstLetter(
       username.split(" ")[0]
-    )}`;
+    )}!`;
     greeting.classList.remove("d-none");
   } else if (greeting) greeting.classList.add("d-none");
 }
