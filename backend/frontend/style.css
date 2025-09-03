@@ -612,3 +612,14 @@ footer {
   background-size: 1rem 1rem;
   padding-right: 2rem;
 }
+
+input[type="date"] {
+  transition: box-shadow 0.3s ease;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}
+
+input[type="date"]:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: #86b7fe;
+}

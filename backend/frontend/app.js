@@ -802,8 +802,10 @@ function capitalizeFirstLetter(name) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  
   updateUIBasedOnAuth();
 
+  
   const isLoggedIn = !!localStorage.getItem("authToken");
   const activeView = localStorage.getItem("activeView");
 
@@ -819,4 +821,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (activeView === "scan") scanBtn.click();
   else if (activeView === "history") historyBtn.click();
+
+  flatpickr("input[type='date']", {
+  animate: true,
+  dateFormat: "Y-m-d",
+  locale: "es", // si querés español
+});
+  
 });
