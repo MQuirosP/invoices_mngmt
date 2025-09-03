@@ -821,9 +821,8 @@ document.addEventListener("DOMContentLoaded", () => {
   else if (activeView === "history") historyBtn.click();
 
   flatpickr("input[type='date']", {
-    dateFormat: "d-m-Y",
     animate: true,
-    dateFormat: "Y-m-d",
+    dateFormat: "d-m-Y",
     locale: "es", // si querés español
   });
 });
