@@ -209,35 +209,32 @@
 
                 <!-- Zona de arrastre -->
                 <div
-                  id="dropZone"
-                  class="d-flex flex-column align-items-center justify-content-center gap-3 flex-wrap border rounded p-3 bg-white"
-                >
-                  <div
-                    id="fileChipContainer"
-                    class="d-flex flex-wrap gap-2 align-content-center justify-content-center w-100 p2"
-                  >
-                    <div class="upload-placeholder text-center w-100 p-3">
-                      <i
-                        class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"
-                      ></i>
-                      <strong class="text-primary d-block"
-                        >Arrastrá tus archivos aquí</strong
-                      >
-                      <span class="text-muted small"
-                        >o hacé clic para seleccionarlos</span
-                      >
-                    </div>
-                  </div>
+  id="dropZone"
+  class="d-flex flex-column align-items-center justify-content-center gap-3 flex-wrap border rounded p-3 bg-white"
+>
+  <div id="uploadBox" class="upload-placeholder w-100 p-3">
+    <div
+      id="fileChipContainer"
+      class="d-flex flex-wrap gap-2 align-content-start justify-content-start"
+    >
+      <div id="uploadMessage" class="text-center w-100">
+        <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+        <strong class="text-primary d-block">Arrastrá tus archivos aquí</strong>
+        <span class="text-muted small">o hacé clic para seleccionarlos</span>
+      </div>
+    </div>
+  </div>
 
-                  <!-- Input oculto -->
-                  <input
-                    type="file"
-                    id="fileInput"
-                    class="form-control d-none"
-                    accept="image/*"
-                    multiple
-                  />
-                </div>
+  <!-- Input oculto -->
+  <input
+    type="file"
+    id="fileInput"
+    class="form-control d-none"
+    accept="image/*"
+    multiple
+  />
+</div>
+
                 <!-- Botones -->
                 <div class="mt-3 d-flex justify-content-center gap-2">
                   <button

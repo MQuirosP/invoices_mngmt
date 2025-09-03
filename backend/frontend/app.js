@@ -689,41 +689,43 @@ fileInput.addEventListener("change", () => {
 });
 
 function renderFileChips() {
-  fileChipContainer.innerHTML = "";
+  // limpio solo chips, no borro el mensaje
+  fileChipContainer.querySelectorAll(".file-chip").forEach((chip) => chip.remove());
+
+  const uploadMessage = document.getElementById("uploadMessage");
 
   if (fileBuffer.files.length === 0) {
-    const placeholder = document.createElement("div");
-    placeholder.className = "upload-placeholder text-center w-100 fade-in";
-    placeholder.innerHTML = `
-      <div class="d-flex flex-column align-items-center justify-content-center w-100 py-3 px-4">
-        <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
-        <strong class="text-primary">Arrastrá tus archivos aquí</strong>
-        <span class="text-muted small">o hacé clic para seleccionarlos</span>
-      </div>
-    `;
-    placeholder.addEventListener("click", (e) => {
-      e.stopPropagation();
-      fileInput.click();
-    });
-    fileChipContainer.appendChild(placeholder);
+    // mostrar mensaje de nuevo
+    uploadMessage.classList.remove("d-none");
     return;
   }
 
+  // ocultar mensaje si hay archivos
+  uploadMessage.classList.add("d-none");
+
   Array.from(fileBuffer.files).forEach((file) => {
-    const chip = document.createElement("span");
-    chip.className = "file-chip fade-in";
-    chip.style.padding = "0.5rem 0.75rem";
+    const chip = document.createElement("div");
+    chip.className = "file-chip fade-in d-inline-flex align-items-center me-2 mb-2";
+    chip.dataset.filename = file.name;
 
-    chip.innerHTML = `
-      <span>${file.name}</span>
-      <button type="button" class="btn-close ms-2" aria-label="Eliminar"></button>
-    `;
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "text-truncate";
+    nameSpan.style.maxWidth = "220px";
+    nameSpan.textContent = file.name;
 
-    chip.querySelector("button").addEventListener("click", (e) => {
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "btn-close";
+    closeBtn.setAttribute("aria-label", "Eliminar");
+    closeBtn.dataset.filename = file.name;
+
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       removeFileFromBuffer(file.name);
     });
 
+    chip.append(nameSpan, closeBtn);
     fileChipContainer.appendChild(chip);
   });
 }
