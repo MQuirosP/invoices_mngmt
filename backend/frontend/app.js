@@ -823,6 +823,6 @@ document.addEventListener("DOMContentLoaded", () => {
   flatpickr("input[type='date']", {
     animate: true,
     dateFormat: "d-m-Y",
-    locale: "es", // si querés español
+    locale: "es",
   });
 });
