@@ -690,7 +690,9 @@ fileInput.addEventListener("change", () => {
 
 function renderFileChips() {
   // limpio solo chips, no borro el mensaje
-  fileChipContainer.querySelectorAll(".file-chip").forEach((chip) => chip.remove());
+  fileChipContainer
+    .querySelectorAll(".file-chip")
+    .forEach((chip) => chip.remove());
 
   const uploadMessage = document.getElementById("uploadMessage");
 
@@ -705,7 +707,8 @@ function renderFileChips() {
 
   Array.from(fileBuffer.files).forEach((file) => {
     const chip = document.createElement("div");
-    chip.className = "file-chip fade-in d-inline-flex align-items-center me-2 mb-2";
+    chip.className =
+      "file-chip fade-in d-inline-flex align-items-center me-2 mb-2";
     chip.dataset.filename = file.name;
 
     const nameSpan = document.createElement("span");

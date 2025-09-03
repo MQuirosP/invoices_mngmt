@@ -363,12 +363,12 @@ footer {
     overflow-y: auto;
     padding: 1rem;
   }
-} 
+}
 
 /* ----------------- Aside Desktop ----------------- */ /* Aside desktop */
 
 #toggleAsideBtn {
-  top: 50%
+  top: 50%;
 }
 .aside-desktop {
   width: 220px;
@@ -518,4 +518,3 @@ footer {
   background-size: 1rem 1rem;
   padding-right: 2rem;
 }
-
