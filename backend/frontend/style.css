@@ -14,7 +14,7 @@
   --color-footer-bg: #212529;
   --color-footer-text: #f8f9fa;
   --color-footer-muted: #adb5bd;
-} 
+}
 
 /* General layout */
 html,
@@ -61,7 +61,7 @@ h3 {
 
 .hidden {
   display: none !important;
-} 
+}
 
 /* Navbar */
 .navbar {
@@ -79,7 +79,7 @@ h3 {
 
 .navbar-nav button {
   font-weight: 500;
-} 
+}
 
 /* Upload section */
 .upload-section {
@@ -204,7 +204,7 @@ h3 {
   100% {
     transform: translateY(0);
   }
-} 
+}
 
 /* Loader */
 #loading {
@@ -219,7 +219,7 @@ h3 {
 #loading p {
   font-size: 1.1rem;
   letter-spacing: 0.5px;
-} 
+}
 
 /* Welcome section */
 #welcomeSection {
@@ -243,7 +243,7 @@ h3 {
   margin-right: 15px;
   flex: 1 1 250px;
   max-width: fit-content;
-} 
+}
 
 /* Results and history tables */
 table {
@@ -291,7 +291,7 @@ table td {
 #results th:first-child,
 #results td:first-child {
   width: 40%;
-} 
+}
 
 /* Modal */
 .modal-title {
@@ -305,7 +305,7 @@ table td {
 
 .modal-header .btn-close {
   filter: invert(1) brightness(1.2);
-} 
+}
 
 /* Buttons */
 button:focus {
@@ -324,7 +324,7 @@ button:focus {
 .btn:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
-} 
+}
 
 /* Layout wrapper */
 #layoutWrapper {
@@ -340,7 +340,7 @@ button:focus {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
-} 
+}
 
 /* Aside panel */
 aside {
@@ -355,7 +355,7 @@ aside {
 aside p {
   font-size: 0.9rem;
   color: #6c757d;
-} 
+}
 
 /* Footer */
 footer {
@@ -393,7 +393,7 @@ footer {
 
 .footer-custom small {
   color: var(--color-footer-muted);
-} 
+}
 
 /* Responsive tweaks */
 @media (max-width: 768px) {
@@ -433,6 +433,18 @@ footer {
     overflow-y: auto;
     padding: 1rem;
   }
+
+  .navbar-brand span {
+    max-width: 120px; /* ajustable según tu diseño */
+    white-space: normal;
+    line-height: 1.1;
+    font-size: 0.85rem;
+  }
+
+  .navbar-brand img,
+  .container-fluid img {
+    height: 55px;
+  }
 }
 
 /* ----------------- Aside Desktop ----------------- */ /* Aside desktop */
@@ -443,26 +455,26 @@ footer {
   border-right: 1px solid #dee2e6;
   position: relative;
   z-index: 1;
-} 
+}
 
 /* Contenido interno */
 .aside-desktop .p-3 {
   color: #212529;
-} 
+}
 
 /* Títulos */
 .aside-desktop h5 {
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
-} 
+}
 
 /* Subtítulos móviles */
 .offcanvas-body h6 {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-} 
+}
 
 /* Labels */
 .aside-desktop label,
@@ -470,7 +482,7 @@ footer {
   font-size: 0.9rem;
   margin-bottom: 0.2rem;
   font-weight: 500;
-} 
+}
 
 /* Selects e Inputs */
 .aside-desktop .form-select,
@@ -479,20 +491,20 @@ footer {
 .offcanvas-body .form-control {
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
-} 
+}
 
 /* Botones accesos rápidos */
 .aside-desktop .btn,
 .offcanvas-body .btn {
   font-size: 0.8rem;
   padding: 0.25rem 0.5rem;
-} 
+}
 
 /* Gap entre botones */
 .aside-desktop .d-flex.flex-column.gap-2,
 .offcanvas-body .d-flex.flex-column.gap-2 {
   margin-bottom: 1rem;
-} 
+}
 
 /* Resumen de facturas */
 .aside-desktop .bg-light,
@@ -502,7 +514,7 @@ footer {
   padding: 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.85rem;
-} 
+}
 
 /* ----------------- Aside Mobile (Offcanvas) ----------------- */
 .offcanvas-header {
@@ -513,13 +525,13 @@ footer {
 
 .offcanvas-body {
   padding: 1rem;
-} 
+}
 
 /* Botones offcanvas */
 .offcanvas-body .btn {
   width: 100%;
   text-align: left;
-} 
+}
 
 /* ----------------- Pestañita Sticky ----------------- */
 .aside-toggle {
@@ -543,7 +555,7 @@ footer {
 .aside-toggle i {
   pointer-events: none; /* evita clicks sobre el icono */
   transition: transform 0.3s ease;
-} 
+}
 
 /* Icono abierto/cerrado */
 .aside-toggle.open i {
@@ -615,7 +627,6 @@ footer {
 
 input {
   cursor: pointer;
-
 }
 
 input[type="date"] {
