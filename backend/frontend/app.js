@@ -21,6 +21,15 @@ if (clearFileBtn) {
   clearFileBtn.classList.add("d-none");
 }
 
+mobileAside.addEventListener("shown.bs.offcanvas", () => {
+  toggleAsideBtn.classList.add("open");
+});
+
+mobileAside.addEventListener("hidden.bs.offcanvas", () => {
+  toggleAsideBtn.classList.remove("open");
+});
+
+
 // 🧹 Elimina archivo del buffer
 fileChipContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("btn-close")) {
