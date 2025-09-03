@@ -29,7 +29,6 @@ mobileAside.addEventListener("hidden.bs.offcanvas", () => {
   toggleAsideBtn.classList.remove("open");
 });
 
-
 // 🧹 Elimina archivo del buffer
 fileChipContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("btn-close")) {
@@ -842,9 +841,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (activeView === "scan") scanBtn.click();
   else if (activeView === "history") historyBtn.click();
 
-  flatpickr("input[type='date']", {
-    animate: true,
-    dateFormat: "d-m-Y",
-    locale: "es",
+  const fp = window.flatpickr;
+
+  fp.localize(fp.l10ns.es); // ← esto registra el idioma globalmente
+
+  fp("input[type='date']", {
+    dateFormat: "d/m/Y",
+    altInput: true,
+    altFormat: "F j, Y",
+    disableMobile: true
   });
+
+
 });
