@@ -546,7 +546,7 @@ footer {
   position: fixed;
   top: 50%;
   left: 0;
-  width: 30px;
+  width: 10px;
   height: 50px;
   background-color: var(--color-text); /* mismo tono que navbar */
   color: #fff;
