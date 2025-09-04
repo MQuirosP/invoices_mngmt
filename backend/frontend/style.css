@@ -447,7 +447,7 @@ footer {
   }
 
   .navbar-brand span {
-    font-size: 1rem; /* o incluso 1.1rem si hay espacio */
+    font-size: 1.1rem; /* o incluso 1.1rem si hay espacio */
     line-height: 1.2;
     max-width: 170px; /* mantiene el wrap en dos líneas */
     white-space: normal;
