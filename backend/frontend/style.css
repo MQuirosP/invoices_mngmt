@@ -72,9 +72,9 @@ h3 {
   z-index: 1000;
 }
 
-.navbar-brand {
+.navbar-brand span {
   font-weight: bold;
-  font-size: 1.25rem;
+  font-size: 1.6rem;
 }
 
 .navbar-nav button {
@@ -84,6 +84,10 @@ h3 {
 /* Upload section */
 .upload-section {
   margin-top: 2rem;
+}
+
+#logo {
+  height: 55px;
 }
 
 #dropZone {
