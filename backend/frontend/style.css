@@ -434,13 +434,6 @@ footer {
     padding: 1rem;
   }
 
-  .navbar-brand span {
-    max-width: 120px; /* ajustable según tu diseño */
-    white-space: normal;
-    line-height: 1.1;
-    font-size: 0.85rem;
-  }
-
   .navbar-brand img,
   .container-fluid img {
     height: 55px;
