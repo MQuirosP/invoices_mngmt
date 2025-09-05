@@ -4,7 +4,7 @@ const historyBtn = document.getElementById("historyBtn");
 const scanSection = document.getElementById("scanSection");
 const historySection = document.getElementById("historySection");
 
-const loginBtn = document.getElementById("loginBtn");
+const loginBtn = document.getElementById("authBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
 
 const fileInput = document.getElementById("fileInput");
