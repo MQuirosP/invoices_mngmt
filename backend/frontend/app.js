@@ -7,6 +7,9 @@ const historySection = document.getElementById("historySection");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
+const loginModal = document.getElementById("loginModal");
+const registerModal = document.getElementById('registerModal');
+
 
 const fileInput = document.getElementById("fileInput");
 const fileChipContainer = document.getElementById("fileChipContainer");
@@ -20,11 +23,23 @@ const viewportHeight = window.innerHeight;
 const minY = 0;
 const maxY = viewportHeight - btnHeight;
 
-
 const clearFileBtn = document.getElementById("clearFileBtn");
 if (clearFileBtn) {
   clearFileBtn.classList.add("d-none");
 }
+
+loginModal.addEventListener("hidden.bs.modal", () => {
+  document.getElementById("loginEmail").value = "";
+  document.getElementById("loginPassword").value = "";
+});
+
+registerModal.addEventListener('hidden.bs.modal', () => {
+    ['registerEmail', 'registerFullname', 'registerPassword', 'registerConfirm'].forEach(id => {
+      const input = document.getElementById(id);
+      if (input) input.value = '';
+    });
+  });
+
 
 mobileAside.addEventListener("shown.bs.offcanvas", () => {
   toggleAsideBtn.classList.add("open");
@@ -654,7 +669,7 @@ document
   .getElementById("confirmLoginBtn")
   .addEventListener("click", async () => {
     const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
+    const password = document.getElementById("loginPassword").value.trim();
 
     if (!email || !password) return showError("Completa los campos");
 
@@ -784,8 +799,10 @@ function clampY(y) {
 }
 
 // 🧩 Posición inicial
-const savedY = localStorage.getItem('asideToggleY');
-const initialY = savedY ? clampY(parseInt(savedY)) : Math.floor((window.innerHeight - btnHeight) / 2);
+const savedY = localStorage.getItem("asideToggleY");
+const initialY = savedY
+  ? clampY(parseInt(savedY))
+  : Math.floor((window.innerHeight - btnHeight) / 2);
 toggleBtn.style.top = `${initialY}px`;
 
 let isDragging = false;
@@ -795,8 +812,7 @@ let isEdgeSwipe = false;
 const edgeThreshold = 20; // px desde el borde izquierdo
 const swipeThreshold = 50; // desplazamiento mínimo para activar
 
-
-document.addEventListener('touchstart', (e) => {
+document.addEventListener("touchstart", (e) => {
   const touch = e.touches[0];
   touchStartX = touch.clientX;
   touchStartY = touch.clientY;
@@ -804,14 +820,14 @@ document.addEventListener('touchstart', (e) => {
   // Detectar si el toque fue sobre el botón
   if (e.target === toggleBtn) {
     isDragging = true;
-    toggleBtn.style.transition = 'none';
+    toggleBtn.style.transition = "none";
   }
 
   // Detectar si fue un swipe desde el borde
   isEdgeSwipe = touchStartX <= edgeThreshold;
 });
 
-document.addEventListener('touchmove', (e) => {
+document.addEventListener("touchmove", (e) => {
   const touch = e.touches[0];
 
   if (isDragging) {
@@ -824,7 +840,7 @@ document.addEventListener('touchmove', (e) => {
     const deltaY = Math.abs(touch.clientY - touchStartY);
 
     if (deltaX > swipeThreshold && deltaY < 30) {
-      const mobileAside = document.getElementById('mobileAside');
+      const mobileAside = document.getElementById("mobileAside");
       const bsAside = bootstrap.Offcanvas.getOrCreateInstance(mobileAside);
       bsAside.show();
       isEdgeSwipe = false;
@@ -832,13 +848,13 @@ document.addEventListener('touchmove', (e) => {
   }
 });
 
-document.addEventListener('touchend', () => {
+document.addEventListener("touchend", () => {
   if (isDragging) {
     isDragging = false;
-    toggleBtn.style.transition = 'top 0.2s ease-in-out';
+    toggleBtn.style.transition = "top 0.2s ease-in-out";
     const finalY = clampY(parseInt(toggleBtn.style.top));
     toggleBtn.style.top = `${finalY}px`;
-    localStorage.setItem('asideToggleY', finalY);
+    localStorage.setItem("asideToggleY", finalY);
   }
 
   isEdgeSwipe = false;
@@ -921,8 +937,6 @@ document.addEventListener("DOMContentLoaded", () => {
     dateFormat: "d/m/Y",
     altInput: true,
     altFormat: "F j, Y",
-    disableMobile: true
+    disableMobile: true,
   });
-
-
 });
