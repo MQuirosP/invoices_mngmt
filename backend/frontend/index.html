@@ -3,6 +3,7 @@
   <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gestión trazable de facturas, garantías y flujos contables con integración a sistemas como QuickBooks y Exactus. UI modular y validaciones defensivas." />
   <title>Gestión de facturas OCR</title>
 
   <!-- Estilos -->
@@ -30,7 +31,7 @@
   <body>
     <header>
       <!-- 🧭 Navbar principal -->
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-1">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-1" role="navigation">
         <div class="container-fluid">
           <div class="d-flex align-content-center">
             <img id="logo" src="assets/logo.png" alt="OCR Logo" height="40" />
@@ -60,17 +61,17 @@
               class="text-light fw-semibold me-3 d-none"
             ></span>
             <div class="navbar-nav">
-              <button id="scanBtn" class="btn btn-outline-light me-2 d-none">
+              <button id="scanBtn" class="btn btn-outline-light me-2 d-none" type="button">
                 Escanear
               </button>
-              <button id="historyBtn" class="btn btn-outline-light me-2 d-none">
+              <button id="historyBtn" class="btn btn-outline-light me-2 d-none" type="button">
                 Historial
               </button>
-              <button id="loginBtn" class="btn btn-success me-2">Login</button>
-              <button id="logoutBtn" class="btn btn-danger me-2 d-none">
+              <button id="loginBtn" class="btn btn-success me-2" type="button">Login</button>
+              <button id="logoutBtn" class="btn btn-danger me-2 d-none" type="button">
                 Logout
               </button>
-              <button id="registerBtn" class="btn btn-outline-info me-2">
+              <button id="registerBtn" class="btn btn-outline-info me-2" type="button">
                 Registro
               </button>
             </div>
@@ -108,13 +109,13 @@
 
           <h5>Accesos rápidos</h5>
           <div class="d-flex flex-column gap-2 mb-3">
-            <button class="btn btn-outline-primary btn-sm">
+            <button class="btn btn-outline-primary btn-sm" type="button">
               Escanear factura
             </button>
-            <button class="btn btn-outline-secondary btn-sm">
+            <button class="btn btn-outline-secondary btn-sm" type="button">
               Historial completo
             </button>
-            <button class="btn btn-outline-info btn-sm">
+            <button class="btn btn-outline-info btn-sm" type="button">
               Facturas pendientes
             </button>
           </div>
@@ -170,13 +171,13 @@
 
             <h6>Accesos rápidos</h6>
             <div class="d-flex flex-column gap-2 mb-3">
-              <button class="btn btn-outline-primary btn-sm">
-                Escanear nueva factura
+              <button class="btn btn-outline-primary btn-sm" type="button">
+                Escanear factura
               </button>
-              <button class="btn btn-outline-secondary btn-sm">
+              <button class="btn btn-outline-secondary btn-sm" type="button">
                 Historial completo
               </button>
-              <button class="btn btn-outline-info btn-sm">
+              <button class="btn btn-outline-info btn-sm" type="button">
                 Facturas pendientes
               </button>
             </div>
@@ -194,7 +195,7 @@
       </div>
 
       <!-- Pestañita sticky solo para mobile -->
-      <button id="toggleAsideBtn" class="aside-toggle d-md-none">
+      <button id="toggleAsideBtn" class="aside-toggle d-md-none" type="button">
         <i class="fas fa-angle-right"></i>
       </button>
 
@@ -266,6 +267,7 @@
                   <button
                     id="uploadBtn"
                     class="btn btn-success d-flex align-items-center gap-2"
+                    type="button"
                   >
                     <i class="fas fa-upload"></i> Procesar imagen
                   </button>
@@ -332,6 +334,7 @@
                   id="downloadImageBtn"
                   class="btn btn-outline-success rounded-circle"
                   aria-label="Descargar imagen"
+                  type="button"
                 >
                   <i class="fas fa-download"></i>
                 </button>
@@ -340,6 +343,7 @@
                   id="shareImageBtn"
                   class="btn btn-outline-primary rounded-circle"
                   aria-label="Compartir imagen"
+                  type="button"
                 >
                   <i class="fas fa-share-alt"></i>
                 </button>
@@ -523,6 +527,7 @@
                   id="viewImageBtn"
                   class="btn btn-outline-primary d-none"
                   target="_blank"
+                  type="button"
                 >
                   Ver imagen adjunta
                 </button>
