@@ -15,6 +15,11 @@ const fileBuffer = new DataTransfer();
 
 const toggleBtn = document.getElementById("toggleAsideBtn");
 const mobileAside = document.getElementById("mobileAside");
+const btnHeight = toggleBtn.offsetHeight;
+const viewportHeight = window.innerHeight;
+const minY = 0;
+const maxY = viewportHeight - btnHeight;
+
 
 const clearFileBtn = document.getElementById("clearFileBtn");
 if (clearFileBtn) {
@@ -771,6 +776,40 @@ function closeMobileAsideIfDesktop() {
     mobileAside.hide();
   }
 }
+
+function clampY(y) {
+  const minY = 0;
+  const maxY = window.innerHeight - btnHeight;
+  return Math.max(minY, Math.min(y, maxY));
+}
+
+// 🧩 Posición inicial
+const savedY = localStorage.getItem('asideToggleY');
+const initialY = savedY ? clampY(parseInt(savedY)) : Math.floor((window.innerHeight - btnHeight) / 2);
+toggleBtn.style.top = `${initialY}px`;
+
+let isDragging = false;
+
+toggleBtn.addEventListener('touchstart', () => {
+  isDragging = true;
+  toggleBtn.style.transition = 'none'; // desactiva animación durante drag
+});
+
+document.addEventListener('touchmove', (e) => {
+  if (!isDragging) return;
+  const touchY = e.touches[0].clientY;
+  const clampedY = clampY(touchY - btnHeight / 2);
+  toggleBtn.style.top = `${clampedY}px`;
+});
+
+document.addEventListener('touchend', () => {
+  if (!isDragging) return;
+  isDragging = false;
+  toggleBtn.style.transition = 'top 0.2s ease-in-out'; // reactiva animación
+  const finalY = clampY(parseInt(toggleBtn.style.top));
+  toggleBtn.style.top = `${finalY}px`;
+  localStorage.setItem('asideToggleY', finalY);
+});
 
 function updateUIBasedOnAuth() {
   const isLoggedIn = !!localStorage.getItem("authToken");

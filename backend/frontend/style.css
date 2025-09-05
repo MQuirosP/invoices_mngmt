@@ -544,11 +544,10 @@ footer {
 /* ----------------- Pestañita Sticky ----------------- */
 .aside-toggle {
   position: fixed;
-  top: 50%;
   left: 0;
   width: 10px;
   height: 50px;
-  background-color: var(--color-text); /* mismo tono que navbar */
+  background-color: var(--color-text);
   color: #fff;
   border: none;
   border-radius: 0 5px 5px 0;
@@ -557,7 +556,9 @@ footer {
   justify-content: center;
   font-size: 1.2rem;
   z-index: 1050;
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
+  transition: top 0.2s ease-in-out;
 }
 
 .aside-toggle i {
