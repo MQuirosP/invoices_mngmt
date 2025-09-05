@@ -30,12 +30,12 @@ const authBtn = document.getElementById("authBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const greeting = document.getElementById("userGreeting");
 
-document
-  .getElementById("confirmLoginBtn")
-  ?.addEventListener("click", handleLogin);
-document
-  .getElementById("confirmRegisterBtn")
-  ?.addEventListener("click", handleRegister);
+// document
+//   .getElementById("confirmLoginBtn")
+//   ?.addEventListener("click", handleLogin);
+// document
+//   .getElementById("confirmRegisterBtn")
+//   ?.addEventListener("click", handleRegister);
 
 authBtn.addEventListener("click", () => openModal("authModal"));
 
@@ -92,10 +92,16 @@ function flipAuthCard() {
   authCard.classList.toggle("flipped");
 }
 
-async function handleLogin() {
+document.getElementById("confirmLoginBtn").addEventListener("click", async (e) => {
+  e.preventDefault(); // Previene cualquier comportamiento por defecto
+
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value.trim();
-  if (!email || !password) return showError("Completa los campos");
+
+  if (!email || !password) {
+    showError("Completa los campos");
+    return;
+  }
 
   try {
     const json = await apiFetchJSON(`${HOST}/api/auth/login`, {
@@ -104,8 +110,9 @@ async function handleLogin() {
     });
 
     const user = json?.data;
-    if (!json?.success || !user?.token)
+    if (!json?.success || !user?.token) {
       throw new Error(json?.message || "Login fallido");
+    }
 
     token = user.token;
     localStorage.setItem("authToken", token);
@@ -124,20 +131,25 @@ async function handleLogin() {
   } catch (err) {
     showError("Error al iniciar sesión: " + err.message);
   }
-}
+});
 
-async function handleRegister() {
+document.getElementById("confirmRegisterBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+
   const email = document.getElementById("registerEmail").value.trim();
-  const fullname = document
-    .getElementById("registerFullname")
-    .value.trim()
-    .toLowerCase();
+  const fullname = document.getElementById("registerFullname").value.trim().toLowerCase();
   const password = document.getElementById("registerPassword").value;
   const confirm = document.getElementById("registerConfirm").value;
 
-  if (!email || !fullname || !password || !confirm)
-    return showError("Completa todos los campos");
-  if (password !== confirm) return showError("Las contraseñas no coinciden");
+  if (!email || !fullname || !password || !confirm) {
+    showError("Completa todos los campos");
+    return;
+  }
+
+  if (password !== confirm) {
+    showError("Las contraseñas no coinciden");
+    return;
+  }
 
   try {
     const json = await apiFetchJSON(`${HOST}/api/auth/register`, {
@@ -145,14 +157,16 @@ async function handleRegister() {
       body: JSON.stringify({ email, fullname, password }),
     });
 
-    if (!json?.success) throw new Error(json?.message || "Registro fallido");
+    if (!json?.success) {
+      throw new Error(json?.message || "Registro fallido");
+    }
 
-    bootstrap.Modal.getInstance(authModal).hide();
+    // bootstrap.Modal.getInstance(authModal).hide();
     showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
   } catch (err) {
     showError("Error al registrar: " + err.message);
   }
-}
+});
 
 function flipAuthCard() {
   document.getElementById("authCard").classList.toggle("flipped");
@@ -466,11 +480,16 @@ function openModal(id, options = {}) {
   const modalEl = document.getElementById(id);
   if (!modalEl) return;
 
-  // Cierra todos los modales abiertos
-  document.querySelectorAll(".modal.show").forEach((m) => {
-    const inst = bootstrap.Modal.getInstance(m);
-    if (inst) inst.hide();
-  });
+  // Evitar cerrar authModal si estamos mostrando un modal de feedback
+  const isFeedbackModal = id === "errorModal" || id === "successModal";
+
+  if (!isFeedbackModal) {
+    // Cierra todos los modales abiertos excepto el que se va a abrir
+    document.querySelectorAll(".modal.show").forEach((m) => {
+      const inst = bootstrap.Modal.getInstance(m);
+      if (inst && m.id !== id) inst.hide();
+    });
+  }
 
   // Actualizar mensaje si se pasa
   if (options.message) {
@@ -490,7 +509,6 @@ function openModal(id, options = {}) {
     }, options.autoHide);
   }
 }
-
 
 function openProtectedImage(invoiceId, attachmentId) {
   // Cierra el modal de detalles antes de continuar
