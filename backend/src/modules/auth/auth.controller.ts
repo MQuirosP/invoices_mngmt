@@ -5,11 +5,16 @@ import { logger } from "@/shared/utils/logging/logger";
 import { AuthRequest } from "./auth.types";
 import { revokeToken } from "@/shared/utils/token/revokeToken";
 import { AuthService } from "./auth.service";
+import { ZodError } from "zod";
 
 const authService = AuthService;
 
 export const AuthController = {
-  register: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  register: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     logger.info({
       layer: "controller",
       action: "USER_REGISTER_ATTEMPT",
@@ -47,17 +52,27 @@ export const AuthController = {
       next(
         error instanceof AppError
           ? error
-          : new AppError("Registration failed", 500, true, error instanceof Error ? error : undefined, {
-              context: "AUTH_CONTROLLER",
-              route: req.originalUrl,
-              method: req.method,
-              payload: req.body,
-            })
+          : new AppError(
+              "Registration failed",
+              500,
+              true,
+              error instanceof Error ? error : undefined,
+              {
+                context: "AUTH_CONTROLLER",
+                route: req.originalUrl,
+                method: req.method,
+                payload: req.body,
+              }
+            )
       );
     }
   },
 
-  login: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  login: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     logger.info({
       layer: "controller",
       action: "USER_LOGIN_ATTEMPT",
@@ -81,21 +96,42 @@ export const AuthController = {
       res.status(200).json({
         success: true,
         data: result,
-        message: "User logged in successfully",
+        message: "Inicio de sesión exitoso",
       });
     } catch (error) {
+      if (error instanceof ZodError) {
+        logger.warn({
+          layer: "controller",
+          action: "USER_LOGIN_VALIDATION_FAILED",
+          method: req.method,
+          path: req.originalUrl,
+          issues: error.errors,
+        });
+
+        res.status(400).json({
+          success: false,
+          message: "Datos inválidos. Verificá el correo y la contraseña.",
+          issues: error.errors,
+        });
+      }
+
       logger.error({
-      layer: "controller",
-      action: "USER_LOGIN_ERROR",
-      method: req.method,
-      path: req.originalUrl,
-      error: error instanceof Error ? error.message : "Unknown error",
+        layer: "controller",
+        action: "USER_LOGIN_ERROR",
+        method: req.method,
+        path: req.originalUrl,
+        error: error instanceof Error ? error.message : "Unknown error",
       });
-      next(error)
+
+      next(error);
     }
   },
 
-  listUsers: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  listUsers: async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const userId = req.user?.id;
 
     logger.info({
@@ -134,17 +170,27 @@ export const AuthController = {
       });
 
       next(
-        new AppError("Failed to list users", 500, true, error instanceof Error ? error : undefined, {
-          context: "AUTH_CONTROLLER",
-          route: req.originalUrl,
-          method: req.method,
-          userId,
-        })
+        new AppError(
+          "Failed to list users",
+          500,
+          true,
+          error instanceof Error ? error : undefined,
+          {
+            context: "AUTH_CONTROLLER",
+            route: req.originalUrl,
+            method: req.method,
+            userId,
+          }
+        )
       );
     }
   },
 
-  logoutUser: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  logoutUser: async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const jti = req.user?.jti;
     const userId = req.user?.id;
 
@@ -201,13 +247,19 @@ export const AuthController = {
       });
 
       next(
-        new AppError("Logout failed", 500, true, error instanceof Error ? error : undefined, {
-          context: "AUTH_CONTROLLER",
-          route: req.originalUrl,
-          method: req.method,
-          userId,
-          jti,
-        })
+        new AppError(
+          "Logout failed",
+          500,
+          true,
+          error instanceof Error ? error : undefined,
+          {
+            context: "AUTH_CONTROLLER",
+            route: req.originalUrl,
+            method: req.method,
+            userId,
+            jti,
+          }
+        )
       );
     }
   },
