@@ -2,7 +2,7 @@ name: Keep Render and DB Alive
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "2/5 * * * *"
   workflow_dispatch: {}
 
 jobs:
