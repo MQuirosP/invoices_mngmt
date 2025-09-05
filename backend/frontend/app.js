@@ -789,26 +789,59 @@ const initialY = savedY ? clampY(parseInt(savedY)) : Math.floor((window.innerHei
 toggleBtn.style.top = `${initialY}px`;
 
 let isDragging = false;
+let touchStartX = 0;
+let touchStartY = 0;
+let isEdgeSwipe = false;
+const edgeThreshold = 20; // px desde el borde izquierdo
+const swipeThreshold = 50; // desplazamiento mínimo para activar
 
-toggleBtn.addEventListener('touchstart', () => {
-  isDragging = true;
-  toggleBtn.style.transition = 'none'; // desactiva animación durante drag
+
+document.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+
+  // Detectar si el toque fue sobre el botón
+  if (e.target === toggleBtn) {
+    isDragging = true;
+    toggleBtn.style.transition = 'none';
+  }
+
+  // Detectar si fue un swipe desde el borde
+  isEdgeSwipe = touchStartX <= edgeThreshold;
 });
 
 document.addEventListener('touchmove', (e) => {
-  if (!isDragging) return;
-  const touchY = e.touches[0].clientY;
-  const clampedY = clampY(touchY - btnHeight / 2);
-  toggleBtn.style.top = `${clampedY}px`;
+  const touch = e.touches[0];
+
+  if (isDragging) {
+    const clampedY = clampY(touch.clientY - btnHeight / 2);
+    toggleBtn.style.top = `${clampedY}px`;
+  }
+
+  if (isEdgeSwipe) {
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = Math.abs(touch.clientY - touchStartY);
+
+    if (deltaX > swipeThreshold && deltaY < 30) {
+      const mobileAside = document.getElementById('mobileAside');
+      const bsAside = bootstrap.Offcanvas.getOrCreateInstance(mobileAside);
+      bsAside.show();
+      isEdgeSwipe = false;
+    }
+  }
 });
 
 document.addEventListener('touchend', () => {
-  if (!isDragging) return;
-  isDragging = false;
-  toggleBtn.style.transition = 'top 0.2s ease-in-out'; // reactiva animación
-  const finalY = clampY(parseInt(toggleBtn.style.top));
-  toggleBtn.style.top = `${finalY}px`;
-  localStorage.setItem('asideToggleY', finalY);
+  if (isDragging) {
+    isDragging = false;
+    toggleBtn.style.transition = 'top 0.2s ease-in-out';
+    const finalY = clampY(parseInt(toggleBtn.style.top));
+    toggleBtn.style.top = `${finalY}px`;
+    localStorage.setItem('asideToggleY', finalY);
+  }
+
+  isEdgeSwipe = false;
 });
 
 function updateUIBasedOnAuth() {
