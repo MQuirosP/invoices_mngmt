@@ -84,8 +84,8 @@
               >
                 Historial
               </button>
-              <button id="loginBtn" class="btn btn-success me-2" type="button">
-                Login
+              <button id="authBtn" class="btn btn-success me-2" type="button">
+                Inicia sesión
               </button>
               <button
                 id="logoutBtn"
@@ -93,13 +93,6 @@
                 type="button"
               >
                 Logout
-              </button>
-              <button
-                id="registerBtn"
-                class="btn btn-outline-info me-2"
-                type="button"
-              >
-                Registro
               </button>
             </div>
           </div>
@@ -402,145 +395,107 @@
           </div>
         </div>
 
-        <!-- 🧑 Modal: Registro -->
-        <div
-          class="modal fade"
-          id="registerModal"
-          tabindex="-1"
-          aria-labelledby="registerModalLabel"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
+        <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog">
             <div class="modal-content border-0 shadow-sm">
-              <div class="modal-header bg-dark border-bottom-0">
-                <h5
-                  class="modal-title fw-semibold text-light"
-                  id="registerModalLabel"
-                >
-                  Registro de usuario
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Cerrar"
-                ></button>
-              </div>
-              <div class="modal-body px-4">
-                <div class="mb-3">
-                  <label for="registerEmail" class="form-label text-muted"
-                    >Correo electrónico</label
-                  >
-                  <input
-                    type="email"
-                    id="registerEmail"
-                    class="form-control"
-                    placeholder="usuario@ejemplo.com"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="registerFullname" class="form-label text-muted"
-                    >Nombre completo</label
-                  >
-                  <input
-                    type="text"
-                    id="registerFullname"
-                    class="form-control"
-                    placeholder="Juan Pérez"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="registerPassword" class="form-label text-muted"
-                    >Contraseña</label
-                  >
-                  <input
-                    type="password"
-                    id="registerPassword"
-                    class="form-control"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="registerConfirm" class="form-label text-muted"
-                    >Confirmar contraseña</label
-                  >
-                  <input
-                    type="password"
-                    id="registerConfirm"
-                    class="form-control"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-              <div class="modal-footer border-top-0 px-4">
-                <button
-                  type="button"
-                  id="confirmRegisterBtn"
-                  class="btn btn-dark w-100"
-                >
-                  Registrarse
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+              <div class="modal-body p-0">
+                <div class="auth-card-container">
+                  <div class="auth-card" id="authCard">
+                    <!-- Cara frontal: Login -->
+                    <div class="auth-face auth-login">
+                      <div class="modal-header bg-dark text-light">
+                        <h5 class="modal-title">Iniciar sesión</h5>
+                        <button
+                          type="button"
+                          class="btn-close btn-close-white"
+                          data-bs-dismiss="modal"
+                          aria-label="Cerrar"
+                        ></button>
+                      </div>
+                      <div class="p-4">
+                        <label for="loginEmail">Correo electrónico</label>
+                        <input
+                          type="email"
+                          id="loginEmail"
+                          class="form-control mb-2"
+                        />
+                        <label for="loginPassword">Contraseña</label>
+                        <input
+                          type="password"
+                          id="loginPassword"
+                          class="form-control mb-3"
+                        />
+                        <button
+                          type="button"
+                          id="confirmLoginBtn"
+                          class="btn btn-dark w-100 mb-2"
+                        >
+                          Ingresar
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-link w-100 text-decoration-none"
+                          onclick="flipAuthCard()"
+                        >
+                          ¿No tenés cuenta? Registrate
+                        </button>
+                      </div>
+                    </div>
 
-        <!-- 🔐 Modal: Login -->
-        <div
-          class="modal fade"
-          id="loginModal"
-          tabindex="-1"
-          aria-labelledby="loginModalLabel"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-sm">
-              <div class="modal-header bg-dark border-bottom-0">
-                <h5
-                  class="modal-title fw-semibold text-light"
-                  id="loginModalLabel"
-                >
-                  Iniciar sesión
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Cerrar"
-                ></button>
-              </div>
-              <div class="modal-body px-4">
-                <div class="mb-3">
-                  <label for="loginEmail" class="form-label text-muted"
-                    >Correo electrónico</label
-                  >
-                  <input
-                    type="email"
-                    id="loginEmail"
-                    class="form-control"
-                    placeholder="usuario@ejemplo.com"
-                  />
+                    <!-- Cara trasera: Registro -->
+                    <div class="auth-face auth-register">
+                      <div class="modal-header bg-dark text-light">
+                        <h5 class="modal-title">Registro de usuario</h5>
+                        <button
+                          type="button"
+                          class="btn-close btn-close-white"
+                          data-bs-dismiss="modal"
+                          aria-label="Cerrar"
+                        ></button>
+                      </div>
+                      <div class="p-4">
+                        <input
+                          type="email"
+                          id="registerEmail"
+                          class="form-control mb-2"
+                          placeholder="Correo electrónico"
+                        />
+                        <input
+                          type="text"
+                          id="registerFullname"
+                          class="form-control mb-2"
+                          placeholder="Nombre completo"
+                        />
+                        <input
+                          type="password"
+                          id="registerPassword"
+                          class="form-control mb-2"
+                          placeholder="Contraseña"
+                        />
+                        <input
+                          type="password"
+                          id="registerConfirm"
+                          class="form-control mb-3"
+                          placeholder="Confirmar contraseña"
+                        />
+                        <button
+                          type="button"
+                          id="confirmRegisterBtn"
+                          class="btn btn-dark w-100 mb-2"
+                        >
+                          Registrarse
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-link w-100 text-decoration-none"
+                          onclick="flipAuthCard()"
+                        >
+                          ¿Ya tenés cuenta? Iniciar sesión
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="mb-3">
-                  <label for="loginPassword" class="form-label text-muted"
-                    >Contraseña</label
-                  >
-                  <input
-                    type="password"
-                    id="loginPassword"
-                    class="form-control"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-              <div class="modal-footer border-top-0 px-4">
-                <button
-                  type="button"
-                  id="confirmLoginBtn"
-                  class="btn btn-dark w-100"
-                >
-                  Ingresar
-                </button>
               </div>
             </div>
           </div>

@@ -5,11 +5,7 @@ const scanSection = document.getElementById("scanSection");
 const historySection = document.getElementById("historySection");
 
 const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
-const loginModal = document.getElementById("loginModal");
-const registerModal = document.getElementById('registerModal');
-
 
 const fileInput = document.getElementById("fileInput");
 const fileChipContainer = document.getElementById("fileChipContainer");
@@ -28,18 +24,154 @@ if (clearFileBtn) {
   clearFileBtn.classList.add("d-none");
 }
 
-loginModal.addEventListener("hidden.bs.modal", () => {
-  document.getElementById("loginEmail").value = "";
-  document.getElementById("loginPassword").value = "";
+const authModal = document.getElementById("authModal");
+const authCard = document.getElementById("authCard");
+const authBtn = document.getElementById("authBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const greeting = document.getElementById("userGreeting");
+
+document
+  .getElementById("confirmLoginBtn")
+  ?.addEventListener("click", handleLogin);
+document
+  .getElementById("confirmRegisterBtn")
+  ?.addEventListener("click", handleRegister);
+
+authBtn.addEventListener("click", () => openModal("authModal"));
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await apiFetchJSON(`${HOST}/api/auth/logout`, { method: "POST" });
+  } catch (err) {
+    showError(
+      "No se pudo cerrar sesión en el servidor, pero tu sesión local fue cerrada."
+    );
+  }
+
+  // Limpiar sesión local
+  localStorage.clear();
+  token = "";
+
+  // Actualizar estado visual
+  greeting.classList.add("d-none");
+  logoutBtn.classList.add("d-none");
+  authBtn.classList.remove("d-none");
+
+  document.getElementById("userGreeting")?.classList.add("d-none");
+  document.getElementById("historySection")?.classList.add("hidden");
+  document.getElementById("scanSection")?.classList.add("hidden");
+  document.getElementById("welcomeSection")?.classList.remove("hidden");
+  const itemsList = document.getElementById("itemsList");
+  if (itemsList) itemsList.innerHTML = "";
+  document.getElementById("results")?.classList.add("hidden");
+
+  updateUIBasedOnAuth();
+  showSuccess("Sesión cerrada.");
 });
 
-registerModal.addEventListener('hidden.bs.modal', () => {
-    ['registerEmail', 'registerFullname', 'registerPassword', 'registerConfirm'].forEach(id => {
-      const input = document.getElementById(id);
-      if (input) input.value = '';
-    });
-  });
+document.getElementById("authModal").addEventListener("hidden.bs.modal", () => {
+  clearInputs([
+    "loginEmail",
+    "loginPassword",
+    "registerEmail",
+    "registerFullname",
+    "registerPassword",
+    "registerConfirm",
+  ]);
+  authCard.classList.remove("flipped");
+});
 
+function clearInputs(ids) {
+  ids.forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) input.value = "";
+  });
+}
+
+function flipAuthCard() {
+  authCard.classList.toggle("flipped");
+}
+
+async function handleLogin() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  if (!email || !password) return showError("Completa los campos");
+
+  try {
+    const json = await apiFetchJSON(`${HOST}/api/auth/login`, {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+
+    const user = json?.data;
+    if (!json?.success || !user?.token)
+      throw new Error(json?.message || "Login fallido");
+
+    token = user.token;
+    localStorage.setItem("authToken", token);
+    localStorage.setItem("userFullname", user.fullname);
+    localStorage.setItem("userEmail", user.email);
+    localStorage.setItem("userRole", user.role);
+
+    greeting.textContent = `¡Hola!, ${user.fullname}`;
+    greeting.classList.remove("d-none");
+    authBtn.classList.add("d-none");
+    logoutBtn.classList.remove("d-none");
+
+    bootstrap.Modal.getInstance(authModal).hide();
+    showSuccess(json.message || "Inicio de sesión exitoso");
+    updateUIBasedOnAuth();
+  } catch (err) {
+    showError("Error al iniciar sesión: " + err.message);
+  }
+}
+
+async function handleRegister() {
+  const email = document.getElementById("registerEmail").value.trim();
+  const fullname = document
+    .getElementById("registerFullname")
+    .value.trim()
+    .toLowerCase();
+  const password = document.getElementById("registerPassword").value;
+  const confirm = document.getElementById("registerConfirm").value;
+
+  if (!email || !fullname || !password || !confirm)
+    return showError("Completa todos los campos");
+  if (password !== confirm) return showError("Las contraseñas no coinciden");
+
+  try {
+    const json = await apiFetchJSON(`${HOST}/api/auth/register`, {
+      method: "POST",
+      body: JSON.stringify({ email, fullname, password }),
+    });
+
+    if (!json?.success) throw new Error(json?.message || "Registro fallido");
+
+    bootstrap.Modal.getInstance(authModal).hide();
+    showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
+  } catch (err) {
+    showError("Error al registrar: " + err.message);
+  }
+}
+
+function flipAuthCard() {
+  document.getElementById("authCard").classList.toggle("flipped");
+}
+
+document.getElementById("authModal").addEventListener("hidden.bs.modal", () => {
+  [
+    "loginEmail",
+    "loginPassword",
+    "registerEmail",
+    "registerFullname",
+    "registerPassword",
+    "registerConfirm",
+  ].forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) input.value = "";
+  });
+  document.getElementById("authCard").classList.remove("flipped");
+});
 
 mobileAside.addEventListener("shown.bs.offcanvas", () => {
   toggleAsideBtn.classList.add("open");
@@ -180,36 +312,6 @@ if (token) {
   logoutBtn.classList.remove("d-none");
 }
 
-loginBtn.addEventListener("click", () => {
-  openModal("loginModal");
-});
-
-logoutBtn.addEventListener("click", async () => {
-  try {
-    await apiFetchJSON(`${HOST}/api/auth/logout`, { method: "POST" });
-  } catch (err) {
-    showError(
-      "No se pudo cerrar sesión en el servidor, pero tu sesión local fue cerrada."
-    );
-  }
-
-  // Limpiar estado visual
-  document.getElementById("userGreeting").classList.add("d-none");
-  document.getElementById("historySection").classList.add("hidden");
-  document.getElementById("scanSection").classList.add("hidden");
-  document.getElementById("welcomeSection").classList.remove("hidden");
-  const itemsList = document.getElementById("itemsList");
-  if (itemsList) itemsList.innerHTML = "";
-  document.getElementById("results").classList.add("hidden");
-
-  // Limpiar sesión local
-  localStorage.removeItem("authToken");
-  token = "";
-
-  updateUIBasedOnAuth();
-  showSuccess("Sesión cerrada.");
-});
-
 scanBtn.addEventListener("click", () => {
   localStorage.setItem("activeView", "scan");
   scanBtn.classList.add("active");
@@ -217,8 +319,6 @@ scanBtn.addEventListener("click", () => {
   scanSection.classList.remove("hidden");
   historySection.classList.add("hidden");
   document.getElementById("results").classList.add("hidden");
-  // document.getElementById("provider").textContent = "";
-  // document.getElementById("issueDate").textContent = "";
   const itemsList = document.getElementById("itemsList");
   if (itemsList) itemsList.innerHTML = "";
   document.getElementById("fileInput").value = "";
@@ -391,12 +491,6 @@ function openModal(id, options = {}) {
   }
 }
 
-// document
-//   .querySelector(`[data-invoice-id="${invoice.id}"]`)
-//   .addEventListener("click", () => {
-//     // Antes: const modalInstance = new bootstrap.Modal(...)
-//     openModal(`modal-${invoice.id}`);
-//   });
 
 function openProtectedImage(invoiceId, attachmentId) {
   // Cierra el modal de detalles antes de continuar
@@ -547,7 +641,7 @@ document
       ).hide();
       historyBtn.click(); // Recarga historial
     } catch (err) {
-      // Si el backend devolvió P2003 ya lo mapeamos en handleResponse, pero dejamos fallback:
+      // Si el backend retorna P2003 lo mapeamos en handleResponse, pero dejamos fallback:
       const msg = /P2003/.test(err.message)
         ? "No se puede eliminar: la factura tiene garantías relacionadas."
         : err.message;
@@ -620,92 +714,6 @@ function showError(msg) {
   openModal("errorModal", { message: msg, autoHide: 4000 });
 }
 
-document.getElementById("registerBtn").addEventListener("click", () => {
-  openModal("registerModal");
-});
-
-document
-  .getElementById("registerModal")
-  .addEventListener("hidden.bs.modal", () => {
-    document.getElementById("registerEmail").value = "";
-    document.getElementById("registerFullname").value = "";
-    document.getElementById("registerPassword").value = "";
-    document.getElementById("registerConfirm").value = "";
-  });
-
-document
-  .getElementById("confirmRegisterBtn")
-  .addEventListener("click", async () => {
-    const email = document.getElementById("registerEmail").value.trim();
-    const fullname = document
-      .getElementById("registerFullname")
-      .value.trim()
-      .toLowerCase();
-    const password = document.getElementById("registerPassword").value;
-    const confirm = document.getElementById("registerConfirm").value;
-
-    if (!email || !fullname || !password || !confirm)
-      return showError("Completa todos los campos");
-    if (password !== confirm) return showError("Las contraseñas no coinciden");
-
-    try {
-      const json = await apiFetchJSON(`${HOST}/api/auth/register`, {
-        method: "POST",
-        body: JSON.stringify({ email, fullname, password }),
-      });
-
-      if (!json?.success) throw new Error(json?.message || "Registro fallido");
-
-      bootstrap.Modal.getInstance(
-        document.getElementById("registerModal")
-      ).hide();
-      showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
-    } catch (err) {
-      showError("Error al registrar: " + err.message);
-    }
-  });
-
-document
-  .getElementById("confirmLoginBtn")
-  .addEventListener("click", async () => {
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value.trim();
-
-    if (!email || !password) return showError("Completa los campos");
-
-    try {
-      const json = await apiFetchJSON(`${HOST}/api/auth/login`, {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
-
-      const user = json?.data;
-      if (!json?.success || !user?.token) {
-        throw new Error(json?.message || "Login fallido");
-      }
-
-      // Guardar token y datos del usuario
-      token = user.token;
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("userFullname", user.fullname);
-      localStorage.setItem("userEmail", user.email);
-      localStorage.setItem("userRole", user.role);
-
-      // Mostrar saludo
-      const greeting = document.getElementById("userGreeting");
-      greeting.textContent = `¡Hola!, ${user.fullname}`;
-      greeting.classList.remove("d-none");
-
-      loginBtn.classList.add("d-none");
-      logoutBtn.classList.remove("d-none");
-      bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
-
-      showSuccess(json.message || "Inicio de sesión exitoso");
-      updateUIBasedOnAuth();
-    } catch (err) {
-      showError("Error al iniciar sesión: " + err.message);
-    }
-  });
 
 function showSuccess(msg) {
   console.info("[UI OK]", msg);

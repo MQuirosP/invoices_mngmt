@@ -248,6 +248,41 @@ h3 {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
+.auth-card-container {
+  perspective: 1000px;
+  height: 100%;
+}
+
+.auth-card {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.auth-face {
+  position: absolute;
+  width: 100%;
+  backface-visibility: hidden;
+  top: 0;
+  left: 0;
+  border-radius: 12px;
+}
+
+.auth-login {
+  z-index: 2;
+  background-color: #fff;
+}
+
+.auth-register {
+  transform: rotateY(180deg);
+  background-color: #fff;
+}
+
+.auth-card.flipped {
+  transform: rotateY(180deg);
+}
+
 .icon-wrapper svg {
   animation: pulseIcon 1.2s ease-in-out infinite alternate;
 }
