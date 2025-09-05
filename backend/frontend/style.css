@@ -94,7 +94,10 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
+  justify-content: center; /* ya lo tenés, mantiene el contenido centrado */
   min-height: 160px;
+  max-width: 60%;
+  margin: 0 auto; /* 🔥 esto lo centra horizontalmente */
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
@@ -517,6 +520,10 @@ footer {
 
   .mobile-break {
     display: inline;
+  }
+
+  #dropZone {
+    max-width: 100%;
   }
 }
 
