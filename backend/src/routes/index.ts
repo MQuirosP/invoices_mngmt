@@ -47,7 +47,7 @@ router.get("/ping", async (req, res) => {
   logger.info({
     layer: "router",
     action: "PING_ATTEMPT",
-    message: `🛰️ Incoming ping detected — jobId: ${jobId}, env: ${env}, source: ${source}`,
+    message: `Incoming ping detected — jobId: ${jobId}, env: ${env}, source: ${source}`,
     jobId,
     env,
     source,
@@ -61,7 +61,7 @@ router.get("/ping", async (req, res) => {
     logger.info({
       layer: "router",
       action: "PING_SUCCESS",
-      message: `✅ Ping completed — jobId: ${jobId}, env: ${env}, source: ${source}, invoices: ${invoiceCount}`,
+      message: `Ping completed — jobId: ${jobId}, env: ${env}, source: ${source}, invoices: ${invoiceCount}`,
       jobId,
       env,
       source,
@@ -74,7 +74,7 @@ router.get("/ping", async (req, res) => {
     logger.error({
       layer: "router",
       action: "PING_ERROR",
-      message: `🚨 Ping failed — jobId: ${jobId}, env: ${env}, source: ${source}, reason: ${err instanceof Error ? err.message : String(err)}`,
+      message: `Ping failed — jobId: ${jobId}, env: ${env}, source: ${source}, reason: ${err instanceof Error ? err.message : String(err)}`,
       jobId,
       env,
       source,
@@ -106,7 +106,7 @@ router.get("/health/db", async (req, res) => {
   logger.info({
     layer: "router",
     action: "DB_HEALTH_ATTEMPT",
-    message: `🔍 DB health check initiated — jobId: ${jobId}, source: ${source}`,
+    message: `DB health check initiated — jobId: ${jobId}, source: ${source}`,
     jobId,
     source,
     timestamp: new Date().toISOString(),
@@ -118,7 +118,7 @@ router.get("/health/db", async (req, res) => {
     logger.info({
       layer: "router",
       action: "DB_HEALTH_SUCCESS",
-      message: `🧬 Database heartbeat confirmed — jobId: ${jobId}, source: ${source}`,
+      message: `Database heartbeat confirmed — jobId: ${jobId}, source: ${source}`,
       jobId,
       source,
       timestamp: new Date().toISOString(),
@@ -131,7 +131,7 @@ router.get("/health/db", async (req, res) => {
     logger.error({
       layer: "router",
       action: "DB_HEALTH_ERROR",
-      message: `💥 DB health check failed — jobId: ${jobId}, source: ${source}, reason: ${error.message}`,
+      message: `DB health check failed — jobId: ${jobId}, source: ${source}, reason: ${error.message}`,
       jobId,
       source,
       error: error.message,
