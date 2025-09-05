@@ -634,14 +634,11 @@ footer {
   padding-right: 2rem;
 }
 
-input {
-  cursor: pointer;
-}
-
 input[type="date"] {
   transition: box-shadow 0.3s ease;
   border-radius: 4px;
   border: 1px solid #ced4da;
+  cursor: pointer;
 }
 
 input[type="date"]:focus {

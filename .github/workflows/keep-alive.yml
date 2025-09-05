@@ -14,10 +14,14 @@ jobs:
 
       - name: Curl to keep service alive
         run: |
-          echo "Pinging Render with Job ID: $JOB_ID"
-          curl --fail --silent https://invoices-mngmt.onrender.com/api/ping \
+          CODE=$(curl --write-out "%{http_code}" --silent --output /dev/null https://invoices-mngmt.onrender.com/api/ping \
             -H "X-Job-ID: $JOB_ID" \
-            -H "X-Env: dev"
+            -H "X-Env: dev")
+          echo "Ping response code: $CODE"
+          if [ "$CODE" -ge 400 ]; then
+            echo "Ping failed with HTTP $CODE"
+            exit 1
+          fi
 
       - name: Curl to wake up DB
         run: |
