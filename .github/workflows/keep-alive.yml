@@ -24,3 +24,5 @@ jobs:
           echo "Pinging DB health check with Job ID: $JOB_ID"
           curl --fail --silent https://invoices-mngmt.onrender.com/api/health/db \
             -H "X-Job-ID: $JOB_ID"
+      - name: Confirm workflow execution
+        run: echo "Workflow Keep Render and DB Alive executed at $(date)"
