@@ -292,18 +292,21 @@ async function handleResponse(res) {
     onUnauthorized();
     throw new Error("No autorizado (token inválido o expirado)");
   }
+
+  if (res.status === 404) {
+    throw new Error("No encontramos una cuenta con ese correo.");
+  }
+
   if (!res.ok) {
-    // Intentamos leer mensaje del backend
     let serverMsg = "";
     try {
       const ct = res.headers.get("content-type") || "";
       if (ct.includes("application/json")) {
         const data = await res.json();
         serverMsg = data?.message || data?.error || JSON.stringify(data);
-        // Sugerencia específica si viene un código Prisma P2003
+
         if (data?.code === "P2003") {
-          serverMsg =
-            "No se puede eliminar la factura porque tiene garantías relacionadas.";
+          serverMsg = "No se puede eliminar la factura porque tiene garantías relacionadas.";
         }
       } else {
         serverMsg = await res.text();
@@ -311,6 +314,7 @@ async function handleResponse(res) {
     } catch {
       // ignorar parsing errors
     }
+
     const friendly = serverMsg || res.statusText || "Error desconocido";
     throw new Error(`HTTP ${res.status}: ${friendly}`);
   }

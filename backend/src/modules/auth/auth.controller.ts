@@ -9,11 +9,7 @@ import { revokeToken } from "@/shared/utils/token/revokeToken";
 const authService = AuthService;
 
 export const AuthController = {
-  register: async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  register: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     logger.info({
       layer: "controller",
       action: "USER_REGISTER_ATTEMPT",
@@ -54,6 +50,7 @@ export const AuthController = {
           message: "Invalid input. Please check your name, email and password.",
           issues: error.errors,
         });
+        return;
       }
 
       logger.error({
@@ -68,11 +65,7 @@ export const AuthController = {
     }
   },
 
-  login: async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  login: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     logger.info({
       layer: "controller",
       action: "USER_LOGIN_ATTEMPT",
@@ -113,6 +106,7 @@ export const AuthController = {
           message: "Invalid input. Please check your email and password.",
           issues: error.errors,
         });
+        return;
       }
 
       logger.error({
@@ -127,11 +121,7 @@ export const AuthController = {
     }
   },
 
-  listUsers: async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  listUsers: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.id;
 
     logger.info({
@@ -173,11 +163,7 @@ export const AuthController = {
     }
   },
 
-  logoutUser: async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  logoutUser: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     const jti = req.user?.jti;
     const userId = req.user?.id;
 
@@ -203,20 +189,11 @@ export const AuthController = {
         success: false,
         message: "Missing token identifier (jti)",
       });
+      return;
     }
 
     try {
-      if (!jti) {
-      logger.warn({
-        layer: "controller",
-        action: "USER_LOGOUT_JTI_MISSING",
-        userId,
-        method: req.method,
-        path: req.originalUrl,
-      });} else {
-
-        await revokeToken(jti);
-      }
+      await revokeToken(jti);
 
       logger.info({
         layer: "controller",
