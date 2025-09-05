@@ -96,7 +96,7 @@ export const AuthController = {
       res.status(200).json({
         success: true,
         data: result,
-        message: "Inicio de sesión exitoso",
+        message: "User logged in successfully",
       });
     } catch (error) {
       if (error instanceof ZodError) {
@@ -110,7 +110,7 @@ export const AuthController = {
 
         res.status(400).json({
           success: false,
-          message: "Datos inválidos. Verificá el correo y la contraseña.",
+          message: "Invalid input. Please check your email and password.",
           issues: error.errors,
         });
       }

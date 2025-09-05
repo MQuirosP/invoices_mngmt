@@ -10,7 +10,11 @@ const userRepo = UserRepository;
 
 export const AuthService = {
   registerUser: async (data: RegisterInput) => {
-    logger.info({ layer: "service", action: "USER_REGISTER_ATTEMPT", email: data.email });
+    logger.info({
+      layer: "service",
+      action: "USER_REGISTER_ATTEMPT",
+      email: data.email,
+    });
 
     const existing = await userRepo.findByEmail(data.email);
     if (existing) {
@@ -43,18 +47,44 @@ export const AuthService = {
   },
 
   loginUser: async (data: LoginInput) => {
-    logger.info({ layer: "service", action: "USER_LOGIN_ATTEMPT", email: data.email });
+    logger.info({
+      layer: "service",
+      action: "USER_LOGIN_ATTEMPT",
+      email: data.email,
+    });
 
     const user = await userRepo.findByEmail(data.email);
-    if (!user) throw new AppError("User not found.", 404);
+    if (!user) {
+      logger.warn({
+        layer: "service",
+        action: "USER_NOT_FOUND",
+        email: data.email,
+      });
+      throw new AppError("No account found with that email.", 404);
+    }
 
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
-    if (!isPasswordValid) throw new AppError("Invalid password.", 401);
+    if (!isPasswordValid) {
+      logger.warn({
+        layer: "service",
+        action: "INVALID_PASSWORD",
+        email: data.email,
+        userId: user.id,
+      });
+      throw new AppError("Incorrect password.", 401);
+    }
 
     const { token } = await signTokenWithJti({
       sub: user.id,
       email: user.email,
       role: user.role,
+    });
+
+    logger.info({
+      layer: "service",
+      action: "USER_LOGIN_SUCCESS",
+      userId: user.id,
+      email: user.email,
     });
 
     return {
