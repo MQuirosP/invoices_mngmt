@@ -92,14 +92,26 @@ function flipAuthCard() {
   authCard.classList.toggle("flipped");
 }
 
-document.getElementById("confirmLoginBtn").addEventListener("click", async (e) => {
-  e.preventDefault(); // Previene cualquier comportamiento por defecto
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
+document.getElementById("confirmLoginBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  const emailInput = document.getElementById("loginEmail");
+  const passwordInput = document.getElementById("loginPassword");
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
 
   if (!email || !password) {
-    showError("Por favor completa todos los campos");
+    showError("Por favor completá todos los campos.");
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    showError("El correo no tiene un formato válido.");
     return;
   }
 
@@ -114,7 +126,7 @@ document.getElementById("confirmLoginBtn").addEventListener("click", async (e) =
       throw new Error(json?.message || "Login fallido");
     }
 
-    token = user.token;
+    const token = user.token;
     localStorage.setItem("authToken", token);
     localStorage.setItem("userFullname", user.fullname);
     localStorage.setItem("userEmail", user.email);
@@ -129,7 +141,8 @@ document.getElementById("confirmLoginBtn").addEventListener("click", async (e) =
     showSuccess(json.message || "Inicio de sesión exitoso");
     updateUIBasedOnAuth();
   } catch (err) {
-    showError("Inicio de sesión fallido: " + getFriendlyErrorMessage(err.message));
+    const msg = getFriendlyErrorMessage(err);
+    showError("Inicio de sesión fallido: " + msg);
   }
 });
 
@@ -323,7 +336,7 @@ async function handleResponse(res) {
 async function apiFetchJSON(url, options = {}) {
   const res = await fetch(url, { ...options, headers: buildHeaders(options) });
   await handleResponse(res);
-
+console.log(res)
   const ct = res.headers.get("content-type") || "";
   if (!ct || res.status === 204) return {};
   if (ct.includes("application/json")) return await res.json();
