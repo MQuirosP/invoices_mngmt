@@ -502,48 +502,38 @@
         </div>
 
         <!-- ⚠️ Modal: Error -->
-        <div
-          class="modal fade"
-          id="errorModal"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header bg-dark text-light">
-                <h5 class="modal-title">Error</h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                ></button>
-              </div>
-              <div class="modal-body" id="errorMessage"></div>
-            </div>
-          </div>
-        </div>
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i> Ups, algo salió mal
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="errorMessage">
+        <!-- Mensaje dinámico -->
+      </div>
+    </div>
+  </div>
+</div>
 
         <!-- ✅ Modal: Éxito -->
-        <div
-          class="modal fade"
-          id="successModal"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-success text-white">
-              <div class="modal-header">
-                <h5 class="modal-title">Éxito</h5>
-                <button
-                  type="button"
-                  class="btn-close btn-close-white"
-                  data-bs-dismiss="modal"
-                ></button>
-              </div>
-              <div class="modal-body" id="successMessage"></div>
-            </div>
-          </div>
-        </div>
+        <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-success text-white border border-white">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-check-circle me-2"></i> ¡Listo!
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="successMessage">
+        <!-- Mensaje dinámico -->
+      </div>
+    </div>
+  </div>
+</div>
 
         <!-- 🧾 Modal: Ver factura -->
         <div

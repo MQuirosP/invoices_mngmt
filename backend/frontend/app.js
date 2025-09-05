@@ -66,7 +66,7 @@ logoutBtn.addEventListener("click", async () => {
   document.getElementById("results")?.classList.add("hidden");
 
   updateUIBasedOnAuth();
-  showSuccess("Sesión cerrada.");
+  showSuccess("Listo, cerraste sesión correctamente.");
 });
 
 document.getElementById("authModal").addEventListener("hidden.bs.modal", () => {
@@ -99,7 +99,7 @@ document.getElementById("confirmLoginBtn").addEventListener("click", async (e) =
   const password = document.getElementById("loginPassword").value.trim();
 
   if (!email || !password) {
-    showError("Completa los campos");
+    showError("Por favor completa todos los campos");
     return;
   }
 
@@ -129,9 +129,27 @@ document.getElementById("confirmLoginBtn").addEventListener("click", async (e) =
     showSuccess(json.message || "Inicio de sesión exitoso");
     updateUIBasedOnAuth();
   } catch (err) {
-    showError("Error al iniciar sesión: " + err.message);
+    showError("Inicio de sesión fallido: " + getFriendlyErrorMessage(err.message));
   }
 });
+
+function getFriendlyErrorMessage(err) {
+  const msg = err?.message?.toLowerCase() || "";
+
+  if (msg.includes("fetch") || msg.includes("network")) {
+    return "No se pudo conectar con el servidor. Verificá tu conexión.";
+  }
+
+  if (msg.includes("timeout")) {
+    return "La solicitud tardó demasiado. Intentá de nuevo.";
+  }
+
+  if (msg.includes("unauthorized") || msg.includes("401")) {
+    return "Credenciales inválidas. Verificá tu correo y contraseña.";
+  }
+
+  return err.message || "Ocurrió un error inesperado.";
+}
 
 document.getElementById("confirmRegisterBtn").addEventListener("click", async (e) => {
   e.preventDefault();

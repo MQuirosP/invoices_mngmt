@@ -85,23 +85,13 @@ export const AuthController = {
       });
     } catch (error) {
       logger.error({
-        layer: "controller",
-        action: "USER_LOGIN_ERROR",
-        method: req.method,
-        path: req.originalUrl,
-        error: error instanceof Error ? error.message : "Unknown error",
+      layer: "controller",
+      action: "USER_LOGIN_ERROR",
+      method: req.method,
+      path: req.originalUrl,
+      error: error instanceof Error ? error.message : "Unknown error",
       });
-
-      next(
-        error instanceof AppError
-          ? error
-          : new AppError("Login failed", 500, true, error instanceof Error ? error : undefined, {
-              context: "AUTH_CONTROLLER",
-              route: req.originalUrl,
-              method: req.method,
-              payload: req.body,
-            })
-      );
+      next(error)
     }
   },
 
