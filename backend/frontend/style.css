@@ -173,8 +173,15 @@ h3 {
 
 /* Animations */
 .fade-in {
-  animation: fadeInText 0.3s ease-in-out;
+  opacity: 0;
+  transform: scale(0.95);
+  animation: fadeInText 0.5s ease-in-out forwards;
 }
+
+.delay-1 {
+  animation-delay: 0.3s;
+}
+
 
 @keyframes fadeInText {
   from {
@@ -227,13 +234,36 @@ h3 {
 
 /* Welcome section */
 #welcomeSection {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
   margin: 2rem auto;
-  max-width: 700px;
+  max-width: 720px;
   padding: 2rem;
+  transition: box-shadow 0.3s ease;
 }
+
+#welcomeSection:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.icon-wrapper svg {
+  animation: pulseIcon 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseIcon {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+
 
 #historyCards {
   padding: 15px;
