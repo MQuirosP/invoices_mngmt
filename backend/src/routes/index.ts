@@ -24,14 +24,33 @@ router.use("/view-image", authenticate, viewImageRouter);
 
 // Keep-alive ping endpoint
 router.get("/ping", async (req, res) => {
-  const jobId = req.headers["x-job-id"] || "unknown";
-  const env = req.headers["x-env"] || "unknown";
+  const jobId =
+    req.headers["x-job-id"]?.toString() ||
+    req.query.jobId?.toString() ||
+    "unknown";
+
+  const env =
+    req.headers["x-env"]?.toString() ||
+    req.query.env?.toString() ||
+    "unknown";
+
+  const userAgent = req.headers["user-agent"] || "";
+  const source =
+    req.query.source?.toString() ||
+    req.headers["x-source"]?.toString() ||
+    (userAgent.includes("cron-job.org")
+      ? "cron-job.org"
+      : userAgent.includes("GitHub")
+      ? "github-actions"
+      : "unknown");
 
   logger.info({
     layer: "router",
     action: "PING_ATTEMPT",
+    message: `🛰️ Incoming ping detected — jobId: ${jobId}, env: ${env}, source: ${source}`,
     jobId,
     env,
+    source,
     timestamp: new Date().toISOString(),
   });
 
@@ -42,8 +61,10 @@ router.get("/ping", async (req, res) => {
     logger.info({
       layer: "router",
       action: "PING_SUCCESS",
+      message: `✅ Ping completed — jobId: ${jobId}, env: ${env}, source: ${source}, invoices: ${invoiceCount}`,
       jobId,
       env,
+      source,
       invoiceCount,
       timestamp: new Date().toISOString(),
     });
@@ -53,8 +74,10 @@ router.get("/ping", async (req, res) => {
     logger.error({
       layer: "router",
       action: "PING_ERROR",
+      message: `🚨 Ping failed — jobId: ${jobId}, env: ${env}, source: ${source}, reason: ${err instanceof Error ? err.message : String(err)}`,
       jobId,
       env,
+      source,
       error: err instanceof Error ? err.message : String(err),
       timestamp: new Date().toISOString(),
     });
@@ -65,12 +88,27 @@ router.get("/ping", async (req, res) => {
 
 // Health check for DB
 router.get("/health/db", async (req, res) => {
-  const jobId = req.headers["x-job-id"] || "unknown";
+  const jobId =
+    req.headers["x-job-id"]?.toString() ||
+    req.query.jobId?.toString() ||
+    "unknown";
+
+  const userAgent = req.headers["user-agent"] || "";
+  const source =
+    req.query.source?.toString() ||
+    req.headers["x-source"]?.toString() ||
+    (userAgent.includes("cron-job.org")
+      ? "cron-job.org"
+      : userAgent.includes("GitHub")
+      ? "github-actions"
+      : "unknown");
 
   logger.info({
     layer: "router",
     action: "DB_HEALTH_ATTEMPT",
+    message: `🔍 DB health check initiated — jobId: ${jobId}, source: ${source}`,
     jobId,
+    source,
     timestamp: new Date().toISOString(),
   });
 
@@ -80,7 +118,9 @@ router.get("/health/db", async (req, res) => {
     logger.info({
       layer: "router",
       action: "DB_HEALTH_SUCCESS",
+      message: `🧬 Database heartbeat confirmed — jobId: ${jobId}, source: ${source}`,
       jobId,
+      source,
       timestamp: new Date().toISOString(),
     });
 
@@ -91,7 +131,9 @@ router.get("/health/db", async (req, res) => {
     logger.error({
       layer: "router",
       action: "DB_HEALTH_ERROR",
+      message: `💥 DB health check failed — jobId: ${jobId}, source: ${source}, reason: ${error.message}`,
       jobId,
+      source,
       error: error.message,
       timestamp: new Date().toISOString(),
     });
