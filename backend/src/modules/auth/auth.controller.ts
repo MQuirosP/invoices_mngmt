@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { loginSchema, registerSchema } from "./auth.schema";
-import { AppError } from "@/shared/utils/appError.utils";
+import { ZodError } from "zod";
 import { logger } from "@/shared/utils/logging/logger";
+import { AuthService } from "./auth.service";
 import { AuthRequest } from "./auth.types";
 import { revokeToken } from "@/shared/utils/token/revokeToken";
-import { AuthService } from "./auth.service";
-import { ZodError } from "zod";
 
 const authService = AuthService;
 
@@ -41,6 +40,22 @@ export const AuthController = {
         message: "User registered successfully",
       });
     } catch (error) {
+      if (error instanceof ZodError) {
+        logger.warn({
+          layer: "controller",
+          action: "USER_REGISTER_VALIDATION_FAILED",
+          method: req.method,
+          path: req.originalUrl,
+          issues: error.errors,
+        });
+
+        res.status(400).json({
+          success: false,
+          message: "Invalid input. Please check your name, email and password.",
+          issues: error.errors,
+        });
+      }
+
       logger.error({
         layer: "controller",
         action: "USER_REGISTER_ERROR",
@@ -49,22 +64,7 @@ export const AuthController = {
         error: error instanceof Error ? error.message : "Unknown error",
       });
 
-      next(
-        error instanceof AppError
-          ? error
-          : new AppError(
-              "Registration failed",
-              500,
-              true,
-              error instanceof Error ? error : undefined,
-              {
-                context: "AUTH_CONTROLLER",
-                route: req.originalUrl,
-                method: req.method,
-                payload: req.body,
-              }
-            )
-      );
+      next(error);
     }
   },
 
@@ -169,20 +169,7 @@ export const AuthController = {
         error: error instanceof Error ? error.message : "Unknown error",
       });
 
-      next(
-        new AppError(
-          "Failed to list users",
-          500,
-          true,
-          error instanceof Error ? error : undefined,
-          {
-            context: "AUTH_CONTROLLER",
-            route: req.originalUrl,
-            method: req.method,
-            userId,
-          }
-        )
-      );
+      next(error);
     }
   },
 
@@ -216,11 +203,20 @@ export const AuthController = {
         success: false,
         message: "Missing token identifier (jti)",
       });
-      return;
     }
 
     try {
-      await revokeToken(jti);
+      if (!jti) {
+      logger.warn({
+        layer: "controller",
+        action: "USER_LOGOUT_JTI_MISSING",
+        userId,
+        method: req.method,
+        path: req.originalUrl,
+      });} else {
+
+        await revokeToken(jti);
+      }
 
       logger.info({
         layer: "controller",
@@ -246,21 +242,7 @@ export const AuthController = {
         error: error instanceof Error ? error.message : "Unknown error",
       });
 
-      next(
-        new AppError(
-          "Logout failed",
-          500,
-          true,
-          error instanceof Error ? error : undefined,
-          {
-            context: "AUTH_CONTROLLER",
-            route: req.originalUrl,
-            method: req.method,
-            userId,
-            jti,
-          }
-        )
-      );
+      next(error);
     }
   },
 };

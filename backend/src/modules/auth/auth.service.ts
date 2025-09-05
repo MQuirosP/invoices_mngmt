@@ -10,16 +10,10 @@ const userRepo = UserRepository;
 
 export const AuthService = {
   registerUser: async (data: RegisterInput) => {
-    logger.info({
-      layer: "service",
-      action: "USER_REGISTER_ATTEMPT",
-      email: data.email,
-    });
+    logger.info({ layer: "service", action: "USER_REGISTER_ATTEMPT", email: data.email });
 
     const existing = await userRepo.findByEmail(data.email);
-    if (existing) {
-      throw new AppError("Email already registered", 409);
-    }
+    if (existing) throw new AppError("Email already registered", 409);
 
     const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
     const hashedPassword = await hashPassword(data.password, saltRounds);
@@ -37,6 +31,8 @@ export const AuthService = {
       role: user.role,
     });
 
+    logger.info({ layer: "service", action: "USER_REGISTER_SUCCESS", userId: user.id });
+
     return {
       id: user.id,
       email: user.email,
@@ -47,30 +43,17 @@ export const AuthService = {
   },
 
   loginUser: async (data: LoginInput) => {
-    logger.info({
-      layer: "service",
-      action: "USER_LOGIN_ATTEMPT",
-      email: data.email,
-    });
+    logger.info({ layer: "service", action: "USER_LOGIN_ATTEMPT", email: data.email });
 
     const user = await userRepo.findByEmail(data.email);
     if (!user) {
-      logger.warn({
-        layer: "service",
-        action: "USER_NOT_FOUND",
-        email: data.email,
-      });
+      logger.warn({ layer: "service", action: "USER_NOT_FOUND", email: data.email });
       throw new AppError("No account found with that email.", 404);
     }
 
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
     if (!isPasswordValid) {
-      logger.warn({
-        layer: "service",
-        action: "INVALID_PASSWORD",
-        email: data.email,
-        userId: user.id,
-      });
+      logger.warn({ layer: "service", action: "INVALID_PASSWORD", email: data.email, userId: user.id });
       throw new AppError("Incorrect password.", 401);
     }
 
@@ -80,12 +63,7 @@ export const AuthService = {
       role: user.role,
     });
 
-    logger.info({
-      layer: "service",
-      action: "USER_LOGIN_SUCCESS",
-      userId: user.id,
-      email: user.email,
-    });
+    logger.info({ layer: "service", action: "USER_LOGIN_SUCCESS", userId: user.id, email: user.email });
 
     return {
       id: user.id,
