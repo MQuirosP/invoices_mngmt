@@ -96,55 +96,57 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-document.getElementById("confirmLoginBtn").addEventListener("click", async (e) => {
-  e.preventDefault();
+document
+  .getElementById("confirmLoginBtn")
+  .addEventListener("click", async (e) => {
+    e.preventDefault();
 
-  const emailInput = document.getElementById("loginEmail");
-  const passwordInput = document.getElementById("loginPassword");
+    const emailInput = document.getElementById("loginEmail");
+    const passwordInput = document.getElementById("loginPassword");
 
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-  if (!email || !password) {
-    showError("Por favor completá todos los campos.");
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    showError("El correo no tiene un formato válido.");
-    return;
-  }
-
-  try {
-    const json = await apiFetchJSON(`${HOST}/api/auth/login`, {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-
-    const user = json?.data;
-    if (!json?.success || !user?.token) {
-      throw new Error(json?.message || "Login fallido");
+    if (!email || !password) {
+      showError("Por favor completá todos los campos.");
+      return;
     }
 
-    const token = user.token;
-    localStorage.setItem("authToken", token);
-    localStorage.setItem("userFullname", user.fullname);
-    localStorage.setItem("userEmail", user.email);
-    localStorage.setItem("userRole", user.role);
+    if (!isValidEmail(email)) {
+      showError("El correo no tiene un formato válido.");
+      return;
+    }
 
-    greeting.textContent = `¡Hola!, ${user.fullname}`;
-    greeting.classList.remove("d-none");
-    authBtn.classList.add("d-none");
-    logoutBtn.classList.remove("d-none");
+    try {
+      const json = await apiFetchJSON(`${HOST}/api/auth/login`, {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
 
-    bootstrap.Modal.getInstance(authModal).hide();
-    showSuccess(json.message || "Inicio de sesión exitoso");
-    updateUIBasedOnAuth();
-  } catch (err) {
-    const msg = getFriendlyErrorMessage(err);
-    showError("Inicio de sesión fallido: " + msg);
-  }
-});
+      const user = json?.data;
+      if (!json?.success || !user?.token) {
+        throw new Error(json?.message || "Login fallido");
+      }
+
+      const token = user.token;
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("userFullname", user.fullname);
+      localStorage.setItem("userEmail", user.email);
+      localStorage.setItem("userRole", user.role);
+
+      greeting.textContent = `¡Hola!, ${user.fullname}`;
+      greeting.classList.remove("d-none");
+      authBtn.classList.add("d-none");
+      logoutBtn.classList.remove("d-none");
+
+      bootstrap.Modal.getInstance(authModal).hide();
+      showSuccess(json.message || "Inicio de sesión exitoso");
+      updateUIBasedOnAuth();
+    } catch (err) {
+      const msg = getFriendlyErrorMessage(err);
+      showError("Inicio de sesión fallido: " + msg);
+    }
+  });
 
 function getFriendlyErrorMessage(err) {
   const msg = err?.message?.toLowerCase() || "";
@@ -164,40 +166,45 @@ function getFriendlyErrorMessage(err) {
   return err.message || "Ocurrió un error inesperado.";
 }
 
-document.getElementById("confirmRegisterBtn").addEventListener("click", async (e) => {
-  e.preventDefault();
+document
+  .getElementById("confirmRegisterBtn")
+  .addEventListener("click", async (e) => {
+    e.preventDefault();
 
-  const email = document.getElementById("registerEmail").value.trim();
-  const fullname = document.getElementById("registerFullname").value.trim().toLowerCase();
-  const password = document.getElementById("registerPassword").value;
-  const confirm = document.getElementById("registerConfirm").value;
+    const email = document.getElementById("registerEmail").value.trim();
+    const fullname = document
+      .getElementById("registerFullname")
+      .value.trim()
+      .toLowerCase();
+    const password = document.getElementById("registerPassword").value;
+    const confirm = document.getElementById("registerConfirm").value;
 
-  if (!email || !fullname || !password || !confirm) {
-    showError("Completa todos los campos");
-    return;
-  }
-
-  if (password !== confirm) {
-    showError("Las contraseñas no coinciden");
-    return;
-  }
-
-  try {
-    const json = await apiFetchJSON(`${HOST}/api/auth/register`, {
-      method: "POST",
-      body: JSON.stringify({ email, fullname, password }),
-    });
-
-    if (!json?.success) {
-      throw new Error(json?.message || "Registro fallido");
+    if (!email || !fullname || !password || !confirm) {
+      showError("Completa todos los campos");
+      return;
     }
 
-    // bootstrap.Modal.getInstance(authModal).hide();
-    showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
-  } catch (err) {
-    showError("Error al registrar: " + err.message);
-  }
-});
+    if (password !== confirm) {
+      showError("Las contraseñas no coinciden");
+      return;
+    }
+
+    try {
+      const json = await apiFetchJSON(`${HOST}/api/auth/register`, {
+        method: "POST",
+        body: JSON.stringify({ email, fullname, password }),
+      });
+
+      if (!json?.success) {
+        throw new Error(json?.message || "Registro fallido");
+      }
+
+      // bootstrap.Modal.getInstance(authModal).hide();
+      showSuccess("Registro exitoso. Ahora podés iniciar sesión.");
+    } catch (err) {
+      showError("Error al registrar: " + err.message);
+    }
+  });
 
 function flipAuthCard() {
   document.getElementById("authCard").classList.toggle("flipped");
@@ -319,7 +326,8 @@ async function handleResponse(res) {
         serverMsg = data?.message || data?.error || JSON.stringify(data);
 
         if (data?.code === "P2003") {
-          serverMsg = "No se puede eliminar la factura porque tiene garantías relacionadas.";
+          serverMsg =
+            "No se puede eliminar la factura porque tiene garantías relacionadas.";
         }
       } else {
         serverMsg = await res.text();
@@ -336,7 +344,7 @@ async function handleResponse(res) {
 async function apiFetchJSON(url, options = {}) {
   const res = await fetch(url, { ...options, headers: buildHeaders(options) });
   await handleResponse(res);
-console.log(res)
+  console.log(res);
   const ct = res.headers.get("content-type") || "";
   if (!ct || res.status === 204) return {};
   if (ct.includes("application/json")) return await res.json();
@@ -767,7 +775,6 @@ function showError(msg) {
   openModal("errorModal", { message: msg, autoHide: 4000 });
 }
 
-
 function showSuccess(msg) {
   console.info("[UI OK]", msg);
   openModal("successModal", { message: msg, autoHide: 3000 });
@@ -814,7 +821,7 @@ function renderFileChips() {
     closeBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      removeFileFromBuffer(file.name);
+      handleChipRemoval(file.name, chip);
     });
 
     chip.append(nameSpan, closeBtn);
@@ -841,6 +848,32 @@ function removeFileFromBuffer(fileName) {
   Array.from(newBuffer.files).forEach((f) => fileBuffer.items.add(f));
   fileInput.files = fileBuffer.files;
   renderFileChips();
+}
+
+function handleChipRemoval(fileName, chipElement) {
+  chipElement.classList.add("fade-out-to-trash");
+
+  chipElement.addEventListener(
+    "animationend",
+    () => {
+      chipElement.remove();
+
+      // actualizar buffer sin re-render global
+      const newBuffer = new DataTransfer();
+      Array.from(fileBuffer.files).forEach((f) => {
+        if (f.name !== fileName) newBuffer.items.add(f);
+      });
+      fileBuffer.items.clear();
+      Array.from(newBuffer.files).forEach((f) => fileBuffer.items.add(f));
+      fileInput.files = fileBuffer.files;
+
+      // mostrar mensaje si ya no hay archivos
+      if (fileBuffer.files.length === 0) {
+        document.getElementById("uploadMessage").classList.remove("d-none");
+      }
+    },
+    { once: true }
+  );
 }
 
 function closeMobileAsideIfDesktop() {

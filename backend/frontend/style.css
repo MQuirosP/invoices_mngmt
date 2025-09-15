@@ -185,6 +185,21 @@ h3 {
   animation-delay: 0.3s;
 }
 
+@keyframes fadeOutToTrash {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100px) scale(0.5);
+  }
+}
+
+.fade-out-to-trash {
+  animation: fadeOutToTrash 400ms ease forwards;
+}
+
 
 @keyframes fadeInText {
   from {
