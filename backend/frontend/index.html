@@ -413,44 +413,47 @@
                         ></button>
                       </div>
                       <div class="p-4">
-  <label for="loginEmail">Correo electrónico</label>
-  <input
-    type="email"
-    id="loginEmail"
-    name="email"
-    class="form-control mb-2"
-    autocomplete="email"
-    required
-  />
+                        <label for="loginEmail">Correo electrónico</label>
+                        <input
+                          type="email"
+                          id="loginEmail"
+                          name="email"
+                          class="form-control mb-2"
+                          autocomplete="email"
+                          required
+                        />
 
-  <label for="loginPassword">Contraseña</label>
-  <input
-    type="password"
-    id="loginPassword"
-    name="password"
-    class="form-control mb-3"
-    autocomplete="current-password"
-    required
-  />
+                        <label for="loginPassword">Contraseña</label>
+                        <input
+                          type="password"
+                          id="loginPassword"
+                          name="password"
+                          class="form-control mb-3"
+                          autocomplete="current-password"
+                          required
+                        />
 
-  <button
-    type="button"
-    id="confirmLoginBtn"
-    class="btn btn-dark w-100 mb-2"
-  >
-    Ingresar
-  </button>
+                        <button
+                          type="button"
+                          id="confirmLoginBtn"
+                          class="btn btn-dark w-100 mb-2"
+                        >
+                          Ingresar
+                        </button>
 
-  <button
-    type="button"
-    class="btn btn-link w-100 text-decoration-none"
-    onclick="flipAuthCard()"
-  >
-    ¿No tenés cuenta? Registrate
-  </button>
+                        <button
+                          type="button"
+                          class="btn btn-link w-100 text-decoration-none"
+                          onclick="flipAuthCard()"
+                        >
+                          ¿No tenés cuenta? Registrate
+                        </button>
 
-  <div id="loginError" style="color: red; margin-top: 0.5rem;"></div>
-</div>
+                        <div
+                          id="loginError"
+                          style="color: red; margin-top: 0.5rem"
+                        ></div>
+                      </div>
                     </div>
 
                     <!-- Cara trasera: Registro -->
@@ -513,38 +516,61 @@
         </div>
 
         <!-- ⚠️ Modal: Error -->
-        <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-danger">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">
-          <i class="fas fa-exclamation-triangle me-2"></i> Ups, algo salió mal
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body" id="errorMessage">
-        <!-- Mensaje dinámico -->
-      </div>
-    </div>
-  </div>
-</div>
+        <div
+          class="modal fade"
+          id="errorModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                  <i class="fas fa-exclamation-triangle me-2"></i> Ups, algo
+                  salió mal
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar"
+                ></button>
+              </div>
+              <div class="modal-body" id="errorMessage">
+                <!-- Mensaje dinámico -->
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- ✅ Modal: Éxito -->
-        <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-success text-white border border-white">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="fas fa-check-circle me-2"></i> ¡Listo!
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body" id="successMessage">
-        <!-- Mensaje dinámico -->
-      </div>
-    </div>
-  </div>
-</div>
+        <div
+          class="modal fade"
+          id="successModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div
+              class="modal-content bg-success text-white border border-white"
+            >
+              <div class="modal-header">
+                <h5 class="modal-title">
+                  <i class="fas fa-check-circle me-2"></i> ¡Listo!
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar"
+                ></button>
+              </div>
+              <div class="modal-body" id="successMessage">
+                <!-- Mensaje dinámico -->
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- 🧾 Modal: Ver factura -->
         <div

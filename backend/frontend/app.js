@@ -488,7 +488,7 @@ function renderHistory(invoices) {
   invoices.forEach((inv) => {
     const card = document.createElement("div");
     card.className = "card shadow-sm";
-
+    card.dataset.invoiceId = inv.id;
     card.innerHTML = `
       <div class="card-body">
         <h5 class="card-title">${inv.provider}</h5>
@@ -690,24 +690,33 @@ document
     if (!pendingDeleteId) return;
 
     const token = localStorage.getItem("authToken") || "";
+    const card = document.querySelector(`[data-invoice-id="${pendingDeleteId}"]`);
+    if (!card) return showError("Card not found");
+
     try {
       await apiFetchJSON(`${HOST}/api/invoices/${pendingDeleteId}`, {
         method: "DELETE",
       });
 
-      showSuccess("Factura eliminada");
+      showSuccess("Invoice deleted");
       pendingDeleteId = null;
-      bootstrap.Modal.getInstance(
-        document.getElementById("confirmDeleteModal")
-      ).hide();
-      historyBtn.click(); // Recarga historial
+
+      // Animación de salida antes de recargar historial
+      card.classList.add("fade-out-to-trash");
+      card.addEventListener("animationend", () => {
+        card.remove();
+        bootstrap.Modal.getInstance(
+          document.getElementById("confirmDeleteModal")
+        ).hide();
+        historyBtn.click(); // Recarga historial después de animar
+      }, { once: true });
+
     } catch (err) {
-      // Si el backend retorna P2003 lo mapeamos en handleResponse, pero dejamos fallback:
       const msg = /P2003/.test(err.message)
-        ? "No se puede eliminar: la factura tiene garantías relacionadas."
+        ? "Cannot delete: invoice has related warranties."
         : err.message;
 
-      showError("Error al eliminar: " + msg);
+      showError("Deletion error: " + msg);
     }
   });
 
@@ -858,7 +867,6 @@ function handleChipRemoval(fileName, chipElement) {
     () => {
       chipElement.remove();
 
-      // actualizar buffer sin re-render global
       const newBuffer = new DataTransfer();
       Array.from(fileBuffer.files).forEach((f) => {
         if (f.name !== fileName) newBuffer.items.add(f);
